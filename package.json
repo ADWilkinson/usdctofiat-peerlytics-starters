@@ -6,7 +6,10 @@
   "scripts": {
     "rate-monitor": "npx tsx rate-monitor.ts",
     "volume-dashboard": "npx tsx volume-dashboard.ts",
-    "x402-agent": "npx tsx x402-agent.ts"
+    "x402-agent": "npx tsx x402-agent.ts",
+    "orderbook-snapshot": "npx tsx orderbook-snapshot.ts",
+    "maker-report": "npx tsx maker-report.ts",
+    "live-activity": "npx tsx live-activity.ts"
   },
   "dependencies": {
     "@peerlytics/sdk": "latest"

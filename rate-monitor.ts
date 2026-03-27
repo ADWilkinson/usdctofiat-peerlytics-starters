@@ -1,78 +1,90 @@
 /**
  * rate-monitor.ts
  *
- * Monitors P2P exchange rates for a given fiat currency and alerts
- * when the best available rate crosses a threshold.
+ * Polls market rates for a fiat currency and alerts when the best
+ * available rate crosses a configurable threshold.
  *
  * Usage:
  *   PEERLYTICS_API_KEY=pk_live_... npx tsx rate-monitor.ts
  *
  * Environment:
- *   PEERLYTICS_API_KEY  - Your Peerlytics API key (optional for free tier)
- *   CURRENCY            - Fiat currency to monitor (default: GBP)
- *   THRESHOLD           - Alert when best rate is below this (default: 1.02)
- *   POLL_SECONDS        - Polling interval in seconds (default: 60)
+ *   PEERLYTICS_API_KEY  - API key (optional, falls back to free tier)
+ *   CURRENCY            - Fiat currency to watch (default: GBP)
+ *   THRESHOLD           - Alert when best rate drops below this (default: 1.02)
+ *   POLL_SECONDS        - Polling interval (default: 60)
  */
 
-import { Peerlytics } from "@peerlytics/sdk";
+import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
+
+// ── Config ──────────────────────────────────────────────────────
 
 const CURRENCY = process.env.CURRENCY ?? "GBP";
 const THRESHOLD = Number(process.env.THRESHOLD ?? "1.02");
 const POLL_SECONDS = Number(process.env.POLL_SECONDS ?? "60");
 
+// ── Formatting ──────────────────────────────────────────────────
+
+const fmt = {
+  dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
+  green: (s: string) => `\x1b[32m${s}\x1b[0m`,
+  red: (s: string) => `\x1b[31m${s}\x1b[0m`,
+  bold: (s: string) => `\x1b[1m${s}\x1b[0m`,
+  rate: (n: number) => n.toFixed(4),
+  time: () => new Date().toISOString().slice(11, 19),
+};
+
+// ── Client ──────────────────────────────────────────────────────
+
 const client = new Peerlytics({
   apiKey: process.env.PEERLYTICS_API_KEY,
 });
 
-function formatRate(rate: number): string {
-  return rate.toFixed(4);
-}
-
-function timestamp(): string {
-  return new Date().toISOString().slice(11, 19);
-}
+// ── Monitor ─────────────────────────────────────────────────────
 
 async function checkRates(): Promise<void> {
-  const summary = await client.getMarketSummary({ currency: CURRENCY });
-  const { markets } = summary;
+  const { markets } = await client.getMarketSummary({ currency: CURRENCY });
 
   if (!markets || markets.length === 0) {
-    console.log(`[${timestamp()}] No market data for ${CURRENCY}`);
+    console.log(`${fmt.dim(fmt.time())}  No market data for ${CURRENCY}`);
     return;
   }
 
-  // Find the best (lowest) rate across all platforms
   let bestRate = Infinity;
   let bestPlatform = "";
 
-  for (const entry of markets) {
-    const rate = entry.median ?? entry.suggestedRate;
-    if (rate !== null && rate > 0 && rate < bestRate) {
+  for (const m of markets) {
+    const rate = m.median ?? m.suggestedRate;
+    if (rate != null && rate > 0 && rate < bestRate) {
       bestRate = rate;
-      bestPlatform = entry.platform;
+      bestPlatform = m.platform;
     }
   }
 
   if (bestRate === Infinity) {
-    console.log(`[${timestamp()}] No active rates for ${CURRENCY}`);
+    console.log(`${fmt.dim(fmt.time())}  No active rates for ${CURRENCY}`);
     return;
   }
 
-  const status = bestRate <= THRESHOLD ? "ALERT" : "OK";
-  const indicator = bestRate <= THRESHOLD ? ">>>" : "   ";
+  const alert = bestRate <= THRESHOLD;
+  const tag = alert ? fmt.red("ALERT") : fmt.green("  OK ");
+  const rateStr = alert ? fmt.red(fmt.rate(bestRate)) : fmt.rate(bestRate);
 
   console.log(
-    `[${timestamp()}] ${indicator} ${CURRENCY} best rate: ${formatRate(bestRate)} ` +
-      `on ${bestPlatform} | threshold: ${formatRate(THRESHOLD)} | ${status}`,
+    `${fmt.dim(fmt.time())}  ${tag}  ${CURRENCY} ${rateStr} on ${bestPlatform}` +
+      `  ${fmt.dim("threshold " + fmt.rate(THRESHOLD))}`,
   );
 }
 
 async function main(): Promise<void> {
-  console.log(`Rate monitor started`);
-  console.log(`  Currency:  ${CURRENCY}`);
-  console.log(`  Threshold: ${formatRate(THRESHOLD)}`);
-  console.log(`  Interval:  ${POLL_SECONDS}s`);
-  console.log(`  API key:   ${process.env.PEERLYTICS_API_KEY ? "configured" : "not set (free tier)"}`);
+  console.log();
+  console.log(`  ┌─────────────────────────────────────────┐`);
+  console.log(`  │  ${fmt.bold("Rate Monitor")}                           │`);
+  console.log(`  ├─────────────────────────────────────────┤`);
+  console.log(`  │  Currency   ${CURRENCY.padEnd(28)}│`);
+  console.log(`  │  Threshold  ${fmt.rate(THRESHOLD).padEnd(28)}│`);
+  console.log(`  │  Interval   ${(POLL_SECONDS + "s").padEnd(28)}│`);
+  console.log(`  │  Auth       ${(process.env.PEERLYTICS_API_KEY ? "API key" : "free tier").padEnd(28)}│`);
+  console.log(`  └─────────────────────────────────────────┘`);
   console.log();
 
   await checkRates();
@@ -81,7 +93,11 @@ async function main(): Promise<void> {
     try {
       await checkRates();
     } catch (err) {
-      console.error(`[${timestamp()}] Error:`, err instanceof Error ? err.message : err);
+      if (err instanceof PeerlyticsError) {
+        console.error(`${fmt.dim(fmt.time())}  ${fmt.red("ERR")}  ${err.message}`);
+      } else {
+        console.error(`${fmt.dim(fmt.time())}  ${fmt.red("ERR")}  ${err instanceof Error ? err.message : err}`);
+      }
     }
   }, POLL_SECONDS * 1000);
 }

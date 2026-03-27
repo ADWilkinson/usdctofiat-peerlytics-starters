@@ -1,6 +1,6 @@
 # peerlytics-starter
 
-Runnable TypeScript examples for the [Peerlytics API](https://peerlytics.xyz/developers) -- protocol analytics, orderbook data, and maker tools for the [ZKP2P](https://zkp2p.xyz) P2P network on Base.
+TypeScript examples for the [Peerlytics API](https://peerlytics.xyz/developers). Query ZKP2P P2P protocol data on Base: rates, orderbooks, maker portfolios, and live activity.
 
 ## Quick start
 
@@ -13,96 +13,88 @@ npx tsx volume-dashboard.ts
 
 ## Examples
 
-| Script | Description | Auth |
-|--------|-------------|------|
-| [`volume-dashboard.ts`](volume-dashboard.ts) | Protocol stats, liquidity, top 5 makers and takers | optional |
-| [`rate-monitor.ts`](rate-monitor.ts) | Poll rates for a currency, alert on threshold crossings | optional |
-| [`orderbook-snapshot.ts`](orderbook-snapshot.ts) | Live orderbook depth across currencies with bar charts | optional |
-| [`maker-report.ts`](maker-report.ts) | Portfolio report for a maker: deposits, profit, APR, platforms | optional |
-| [`live-activity.ts`](live-activity.ts) | Stream real-time protocol events with color-coded output | optional |
-| [`x402-agent.ts`](x402-agent.ts) | Walk through the x402 pay-per-request flow (no key needed) | none |
+| Script | What it does |
+|--------|-------------|
+| [`volume-dashboard.ts`](volume-dashboard.ts) | Protocol stats, liquidity, top 5 makers and takers |
+| [`rate-monitor.ts`](rate-monitor.ts) | Polls rates for a currency, alerts when they cross a threshold |
+| [`orderbook-snapshot.ts`](orderbook-snapshot.ts) | Orderbook depth across currencies with bar charts |
+| [`maker-report.ts`](maker-report.ts) | Portfolio report for a maker address (deposits, profit, APR) |
+| [`live-activity.ts`](live-activity.ts) | Real-time protocol events, color-coded by type |
+| [`x402-agent.ts`](x402-agent.ts) | Walks through the x402 pay-per-request flow (no key needed) |
 
-Every script is self-contained. Run any of them with `npx tsx <script>.ts`.
+Each script is self-contained. Run any with `npx tsx <file>.ts`.
 
-## Authentication
+## Auth
 
-| Method | Setup | Best for |
-|--------|-------|----------|
-| **Free tier** | Nothing -- works out of the box | Getting started, low volume |
-| **API key** | `export PEERLYTICS_API_KEY=pk_live_...` | Production apps, higher rate limits |
-| **x402** | Pay per request with USDC on Base | Autonomous agents, no credentials |
+You don't need an API key to get started. The free tier gives you 1,000 requests/month.
 
-Get an API key at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account).
-
-## Environment variables
+For higher limits, grab a key at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) and export it:
 
 ```bash
-# Copy and edit
-cp .env.example .env
-
-# Or export directly
 export PEERLYTICS_API_KEY=pk_live_your_key_here
 ```
 
-| Variable | Default | Used by |
-|----------|---------|---------|
-| `PEERLYTICS_API_KEY` | _(free tier)_ | All scripts |
+Or copy the template:
+
+```bash
+cp .env.example .env
+```
+
+There's also x402 (pay-per-request with USDC on Base) if you want to skip keys entirely. See `x402-agent.ts`.
+
+## Config
+
+| Variable | Default | Script |
+|----------|---------|--------|
+| `PEERLYTICS_API_KEY` | _(free tier)_ | all |
 | `CURRENCY` | `GBP` | rate-monitor |
 | `CURRENCIES` | `GBP,EUR,BRL,TRY,NGN` | orderbook-snapshot |
 | `THRESHOLD` | `1.02` | rate-monitor |
 | `POLL_SECONDS` | `60` / `10` | rate-monitor, live-activity |
 | `EVENT_TYPE` | _(all)_ | live-activity |
 
-## SDK reference
+## SDK
 
-The examples use [`@peerlytics/sdk`](https://www.npmjs.com/package/@peerlytics/sdk). Key methods:
+All examples use [`@peerlytics/sdk`](https://www.npmjs.com/package/@peerlytics/sdk):
 
 ```ts
 import { Peerlytics } from "@peerlytics/sdk";
 const p = new Peerlytics({ apiKey: "pk_live_..." });
 ```
 
-| Category | Method | Description |
-|----------|--------|-------------|
-| Analytics | `getSummary()` | Protocol volume, liquidity, deposits, spreads |
-| Analytics | `getLeaderboard({ limit? })` | Top makers and takers by volume, APR, profit |
-| Market | `getMarketSummary({ currency? })` | Rate stats per (platform, currency) pair |
-| Market | `getOrderbook({ currency? })` | Live orderbook grouped by rate level |
-| Explorer | `getDeposit(id)` | Deposit detail with intents and payment methods |
-| Explorer | `getAddress(address)` | Address profile: deposits, intents, stats |
-| Explorer | `getMaker(address)` | Maker portfolio: allocations, profit, APR |
-| Explorer | `search(query)` | Multi-type search (address, ENS, deposit ID) |
-| Activity | `getActivity({ type?, limit? })` | Live protocol events |
-| History | `getMakerHistory(address)` | Maker historical performance |
-| Metadata | `getCurrencies()` | Supported fiat currencies |
-| Metadata | `getPlatforms()` | Supported payment platforms |
-| Vaults | `getVaultsOverview()` | All vaults with AUM, fees, snapshots |
+| Method | Returns |
+|--------|---------|
+| `getSummary()` | Protocol volume, liquidity, deposit count, spreads |
+| `getLeaderboard({ limit? })` | Top makers/takers by volume, APR, profit |
+| `getMarketSummary({ currency? })` | Rate stats per platform/currency pair |
+| `getOrderbook({ currency? })` | Live orderbook grouped by rate level |
+| `getDeposit(id)` | Single deposit with intents and payment methods |
+| `getAddress(address)` | Address profile with deposits, intents, stats |
+| `getMaker(address)` | Maker portfolio with allocations and profit |
+| `search(query)` | Search by address, ENS, deposit ID |
+| `getActivity({ type?, limit? })` | Protocol events (signals, fills, rate updates) |
+| `getMakerHistory(address)` | Historical maker performance |
+| `getCurrencies()` | Supported fiat currencies |
+| `getPlatforms()` | Supported payment platforms |
+| `getVaultsOverview()` | All vaults with AUM, fees, snapshots |
 
-Full reference: [`@peerlytics/sdk` README](https://www.npmjs.com/package/@peerlytics/sdk)
+Full reference on [npm](https://www.npmjs.com/package/@peerlytics/sdk).
 
-## For AI agents
+## For agents
 
-Point your agent at the Peerlytics `llms.txt` for API discovery:
+If you're integrating with an LLM or building an autonomous agent:
 
-```
-https://peerlytics.xyz/llms.txt
-```
-
-Or use the OpenAPI spec directly:
-
-```bash
-curl https://peerlytics.xyz/api/openapi | jq
-```
-
-The x402 pay-per-request flow (`x402-agent.ts`) is designed for autonomous agents -- no API key management, just a wallet with USDC on Base.
+- **llms.txt** at `https://peerlytics.xyz/llms.txt` has the full API surface in a format agents can parse
+- **OpenAPI spec** at `https://peerlytics.xyz/api/openapi` for structured endpoint discovery
+- **x402** lets agents pay per request with USDC on Base, no key management needed
 
 ## Links
 
-- [API documentation](https://peerlytics.xyz/developers)
-- [SDK on npm](https://www.npmjs.com/package/@peerlytics/sdk)
+- [peerlytics.xyz/developers](https://peerlytics.xyz/developers)
+- [@peerlytics/sdk on npm](https://www.npmjs.com/package/@peerlytics/sdk)
 - [OpenAPI spec](https://peerlytics.xyz/api/openapi?download=1)
 - [llms.txt](https://peerlytics.xyz/llms.txt)
-- [ZKP2P protocol](https://zkp2p.xyz)
+- [zkp2p.xyz](https://zkp2p.xyz)
 
 ## License
 

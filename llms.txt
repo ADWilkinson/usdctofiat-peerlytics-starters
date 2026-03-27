@@ -1,6 +1,6 @@
 # peerlytics-starter
 
-Runnable TypeScript examples for the Peerlytics API -- analytics, orderbook, and maker tools for the ZKP2P P2P protocol on Base.
+TypeScript examples for the Peerlytics API. Query ZKP2P P2P protocol data on Base.
 
 ## SDK
 
@@ -9,58 +9,58 @@ Install: npm install @peerlytics/sdk
 
 ```ts
 import { Peerlytics } from "@peerlytics/sdk";
-const client = new Peerlytics({ apiKey: "pk_live_..." }); // apiKey optional for free tier
+const client = new Peerlytics({ apiKey: "pk_live_..." }); // apiKey is optional, free tier works without it
 ```
 
-## Available methods
+## Methods
 
 Analytics:
-- client.getSummary() -- protocol volume, liquidity, deposits, spreads
-- client.getLeaderboard({ limit?, offset? }) -- top makers/takers by volume, APR, profit
-- client.getPeriod(range) -- dashboard data for mtd, 3mtd, ytd, all
-- client.getAttribution() -- intent attribution
-- client.getDepositAttribution() -- deposit attribution
+- client.getSummary() - protocol volume, liquidity, deposits, spreads
+- client.getLeaderboard({ limit?, offset? }) - top makers/takers by volume, APR, profit
+- client.getPeriod(range) - dashboard data for mtd, 3mtd, ytd, all
+- client.getAttribution() - intent attribution
+- client.getDepositAttribution() - deposit attribution
 
 Market:
-- client.getMarketSummary({ currency?, platform? }) -- rate stats per pair
-- client.getOrderbook({ currency?, platform? }) -- live orderbook by rate level
+- client.getMarketSummary({ currency?, platform? }) - rate stats per pair
+- client.getOrderbook({ currency?, platform? }) - live orderbook by rate level
 
 Explorer:
-- client.getDeposit(id) -- deposit detail with intents
-- client.getDeposits({ depositor?, delegate?, platform?, currency?, status? }) -- query deposits
-- client.getIntent(hash) -- intent detail
-- client.getIntents({ owner?, recipient?, verifier?, status? }) -- query intents
-- client.getAddress(address) -- address profile with stats
-- client.getMaker(address) -- maker portfolio
-- client.search(query, { type? }) -- multi-type search
+- client.getDeposit(id) - deposit detail with intents
+- client.getDeposits({ depositor?, delegate?, platform?, currency?, status? }) - query deposits
+- client.getIntent(hash) - intent detail
+- client.getIntents({ owner?, recipient?, verifier?, status? }) - query intents
+- client.getAddress(address) - address profile with stats
+- client.getMaker(address) - maker portfolio
+- client.search(query, { type? }) - multi-type search
 
 Activity:
-- client.getActivity({ type?, depositId?, limit? }) -- live protocol events
+- client.getActivity({ type?, depositId?, limit? }) - live protocol events
 
 History:
-- client.getMakerHistory(address) -- maker historical stats
-- client.getTakerHistory(address) -- taker historical stats
+- client.getMakerHistory(address) - maker historical stats
+- client.getTakerHistory(address) - taker historical stats
 
 Metadata:
-- client.getCurrencies() -- supported fiat currencies
-- client.getPlatforms() -- supported payment platforms
+- client.getCurrencies() - supported fiat currencies
+- client.getPlatforms() - supported payment platforms
 
 Vaults:
-- client.getVaultsOverview() -- all vaults
-- client.getVault(id) -- vault detail
+- client.getVaultsOverview() - all vaults
+- client.getVault(id) - vault detail
 
 Account:
-- client.listKeys() -- list API keys
-- client.createKey(label?) -- create key
-- client.getCredits() -- credit balance
+- client.listKeys() - list API keys
+- client.createKey(label?) - create key
+- client.getCredits() - credit balance
 
-## Authentication
+## Auth
 
 1. API key: set PEERLYTICS_API_KEY env var or pass { apiKey: "pk_live_..." }
 2. x402: pay per request with USDC on Base, no key needed
 3. Free tier: 1000 requests/month, no key required
 
-## Error handling
+## Errors
 
 ```ts
 import { PeerlyticsError, RateLimitError, NotFoundError } from "@peerlytics/sdk";
@@ -78,7 +78,7 @@ import { PeerlyticsError, RateLimitError, NotFoundError } from "@peerlytics/sdk"
 ## Links
 
 - API docs: https://peerlytics.xyz/developers
-- SDK npm: https://www.npmjs.com/package/@peerlytics/sdk
+- SDK: https://www.npmjs.com/package/@peerlytics/sdk
 - OpenAPI: https://peerlytics.xyz/api/openapi
 - LLM context: https://peerlytics.xyz/llms.txt
 - Protocol: https://zkp2p.xyz

@@ -37,7 +37,7 @@ const { createDeposit, getDeposits, withdrawDeposit, step, txHash, depositId, er
 type Platform = "venmo" | "cashapp" | "chime" | "revolut" | "wise" | "mercadopago" | "zelle" | "paypal" | "monzo" | "n26";
 
 interface OfframpParams {
-  amount: string;      // USDC decimal, min 10
+  amount: string;      // USDC decimal, min 1
   platform: Platform;
   currency: string;    // ISO 4217 code
   identifier: string;  // platform-specific username/email
@@ -88,14 +88,14 @@ import { OfframpError } from "@usdctofiat/offramp";
 
 ## How It Works
 
-createDeposit orchestrates 6 steps, 3 of which are wallet transactions:
+createDeposit orchestrates 5 steps, 3 of which are wallet transactions:
 1. Approve USDC allowance (wallet tx)
 2. Register payee details (API call, no signature)
 3. Create deposit on-chain (wallet tx)
 4. Confirm deposit ID from receipt or indexer (automatic)
 5. Delegate to the Delegate vault (wallet tx)
 
-The SDK handles orchestration and reports progress via onProgress callback. Steps 1, 3, and 5 each require a wallet signature.
+The SDK reports progress via onProgress callback with these states plus a final "done" signal. Steps 1, 3, and 5 each require a wallet signature.
 
 All deposits are:
 - Delegated to the USDCtoFiat Delegate vault (mandatory)

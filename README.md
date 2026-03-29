@@ -49,7 +49,7 @@ const result = await offramp.createDeposit(walletClient, {
 |--------|---------|
 | `createDeposit(walletClient, params, onProgress?)` | `{ depositId, txHash }` |
 | `getDeposits(walletAddress)` | `DepositInfo[]` with status, balance, fills |
-| `withdrawDeposit(walletClient, depositId)` | Tx hash |
+| `withdrawDeposit(walletClient, depositId, escrowAddress?)` | Tx hash |
 | `getPlatforms()` | Supported platforms with currencies |
 | `getCurrencies(platform)` | Currency codes for a platform |
 | `validateIdentifier(platform, identifier)` | `{ valid, normalized, error? }` |
@@ -58,7 +58,7 @@ React hook: `import { useOfframp } from "@usdctofiat/offramp/react"`
 
 ### How deposits work
 
-`createDeposit` orchestrates 6 steps, 3 of which are wallet transactions:
+`createDeposit` orchestrates 5 steps, 3 of which are wallet transactions:
 
 1. **Approve** USDC allowance (wallet tx)
 2. **Register** payee details (API call, no signature)

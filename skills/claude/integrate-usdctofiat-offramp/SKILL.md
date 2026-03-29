@@ -33,7 +33,7 @@ const offramp = new Offramp();
 
 // Create a deposit
 const result = await offramp.createDeposit(walletClient, {
-  amount: "100",        // USDC (min 10)
+  amount: "100",        // USDC (min 1)
   platform: "revolut",  // Payment platform
   currency: "EUR",      // Fiat currency
   identifier: "alice",  // Platform username/email
@@ -44,7 +44,8 @@ const result = await offramp.createDeposit(walletClient, {
 ## Core pattern — React
 
 ```typescript
-import { useOfframp, type OfframpError } from "@usdctofiat/offramp/react";
+import { useOfframp } from "@usdctofiat/offramp/react";
+import type { OfframpError } from "@usdctofiat/offramp";
 
 function SellButton({ walletClient }) {
   const { createDeposit, step, isLoading, error, reset } = useOfframp();
@@ -142,8 +143,8 @@ try {
 ## Key constraints
 
 - **Base network only** (chain ID 8453)
-- **Minimum deposit**: 10 USDC
-- **Order limits**: 5 USDC min, deposit amount max
+- **Minimum deposit**: 1 USDC
+- **Order limits**: 1 USDC min, deposit amount max
 - **Wallet**: requires a viem `WalletClient` with an account (wagmi, privy, or raw viem)
 - **Delegation**: mandatory — every deposit delegates to the Delegate vault
 - **Rate management**: handled by the vault oracle (no manual rate setting)

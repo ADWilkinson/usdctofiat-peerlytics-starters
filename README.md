@@ -1,6 +1,6 @@
-# peerlytics-starter
+# USDCtoFiat & Peerlytics Starters
 
-TypeScript examples for the [Peerlytics API](https://peerlytics.xyz/developers). Query ZKP2P P2P protocol data on Base: rates, orderbooks, maker portfolios, and live activity.
+TypeScript examples for integrating USDC-to-fiat offramps and querying ZKP2P protocol data on Base.
 
 ## Quick start
 
@@ -8,57 +8,95 @@ TypeScript examples for the [Peerlytics API](https://peerlytics.xyz/developers).
 git clone https://github.com/ADWilkinson/peerlytics-starter.git
 cd peerlytics-starter
 npm install
-export PEERLYTICS_API_KEY=pk_live_your_key_here  # get one at peerlytics.xyz/developers
-npx tsx volume-dashboard.ts
 ```
 
-## Examples
+---
+
+## USDCtoFiat — Offramp SDK
+
+Create and manage USDC-to-fiat deposits on Base. Every deposit is delegated to the [Delegate vault](https://delegate.usdctofiat.xyz) for oracle-based rate management.
+
+```bash
+export PRIVATE_KEY=0x...   # wallet with USDC on Base
+npx tsx usdctofiat/create-deposit.ts
+```
 
 | Script | What it does |
 |--------|-------------|
-| [`volume-dashboard.ts`](volume-dashboard.ts) | Protocol stats, liquidity, top 5 makers and takers |
-| [`rate-monitor.ts`](rate-monitor.ts) | Polls rates for a currency, alerts when they cross a threshold |
-| [`orderbook-snapshot.ts`](orderbook-snapshot.ts) | Orderbook depth across currencies with bar charts |
-| [`maker-report.ts`](maker-report.ts) | Portfolio report for a maker address (deposits, profit, APR) |
-| [`live-activity.ts`](live-activity.ts) | Real-time protocol events, color-coded by type |
-| [`x402-agent.ts`](x402-agent.ts) | Walks through the x402 pay-per-request flow (no key needed) |
+| [`create-deposit.ts`](usdctofiat/create-deposit.ts) | Creates a delegated offramp deposit (approve → deposit → delegate) |
+| [`manage-deposits.ts`](usdctofiat/manage-deposits.ts) | Lists deposits with status, balance, fills, delegation state |
+| [`close-deposit.ts`](usdctofiat/close-deposit.ts) | Withdraws remaining USDC and closes a deposit |
+| [`platform-explorer.ts`](usdctofiat/platform-explorer.ts) | Browse supported platforms, currencies, and validation rules |
+| [`react-example.tsx`](usdctofiat/react-example.tsx) | Copy-paste React component with useOfframp hook |
 
-Each script is self-contained. Run any with `npx tsx <file>.ts`.
+### SDK
 
-## Auth
+Package: [`@usdctofiat/offramp`](https://www.npmjs.com/package/@usdctofiat/offramp)
 
-Two ways to authenticate:
+```ts
+import { Offramp } from "@usdctofiat/offramp";
 
-**API key** (recommended). Every key includes 1,000 free requests/month. Generate one at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) or programmatically via `client.createKey()`, then:
-
-```bash
-export PEERLYTICS_API_KEY=pk_live_your_key_here
+const offramp = new Offramp();
+const result = await offramp.createDeposit(walletClient, {
+  amount: "100",
+  platform: "revolut",
+  currency: "EUR",
+  identifier: "alice",
+});
 ```
 
-**x402** (keyless). Pay per request with USDC on Base. No account, no key. See `x402-agent.ts` for the full flow.
+| Method | Returns |
+|--------|---------|
+| `createDeposit(walletClient, params, onProgress?)` | `{ depositId, txHash }` |
+| `getDeposits(walletAddress)` | `DepositInfo[]` with status, balance, fills |
+| `withdrawDeposit(walletClient, depositId)` | Tx hash |
+| `getPlatforms()` | Supported platforms with currencies |
+| `getCurrencies(platform)` | Currency codes for a platform |
+| `validateIdentifier(platform, identifier)` | `{ valid, normalized, error? }` |
 
-## Config
+React hook: `import { useOfframp } from "@usdctofiat/offramp/react"`
+
+### How deposits work
+
+`createDeposit` executes 3 wallet transactions in sequence:
+
+1. **Approve** USDC allowance on the escrow contract
+2. **Create deposit** on-chain with payment method, currency, and order limits
+3. **Delegate** to the Delegate vault for automatic rate management
+
+Each step requires a wallet signature. The SDK orchestrates the flow and reports progress via the `onProgress` callback.
+
+### Supported platforms
+
+Revolut (23 currencies) · Wise (30+) · PayPal (7) · Venmo · Cash App · Zelle · Monzo · N26 · Chime · Mercado Pago
+
+---
+
+## Peerlytics — Analytics SDK
+
+Query ZKP2P protocol data: rates, orderbooks, maker portfolios, and live activity.
 
 ```bash
-cp .env.example .env
+export PEERLYTICS_API_KEY=pk_live_...   # get one at peerlytics.xyz/developers
+npx tsx peerlytics/volume-dashboard.ts
 ```
 
-| Variable | Default | Script |
-|----------|---------|--------|
-| `PEERLYTICS_API_KEY` | _(required)_ | all except x402-agent |
-| `CURRENCY` | `GBP` | rate-monitor |
-| `CURRENCIES` | `GBP,EUR,BRL,TRY,NGN` | orderbook-snapshot |
-| `THRESHOLD` | `1.02` | rate-monitor |
-| `POLL_SECONDS` | `60` / `10` | rate-monitor, live-activity |
-| `EVENT_TYPE` | _(all)_ | live-activity |
+| Script | What it does |
+|--------|-------------|
+| [`volume-dashboard.ts`](peerlytics/volume-dashboard.ts) | Protocol stats, liquidity, top 5 makers and takers |
+| [`rate-monitor.ts`](peerlytics/rate-monitor.ts) | Polls rates for a currency, alerts when they cross a threshold |
+| [`orderbook-snapshot.ts`](peerlytics/orderbook-snapshot.ts) | Orderbook depth across currencies with bar charts |
+| [`maker-report.ts`](peerlytics/maker-report.ts) | Portfolio report for a maker address (deposits, profit, APR) |
+| [`live-activity.ts`](peerlytics/live-activity.ts) | Real-time protocol events, color-coded by type |
+| [`x402-agent.ts`](peerlytics/x402-agent.ts) | x402 pay-per-request flow (no key needed) |
 
-## SDK
+### SDK
 
-All examples use [`@peerlytics/sdk`](https://www.npmjs.com/package/@peerlytics/sdk):
+Package: [`@peerlytics/sdk`](https://www.npmjs.com/package/@peerlytics/sdk)
 
 ```ts
 import { Peerlytics } from "@peerlytics/sdk";
-const p = new Peerlytics({ apiKey: "pk_live_..." });
+const client = new Peerlytics({ apiKey: "pk_live_..." });
 ```
 
 | Method | Returns |
@@ -72,28 +110,57 @@ const p = new Peerlytics({ apiKey: "pk_live_..." });
 | `getMaker(address)` | Maker portfolio with allocations and profit |
 | `search(query)` | Search by address, ENS, deposit ID |
 | `getActivity({ type?, limit? })` | Protocol events (signals, fills, rate updates) |
-| `getMakerHistory(address)` | Historical maker performance |
-| `getCurrencies()` | Supported fiat currencies |
-| `getPlatforms()` | Supported payment platforms |
 | `getVaultsOverview()` | All vaults with AUM, fees, snapshots |
 
-Full reference on [npm](https://www.npmjs.com/package/@peerlytics/sdk).
+### Auth
+
+**API key** (recommended): 1,000 free requests/month. Get one at [peerlytics.xyz/developers](https://peerlytics.xyz/developers).
+
+**x402** (keyless): Pay per request with USDC on Base. See `x402-agent.ts`.
+
+---
+
+## Config
+
+```bash
+cp .env.example .env
+```
+
+### USDCtoFiat
+
+| Variable | Default | Script |
+|----------|---------|--------|
+| `PRIVATE_KEY` | _(required)_ | create-deposit, close-deposit |
+| `WALLET_ADDRESS` | _(optional)_ | manage-deposits |
+| `PLATFORM` | `revolut` | create-deposit |
+| `CURRENCY` | `USD` | create-deposit |
+| `IDENTIFIER` | `demo` | create-deposit |
+| `AMOUNT` | `10` | create-deposit |
+
+### Peerlytics
+
+| Variable | Default | Script |
+|----------|---------|--------|
+| `PEERLYTICS_API_KEY` | _(required)_ | all except x402-agent |
+| `CURRENCY` | `GBP` | rate-monitor |
+| `CURRENCIES` | `GBP,EUR,BRL,TRY,NGN` | orderbook-snapshot |
+| `THRESHOLD` | `1.02` | rate-monitor |
+| `POLL_SECONDS` | `60` / `10` | rate-monitor, live-activity |
 
 ## For agents
 
-If you're building an autonomous agent or integrating with an LLM:
-
-- **llms.txt** at `https://peerlytics.xyz/llms.txt` has the full API surface in a format agents can parse
-- **OpenAPI spec** at `https://peerlytics.xyz/api/openapi` for structured endpoint discovery
-- **x402** lets agents pay per request with USDC on Base, no key management needed
+- **llms.txt**: `https://peerlytics.xyz/llms.txt` — full API surface for LLM parsing
+- **OpenAPI**: `https://peerlytics.xyz/api/openapi` — structured endpoint discovery
+- **x402**: pay-per-request with USDC, no key management needed
 
 ## Links
 
-- [peerlytics.xyz/developers](https://peerlytics.xyz/developers)
+- [usdctofiat.xyz](https://usdctofiat.xyz) — USDC offramp app
+- [delegate.usdctofiat.xyz](https://delegate.usdctofiat.xyz) — Delegate vault
+- [peerlytics.xyz/developers](https://peerlytics.xyz/developers) — Peerlytics API
+- [@usdctofiat/offramp on npm](https://www.npmjs.com/package/@usdctofiat/offramp)
 - [@peerlytics/sdk on npm](https://www.npmjs.com/package/@peerlytics/sdk)
-- [OpenAPI spec](https://peerlytics.xyz/api/openapi?download=1)
-- [llms.txt](https://peerlytics.xyz/llms.txt)
-- [zkp2p.xyz](https://zkp2p.xyz)
+- [zkp2p.xyz](https://zkp2p.xyz) — Protocol
 
 ## License
 

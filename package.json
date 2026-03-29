@@ -1,21 +1,28 @@
 {
-  "name": "peerlytics-starter",
+  "name": "usdctofiat-peerlytics-starters",
   "version": "1.0.0",
-  "description": "Example scripts for the Peerlytics API and @peerlytics/sdk",
+  "description": "Example scripts for @usdctofiat/offramp and @peerlytics/sdk",
   "private": true,
   "scripts": {
-    "rate-monitor": "npx tsx rate-monitor.ts",
-    "volume-dashboard": "npx tsx volume-dashboard.ts",
-    "x402-agent": "npx tsx x402-agent.ts",
-    "orderbook-snapshot": "npx tsx orderbook-snapshot.ts",
-    "maker-report": "npx tsx maker-report.ts",
-    "live-activity": "npx tsx live-activity.ts"
+    "usdctofiat:create": "npx tsx usdctofiat/create-deposit.ts",
+    "usdctofiat:deposits": "npx tsx usdctofiat/manage-deposits.ts",
+    "usdctofiat:close": "npx tsx usdctofiat/close-deposit.ts",
+    "usdctofiat:platforms": "npx tsx usdctofiat/platform-explorer.ts",
+    "peerlytics:dashboard": "npx tsx peerlytics/volume-dashboard.ts",
+    "peerlytics:rates": "npx tsx peerlytics/rate-monitor.ts",
+    "peerlytics:orderbook": "npx tsx peerlytics/orderbook-snapshot.ts",
+    "peerlytics:maker": "npx tsx peerlytics/maker-report.ts",
+    "peerlytics:activity": "npx tsx peerlytics/live-activity.ts",
+    "peerlytics:x402": "npx tsx peerlytics/x402-agent.ts"
   },
   "dependencies": {
-    "@peerlytics/sdk": "latest"
+    "@peerlytics/sdk": "latest",
+    "@usdctofiat/offramp": "latest",
+    "viem": "latest"
   },
   "devDependencies": {
     "@types/node": "latest",
+    "@types/react": "latest",
     "tsx": "latest",
     "typescript": "latest"
   }

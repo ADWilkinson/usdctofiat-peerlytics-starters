@@ -1,6 +1,10 @@
 # USDCtoFiat & Peerlytics Starters
 
-TypeScript examples for integrating USDC-to-fiat offramps and querying ZKP2P protocol data on Base.
+[![npm @usdctofiat/offramp](https://img.shields.io/npm/v/@usdctofiat/offramp?label=%40usdctofiat%2Fofframp&color=8fb47d)](https://www.npmjs.com/package/@usdctofiat/offramp)
+[![npm @peerlytics/sdk](https://img.shields.io/npm/v/@peerlytics/sdk?label=%40peerlytics%2Fsdk&color=8fb47d)](https://www.npmjs.com/package/@peerlytics/sdk)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+TypeScript examples and agent skills for integrating USDC-to-fiat offramps and querying ZKP2P protocol data on Base.
 
 ## Quick start
 
@@ -34,13 +38,13 @@ npx tsx usdctofiat/create-deposit.ts
 Package: [`@usdctofiat/offramp`](https://www.npmjs.com/package/@usdctofiat/offramp)
 
 ```ts
-import { Offramp } from "@usdctofiat/offramp";
+import { Offramp, PAYMENT_PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
 
 const offramp = new Offramp();
 const result = await offramp.createDeposit(walletClient, {
   amount: "100",
-  platform: "revolut",
-  currency: "EUR",
+  platform: PAYMENT_PLATFORMS.REVOLUT,
+  currency: CURRENCIES.EUR,
   identifier: "alice",
 });
 ```

@@ -8,7 +8,7 @@ Package: @usdctofiat/offramp (npm)
 Install: npm install @usdctofiat/offramp
 
 ```ts
-import { Offramp } from "@usdctofiat/offramp";
+import { Offramp, PAYMENT_PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
 const offramp = new Offramp();
 ```
 
@@ -22,6 +22,8 @@ Deposits:
 Discovery:
 - offramp.getPlatforms() - list supported payment platforms with currencies, identifier labels, helper text
 - offramp.getCurrencies(platform) - get supported currency codes for a platform
+- offramp.getCurrencyInfo(code) - get currency metadata (symbol, name, countryCode). Returns CurrencyInfo | null
+- offramp.getAllCurrencies() - get all supported currencies with metadata. Returns CurrencyInfo[]
 - offramp.validateIdentifier(platform, identifier) - validate and normalize a payment identifier. Returns { valid, normalized, error? }
 
 ## React Hook
@@ -31,15 +33,22 @@ import { useOfframp } from "@usdctofiat/offramp/react";
 const { createDeposit, getDeposits, withdrawDeposit, step, txHash, depositId, error, isLoading, reset, getPlatforms, getCurrencies, validateIdentifier } = useOfframp();
 ```
 
+## Typed Constants
+
+Use these for autocomplete and compile-time safety:
+- PAYMENT_PLATFORMS.REVOLUT, .WISE, .VENMO, .CASHAPP, .CHIME, .MERCADO_PAGO, .ZELLE, .PAYPAL, .MONZO, .N26
+- CURRENCIES.USD, .EUR, .GBP, .AUD, .CAD, .SGD, .CHF, .JPY, .AED, .MXN, .INR, .BRL, .HKD, .NZD, .PLN, .TRY, .ZAR, .SEK, .NOK, .DKK, .CZK, .HUF, .RON, .THB, .CNY, .IDR, .ILS, .KES, .MYR, .VND, .UGX, .PHP, .SAR, .ARS, .KRW, .TWD, .CLP, .COP, .PEN
+
 ## Types
 
 ```ts
 type Platform = "venmo" | "cashapp" | "chime" | "revolut" | "wise" | "mercadopago" | "zelle" | "paypal" | "monzo" | "n26";
+type Currency = "AED" | "ARS" | "AUD" | ... | "USD" | "ZAR"; // 39 currencies
 
 interface OfframpParams {
   amount: string;      // USDC decimal, min 1
-  platform: Platform;
-  currency: string;    // ISO 4217 code
+  platform: Platform;  // use PAYMENT_PLATFORMS constant
+  currency: Currency;  // use CURRENCIES constant
   identifier: string;  // platform-specific username/email
 }
 
@@ -56,6 +65,13 @@ interface PlatformInfo {
   identifierLabel: string;
   identifierPlaceholder: string;
   helperText: string;
+}
+
+interface CurrencyInfo {
+  code: string;        // "EUR"
+  name: string;        // "Euro"
+  symbol: string;      // "€"
+  countryCode: string; // "eu"
 }
 
 type DepositStatus = "active" | "empty" | "closed";

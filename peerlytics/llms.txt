@@ -20,20 +20,23 @@ Analytics:
 - client.getProtocolOverview(range) - full analytics overview for mtd, 3mtd, ytd, all
 
 Market:
-- client.getMarketSummary({ currency?, platform? }) - rate stats per pair
-- client.getOrderbook({ currency?, platform? }) - live orderbook by rate level
+- client.getMarketSummary({ currency?, platform?, includeRates?, limit?, offset? }) - rate stats per pair
+- client.getOrderbook({ currency?, platform?, minSize? }) - live orderbook by rate level
 
 Explorer:
-- client.getDeposit(id) - deposit detail with intents
-- client.getDeposits({ depositor?, delegate?, platform?, currency?, status? }) - query deposits
+- client.getDeposit(id, { limit?, offset? }) - deposit detail with intents
+- client.getDeposits({ depositor?, delegate?, platform?, currency?, status?, accepting?, limit?, offset? }) - query deposits
 - client.getIntent(hash) - intent detail
-- client.getIntents({ owner?, recipient?, verifier?, status? }) - query intents
-- client.getAddress(address) - address profile with stats
-- client.getMaker(address) - maker portfolio
-- client.search(query, { type? }) - multi-type search
+- client.getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? }) - query intents
+- client.getAddress(address, { limit?, offset? }) - address profile with stats
+- client.getMaker(address) - maker portfolio with allocations and profit
+- client.getVerifier(address, { limit?, offset? }) - verifier stats and breakdown
+- client.getVault(id, { days? }) - vault detail with snapshots
+- client.search(query, { type?, role?, limit?, offset? }) - multi-type search
 
 Activity:
-- client.getActivity({ type?, depositId?, limit? }) - live protocol events
+- client.getActivity({ type?, depositId?, address?, rateManagerId?, since?, limit?, offset? }) - live protocol events
+- client.streamActivity({ type?, rateManagerId?, since?, intervalMs?, limit? }, { signal? }) - SSE real-time event stream (returns ReadableStream<LiveEvent>)
 
 History:
 - client.getMakerHistory(address) - maker historical stats
@@ -44,13 +47,16 @@ Metadata:
 - client.getPlatforms() - supported payment platforms
 
 Vaults:
-- client.getVaultsOverview() - all vaults
-- client.getVault(id) - vault detail
+- client.getVaultsOverview() - all vaults with AUM, fees, snapshots
+- client.getVault(id, { days? }) - vault detail with snapshots
 
 Account:
 - client.listKeys() - list API keys
 - client.createKey(label?) - create key
-- client.getCredits() - credit balance
+- client.rotateKey(oldKey) - rotate key
+- client.deleteKey(key) - delete key
+- client.getCredits() - credit balance and packages
+- client.createCheckout(pkg) - purchase credits (starter/growth/scale)
 
 ## Auth
 
@@ -60,8 +66,10 @@ Account:
 ## Errors
 
 ```ts
-import { PeerlyticsError, RateLimitError, NotFoundError } from "@peerlytics/sdk";
+import { PeerlyticsError, RateLimitError, NotFoundError, ValidationError } from "@peerlytics/sdk";
 ```
+
+Types: ActivityStreamFilters, ActivityStreamEvent (for streamActivity)
 
 ## Examples in this repo
 

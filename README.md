@@ -120,16 +120,33 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 
 | Method | Returns |
 |--------|---------|
-| `getProtocolSummary()` | Protocol MTD/QTD/YTD volume, liquidity, deposits |
-| `getLeaderboard({ limit? })` | Top makers/takers by volume, APR, profit |
-| `getMarketSummary({ currency? })` | Rate stats per platform/currency pair |
-| `getOrderbook({ currency? })` | Live orderbook grouped by rate level |
-| `getDeposit(id)` | Single deposit with intents and payment methods |
-| `getAddress(address)` | Address profile with deposits, intents, stats |
+| `getProtocolSummary()` | Protocol MTD/QTD/YTD/all-time volume, liquidity, deposits |
+| `getProtocolOverview(range)` | Full analytics overview with timeseries for mtd, 3mtd, ytd, all |
+| `getLeaderboard({ limit?, offset? })` | Top makers/takers by volume, APR, profit |
+| `getMarketSummary({ currency?, platform?, includeRates?, limit?, offset? })` | Rate stats per platform/currency pair |
+| `getOrderbook({ currency?, platform?, minSize? })` | Live orderbook grouped by rate level |
+| `getDeposit(id, { limit?, offset? })` | Single deposit with intents and payment methods |
+| `getDeposits({ depositor?, delegate?, platform?, currency?, status?, accepting?, limit?, offset? })` | Query deposits with filters |
+| `getIntent(hash)` | Intent detail |
+| `getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? })` | Query intents with filters |
+| `getAddress(address, { limit?, offset? })` | Address profile with deposits, intents, stats |
 | `getMaker(address)` | Maker portfolio with allocations and profit |
-| `search(query)` | Search by address, ENS, deposit ID |
-| `getActivity({ type?, limit? })` | Protocol events (signals, fills, rate updates) |
+| `getVerifier(address, { limit?, offset? })` | Verifier stats and breakdown |
+| `search(query, { type?, role?, limit?, offset? })` | Search by address, ENS, deposit ID |
+| `getActivity({ type?, depositId?, address?, rateManagerId?, since?, limit?, offset? })` | Protocol events (signals, fills, rate updates) |
+| `streamActivity(filters, { signal? })` | SSE real-time event stream (returns ReadableStream) |
+| `getMakerHistory(address)` | Maker historical stats |
+| `getTakerHistory(address)` | Taker historical stats |
+| `getCurrencies()` | Supported fiat currencies |
+| `getPlatforms()` | Supported payment platforms |
 | `getVaultsOverview()` | All vaults with AUM, fees, snapshots |
+| `getVault(id, { days? })` | Vault detail with snapshots |
+| `listKeys()` | List API keys |
+| `createKey(label?)` | Create key |
+| `rotateKey(oldKey)` | Rotate key |
+| `deleteKey(key)` | Delete key |
+| `getCredits()` | Credit balance and packages |
+| `createCheckout(pkg)` | Purchase credits (starter/growth/scale) |
 
 ### Auth
 

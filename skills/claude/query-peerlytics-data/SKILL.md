@@ -88,20 +88,23 @@ Analytics:
 - `getProtocolOverview(range)` — full analytics overview for mtd, 3mtd, ytd, all
 
 Market:
-- `getMarketSummary({ currency?, platform? })` — rate stats per pair
-- `getOrderbook({ currency?, platform? })` — live orderbook by rate level
+- `getMarketSummary({ currency?, platform?, includeRates?, limit?, offset? })` — rate stats per pair
+- `getOrderbook({ currency?, platform?, minSize? })` — live orderbook by rate level
 
 Explorer:
-- `getDeposit(id)` — deposit detail with intents
-- `getDeposits({ depositor?, delegate?, platform?, currency?, status? })` — query deposits
+- `getDeposit(id, { limit?, offset? })` — deposit detail with intents
+- `getDeposits({ depositor?, delegate?, platform?, currency?, status?, accepting?, limit?, offset? })` — query deposits
 - `getIntent(hash)` — intent detail
-- `getIntents({ owner?, recipient?, verifier?, status? })` — query intents
-- `getAddress(address)` — address profile with stats
-- `getMaker(address)` — maker portfolio
-- `search(query, { type? })` — multi-type search
+- `getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? })` — query intents
+- `getAddress(address, { limit?, offset? })` — address profile with stats
+- `getMaker(address)` — maker portfolio with allocations and profit
+- `getVerifier(address, { limit?, offset? })` — verifier stats and breakdown
+- `getVault(id, { days? })` — vault detail with snapshots
+- `search(query, { type?, role?, limit?, offset? })` — multi-type search
 
 Activity:
-- `getActivity({ type?, depositId?, limit? })` — live protocol events
+- `getActivity({ type?, depositId?, address?, rateManagerId?, since?, limit?, offset? })` — live protocol events
+- `streamActivity({ type?, rateManagerId?, since?, intervalMs?, limit? }, { signal? })` — SSE real-time event stream (returns ReadableStream<LiveEvent>)
 
 History:
 - `getMakerHistory(address)` — maker historical stats
@@ -112,18 +115,21 @@ Metadata:
 - `getPlatforms()` — supported payment platforms
 
 Vaults:
-- `getVaultsOverview()` — all vaults
-- `getVault(id)` — vault detail
+- `getVaultsOverview()` — all vaults with AUM, fees, snapshots
+- `getVault(id, { days? })` — vault detail with snapshots
 
 Account:
 - `listKeys()` — list API keys
 - `createKey(label?)` — create key
-- `getCredits()` — credit balance
+- `rotateKey(oldKey)` — rotate key
+- `deleteKey(key)` — delete key
+- `getCredits()` — credit balance and packages
+- `createCheckout(pkg)` — purchase credits (starter/growth/scale)
 
 ## Error handling
 
 ```typescript
-import { PeerlyticsError, RateLimitError, NotFoundError } from "@peerlytics/sdk";
+import { PeerlyticsError, RateLimitError, NotFoundError, ValidationError } from "@peerlytics/sdk";
 
 try {
   const data = await client.getMaker(address);

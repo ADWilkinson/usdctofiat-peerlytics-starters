@@ -653,11 +653,11 @@ export default function App() {
                 <InlineMessage tone="success">
                   Deposit #{depositId} created.{" "}
                   <a
-                    href={`https://basescan.org/tx/${txHash}`}
+                    href={`https://peerlytics.xyz/explorer/deposit/${depositId}`}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    View on Basescan →
+                    View on Peerlytics →
                   </a>
                 </InlineMessage>
               )}

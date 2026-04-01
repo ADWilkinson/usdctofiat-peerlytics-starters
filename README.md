@@ -1,96 +1,127 @@
-# Delegated USDC Offramp
+# Peerlytics & USDCtoFiat Starters
 
-A minimal Vite + React demo for delegated USDC sells on Base.
+Production-ready examples and a live demo for two SDKs that cover the ZKP2P protocol on Base: server-side analytics with **@peerlytics/sdk** and wallet-native USDC off-ramps with **@usdctofiat/offramp**.
 
-It keeps the surface area intentionally small:
+[![npm: @peerlytics/sdk](https://img.shields.io/npm/v/@peerlytics/sdk?label=%40peerlytics%2Fsdk&color=1b5e4e)](https://www.npmjs.com/package/@peerlytics/sdk)
+[![npm: @usdctofiat/offramp](https://img.shields.io/npm/v/@usdctofiat/offramp?label=%40usdctofiat%2Fofframp&color=6e4a0e)](https://www.npmjs.com/package/@usdctofiat/offramp)
 
-- create a delegated deposit with `@usdctofiat/offramp`
-- read the live orderbook through a tiny server-side `@peerlytics/sdk` proxy
-- show only active deposits for the connected wallet
-- cache orderbook responses in `sessionStorage` for the current browser session
+**Live demo:** [offramp-sdk.vercel.app](https://offramp-sdk.vercel.app)
 
-## Stack
+## What's in this repo
 
-- Vite
-- React 19
-- TypeScript
-- `@usdctofiat/offramp`
-- `@peerlytics/sdk`
-- Vercel
+```text
+demo/                        Vite + React demo app (deployed to Vercel)
+  src/App.tsx                  single-page UI: create deposits, live orderbook, withdraw
+  api/orderbook.ts             Vercel serverless orderbook proxy
+  server/peerlytics.ts         shared Peerlytics server helper (dev + prod)
 
-## Local development
+peerlytics/                  @peerlytics/sdk examples (run standalone with ts-node/bun)
+  orderbook-snapshot.ts        multi-currency orderbook depth
+  rate-monitor.ts              poll rates, alert on threshold
+  volume-dashboard.ts          protocol stats terminal dashboard
+  maker-report.ts              portfolio report for a maker address
+  live-activity.ts             real-time protocol event stream (SSE)
+  x402-agent.ts                x402 pay-per-request flow (no API key needed)
+  llms.txt                     LLM-friendly SDK reference
+
+usdctofiat/                  @usdctofiat/offramp examples
+  create-deposit.ts            create and delegate a USDC deposit
+  close-deposit.ts             withdraw remaining USDC and close a deposit
+  resume-deposit.ts            resume an interrupted deposit flow
+  manage-deposits.ts           list and inspect deposits for a wallet
+  platform-explorer.ts         enumerate platforms, currencies, and validation
+  react-example.tsx            useOfframp hook usage in React
+  llms.txt                     LLM-friendly SDK reference
+
+skills/                      Claude Code skills for AI-assisted development
+  claude/
+    query-peerlytics-data/     skill: query protocol data via Peerlytics SDK
+    integrate-usdctofiat-offramp/  skill: integrate the offramp SDK
+```
+
+## Quick start
+
+### Demo app
 
 ```bash
+cd demo
 npm install
 cp .env.example .env.local
-```
-
-Set your server-side Peerlytics key:
-
-```bash
-PEERLYTICS_API_KEY=pk_live_...
-```
-
-Then run:
-
-```bash
+# set PEERLYTICS_API_KEY=pk_live_...
 npm run dev
 ```
 
-## Production build
+### Standalone examples
+
+Each script in `peerlytics/` and `usdctofiat/` runs independently:
 
 ```bash
-npm run build
+# Peerlytics (server-side, needs API key)
+export PEERLYTICS_API_KEY=pk_live_...
+npx tsx peerlytics/orderbook-snapshot.ts
+npx tsx peerlytics/live-activity.ts
+
+# USDCtoFiat (wallet-side, needs private key for tx examples)
+npx tsx usdctofiat/platform-explorer.ts
 ```
 
-## Deploy to Vercel
+## SDKs at a glance
 
-Link the repo once:
+### @peerlytics/sdk
 
-```bash
-vercel link
+Real-time analytics for the ZKP2P protocol. Orderbooks, activity feeds, maker stats, vault data.
+
+```ts
+import { Peerlytics } from "@peerlytics/sdk";
+
+const client = new Peerlytics({ apiKey: "pk_live_..." });
+const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "revolut" });
 ```
 
-Add the server-side env:
+Auth options: API key (1,000 free requests/month) or x402 pay-per-request with USDC on Base.
+
+[npm](https://www.npmjs.com/package/@peerlytics/sdk) | [API docs](https://peerlytics.xyz/developers) | [OpenAPI spec](https://peerlytics.xyz/api/openapi) | [llms.txt](https://peerlytics.xyz/llms.txt)
+
+### @usdctofiat/offramp
+
+Delegated USDC-to-fiat off-ramp on Base. Revolut, Venmo, Wise, PayPal, and more.
+
+```ts
+import { useOfframp, PLATFORMS, CURRENCIES } from "@usdctofiat/offramp/react";
+
+const { offramp, deposits, close } = useOfframp();
+await offramp(walletClient, {
+  amount: "100",
+  platform: PLATFORMS.REVOLUT,
+  currency: CURRENCIES.USD,
+  identifier: "alice",
+});
+```
+
+Supported platforms: Revolut, Venmo, CashApp, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
+
+[npm](https://www.npmjs.com/package/@usdctofiat/offramp) | [usdctofiat.xyz](https://usdctofiat.xyz)
+
+## Deploy the demo
+
+The demo deploys to Vercel with root directory set to `demo/`.
 
 ```bash
+cd demo
+vercel link          # link to your Vercel project
 vercel env add PEERLYTICS_API_KEY production
 vercel env add PEERLYTICS_API_KEY preview
-```
-
-Deploy production:
-
-```bash
 vercel --prod
 ```
 
-## Project structure
+The orderbook API key stays server-side and is never exposed to the browser.
 
-```text
-api/
-  orderbook.ts        # Vercel serverless orderbook proxy
-server/
-  peerlytics.ts       # shared Peerlytics server helper
-src/
-  App.tsx             # single-page demo UI
-  styles.css          # visual system
-  lib/
-    format.ts         # formatting helpers
-    wallet.ts         # injected wallet + Base helpers
-scripts/
-  deploy.sh           # claimable preview deploy helper
-```
+## Links
 
-## Notes
+- [Peerlytics Explorer](https://peerlytics.xyz/explorer)
+- [ZKP2P Protocol](https://zkp2p.xyz)
+- [@davyjones0x](https://x.com/davyjones0x)
 
-- The orderbook key stays server-side in Vercel and is not exposed to the browser.
-- The local Vite dev server mounts the same `/api/orderbook` path for parity with production.
-- Deposits are filtered to `active` only.
-- Older standalone SDK examples are still available in `peerlytics/` and `usdctofiat/` if you want more reference scripts.
+## License
 
-## References
-
-- [Offramp SDK on npm](https://www.npmjs.com/package/@usdctofiat/offramp)
-- [Peerlytics SDK on npm](https://www.npmjs.com/package/@peerlytics/sdk)
-- [Starter repo](https://github.com/ADWilkinson/usdctofiat-peerlytics-starters)
-- [davyjones0x on X](https://x.com/davyjones0x)
+[MIT](LICENSE)

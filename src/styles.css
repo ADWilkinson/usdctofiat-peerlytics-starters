@@ -14,6 +14,9 @@
   --accent: #1b5e4e;
   --accent-strong: #124437;
   --accent-soft: rgba(27, 94, 78, 0.09);
+  --amber: rgba(110, 74, 14, 0.88);
+  --amber-border: rgba(163, 124, 58, 0.22);
+  --amber-soft: rgba(163, 124, 58, 0.07);
   --danger: #a23a2e;
   --success: #185f49;
   --shadow: 0 18px 40px rgba(35, 30, 18, 0.06);
@@ -62,66 +65,30 @@ select {
   margin: 0 auto;
 }
 
-.topbar,
-.section-head,
-.submit-row,
-.deposit-meta,
-.deposit-flags {
+/* ─────────────────────────────────────────
+   Topbar
+───────────────────────────────────────── */
+
+.topbar {
   display: flex;
   gap: 16px;
   justify-content: space-between;
   align-items: flex-start;
-}
-
-.topbar {
-  margin-bottom: 22px;
+  margin-bottom: 0;
   padding: 4px 0 22px;
   border-bottom: 1px solid var(--border);
 }
 
-.eyebrow,
-.value-tile span,
-.book-header,
-.status,
-.deposit-meta span {
+.topbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand-mono {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
-
-h1,
-h2,
-p {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-weight: 600;
-  letter-spacing: -0.045em;
-  text-wrap: balance;
-}
-
-h1 {
-  margin-top: 10px;
-  max-width: 10ch;
-  font-size: clamp(2rem, 5vw, 3.2rem);
-  line-height: 0.94;
-}
-
-h2 {
-  font-size: clamp(1.28rem, 3vw, 1.8rem);
-  line-height: 1.02;
-}
-
-.subtitle {
-  margin-top: 12px;
-  max-width: 30rem;
+  font-size: 13px;
   color: var(--text-soft);
-  font-size: 14px;
-  line-height: 1.6;
+  letter-spacing: -0.01em;
 }
 
 .topbar-actions {
@@ -143,12 +110,347 @@ h2 {
   font-size: 12px;
 }
 
-.workspace {
-  display: grid;
-  gap: 18px;
-  align-items: start;
-  grid-template-columns: minmax(0, 1.08fr) minmax(330px, 0.92fr);
+.wallet-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  flex-shrink: 0;
 }
+
+.chain-label {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.chain-wrong {
+  color: var(--danger);
+}
+
+/* ─────────────────────────────────────────
+   Page header
+───────────────────────────────────────── */
+
+.page-header {
+  padding: 44px 0 40px;
+  border-bottom: 1px solid var(--border);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+h1 {
+  max-width: 10ch;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 0.94;
+}
+
+h2 {
+  font-size: clamp(1.28rem, 3vw, 1.8rem);
+  line-height: 1.02;
+}
+
+h3 {
+  font-size: 1.14rem;
+  line-height: 1.1;
+}
+
+.page-subheading {
+  margin-top: 16px;
+  max-width: 44rem;
+  color: var(--text-soft);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.sdk-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.sdk-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  text-decoration: none;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.sdk-badge-peerlytics {
+  border-color: rgba(27, 94, 78, 0.2);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.sdk-badge-peerlytics:hover {
+  background: rgba(27, 94, 78, 0.14);
+}
+
+.sdk-badge-offramp {
+  border-color: var(--amber-border);
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.sdk-badge-offramp:hover {
+  background: rgba(163, 124, 58, 0.13);
+}
+
+/* ─────────────────────────────────────────
+   SDK Strips
+───────────────────────────────────────── */
+
+.sdk-strip {
+  display: grid;
+  grid-template-columns: 400px minmax(0, 1fr);
+  align-items: start;
+  padding: 52px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.strip-left {
+  padding-right: 44px;
+  border-right: 1px solid var(--border);
+}
+
+.strip-demo {
+  padding-left: 44px;
+}
+
+.strip-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.strip-name {
+  margin-bottom: 10px;
+  font-size: 1.18rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.strip-desc {
+  margin-bottom: 18px;
+  color: var(--text-soft);
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+.strip-features {
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 7px;
+}
+
+.strip-features li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sdk-strip-peerlytics .strip-features li::before {
+  content: "—";
+  color: var(--accent);
+  flex-shrink: 0;
+  font-size: 11px;
+}
+
+.sdk-strip-offramp .strip-features li::before {
+  content: "—";
+  color: var(--amber);
+  flex-shrink: 0;
+  font-size: 11px;
+}
+
+.strip-code {
+  margin-top: 18px;
+}
+
+/* ─────────────────────────────────────────
+   SDK Pills
+───────────────────────────────────────── */
+
+.eyebrow,
+.value-tile span,
+.book-header,
+.status,
+.deposit-meta span {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.sdk-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.01em;
+}
+
+.badge-peerlytics {
+  border-color: rgba(27, 94, 78, 0.2);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badge-offramp {
+  border-color: var(--amber-border);
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.sdk-docs-link {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--text-faint);
+  text-decoration: none;
+  transition: color 140ms ease;
+}
+
+.sdk-docs-link:hover {
+  color: var(--text-soft);
+}
+
+/* ─────────────────────────────────────────
+   Install command
+───────────────────────────────────────── */
+
+.install-cmd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid rgba(27, 94, 78, 0.12);
+  border-radius: 12px;
+  background: rgba(27, 94, 78, 0.04);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.install-cmd:hover {
+  background: rgba(27, 94, 78, 0.08);
+  border-color: rgba(27, 94, 78, 0.2);
+}
+
+.install-cmd-offramp {
+  border-color: rgba(163, 124, 58, 0.14);
+  background: rgba(163, 124, 58, 0.04);
+}
+
+.install-cmd-offramp:hover {
+  background: rgba(163, 124, 58, 0.08);
+  border-color: rgba(163, 124, 58, 0.22);
+}
+
+.install-prompt {
+  color: var(--accent);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.install-prompt-offramp {
+  color: var(--amber);
+}
+
+.install-copy {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-faint);
+  transition: color 140ms ease;
+}
+
+.install-cmd:hover .install-copy {
+  color: var(--text-soft);
+}
+
+/* ─────────────────────────────────────────
+   Code block
+───────────────────────────────────────── */
+
+.code-block {
+  position: relative;
+  border-radius: 14px;
+  background: #1c1b19;
+  overflow: hidden;
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 18px 20px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #ccc8be;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: rgba(204, 200, 190, 0.5);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.code-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.13);
+  color: rgba(204, 200, 190, 0.85);
+}
+
+/* ─────────────────────────────────────────
+   Card
+───────────────────────────────────────── */
 
 .card {
   padding: 24px;
@@ -165,14 +467,59 @@ h2 {
   backdrop-filter: blur(18px);
 }
 
-.form-grid,
-.book-summary,
-.deposit-list,
-.deposit-values {
-  display: grid;
+/* ─────────────────────────────────────────
+   Section head
+───────────────────────────────────────── */
+
+.section-head {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
 }
 
+/* ─────────────────────────────────────────
+   Route controls (orderbook card header)
+───────────────────────────────────────── */
+
+.route-controls {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.route-select {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-strong);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.route-select:hover {
+  border-color: var(--border-strong);
+}
+
+.route-select:focus {
+  outline: none;
+  border-color: rgba(27, 94, 78, 0.22);
+  box-shadow: 0 0 0 3px rgba(27, 94, 78, 0.07);
+}
+
+/* ─────────────────────────────────────────
+   Form
+───────────────────────────────────────── */
+
 .form-grid {
+  display: grid;
   margin-top: 20px;
   gap: 14px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -230,8 +577,11 @@ h2 {
 }
 
 .submit-row {
-  margin-top: 2px;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
   align-items: center;
+  margin-top: 2px;
 }
 
 .route-note {
@@ -239,6 +589,10 @@ h2 {
   font-size: 13px;
   line-height: 1.4;
 }
+
+/* ─────────────────────────────────────────
+   Buttons
+───────────────────────────────────────── */
 
 .button {
   display: inline-flex;
@@ -284,6 +638,10 @@ h2 {
   color: inherit;
 }
 
+/* ─────────────────────────────────────────
+   Inline message
+───────────────────────────────────────── */
+
 .inline-message {
   margin-top: 14px;
   padding: 12px 14px;
@@ -304,6 +662,10 @@ h2 {
   border-color: rgba(24, 95, 73, 0.18);
   color: var(--success);
 }
+
+/* ─────────────────────────────────────────
+   Step rail
+───────────────────────────────────────── */
 
 .step-rail {
   display: grid;
@@ -331,32 +693,30 @@ h2 {
   color: var(--accent);
 }
 
+.step-dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  margin: 0 auto 5px;
+  opacity: 0.5;
+}
+
+.step-item.active .step-dot,
+.step-item.complete .step-dot {
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────
+   Orderbook
+───────────────────────────────────────── */
+
 .book-summary {
+  display: grid;
   gap: 12px;
   margin-top: 18px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.deposit-values {
-  gap: 12px;
-  margin-top: 16px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.value-tile {
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.58);
-}
-
-.value-tile strong {
-  display: block;
-  margin-top: 8px;
-  font-size: 1.08rem;
-  line-height: 1.1;
-  letter-spacing: -0.04em;
 }
 
 .book-table {
@@ -422,11 +782,40 @@ h2 {
   text-align: right;
 }
 
+/* ─────────────────────────────────────────
+   Value tile
+───────────────────────────────────────── */
+
+.value-tile {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.value-tile strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.08rem;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.accent-value {
+  color: var(--accent);
+}
+
+/* ─────────────────────────────────────────
+   Active deposits
+───────────────────────────────────────── */
+
 .deposits-card {
-  margin-top: 18px;
+  margin-top: 36px;
 }
 
 .deposit-list {
+  display: grid;
   gap: 12px;
   margin-top: 18px;
 }
@@ -443,6 +832,9 @@ h2 {
 }
 
 .deposit-meta {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -452,8 +844,17 @@ h2 {
 }
 
 .deposit-flags {
+  display: flex;
+  gap: 16px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.deposit-values {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .status {
@@ -463,6 +864,11 @@ h2 {
   border: 1px solid var(--border);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.78);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
 }
 
 .status-delegated {
@@ -481,8 +887,55 @@ h2 {
   font-size: 14px;
 }
 
+/* ─────────────────────────────────────────
+   Powered-by label
+───────────────────────────────────────── */
+
+.powered-by {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border: 1px solid rgba(27, 94, 78, 0.14);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+/* ─────────────────────────────────────────
+   Loading + wallet dots
+───────────────────────────────────────── */
+
+.loading-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: 8px;
+  vertical-align: middle;
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ─────────────────────────────────────────
+   Footer
+───────────────────────────────────────── */
+
 .site-foot {
-  padding: 18px 4px 0;
+  padding: 28px 4px 0;
 }
 
 .footer-copy {
@@ -497,20 +950,44 @@ h2 {
   text-underline-offset: 0.22em;
 }
 
+/* ─────────────────────────────────────────
+   Responsive
+───────────────────────────────────────── */
+
 @media (max-width: 900px) {
-  .workspace {
+  .sdk-strip {
     grid-template-columns: 1fr;
+    padding: 40px 0;
   }
 
-  .topbar,
-  .section-head,
-  .submit-row,
-  .deposit-meta {
+  .strip-left {
+    padding-right: 0;
+    padding-bottom: 32px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .strip-demo {
+    padding-left: 0;
+    padding-top: 32px;
+  }
+
+  .section-head {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .topbar-actions {
+  .route-controls {
+    margin-top: 8px;
+  }
+
+  .submit-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .deposit-meta {
+    flex-direction: column;
     align-items: stretch;
   }
 
@@ -531,6 +1008,14 @@ h2 {
   .card {
     padding: 18px;
     border-radius: 22px;
+  }
+
+  .page-header {
+    padding: 28px 0 28px;
+  }
+
+  .sdk-strip {
+    padding: 32px 0;
   }
 
   .form-grid,
@@ -556,426 +1041,6 @@ h2 {
 
   .wallet-badge {
     justify-content: space-between;
-  }
-}
-
-/* ─────────────────────────────────────────
-   Topbar brand
-───────────────────────────────────────── */
-
-.topbar-brand {
-  display: flex;
-  align-items: center;
-}
-
-.brand-mono {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 13px;
-  color: var(--text-soft);
-  letter-spacing: -0.01em;
-}
-
-/* ─────────────────────────────────────────
-   Hero
-───────────────────────────────────────── */
-
-.hero {
-  padding: 44px 0 36px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 32px;
-}
-
-.hero-subtitle {
-  margin-top: 16px;
-  max-width: 44rem;
-  color: var(--text-soft);
-  font-size: 15px;
-  line-height: 1.65;
-}
-
-.sdk-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 24px;
-}
-
-.sdk-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 14px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 12px;
-  text-decoration: none;
-  transition:
-    background-color 140ms ease,
-    border-color 140ms ease;
-}
-
-.sdk-badge-peerlytics {
-  border-color: rgba(27, 94, 78, 0.2);
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.sdk-badge-peerlytics:hover {
-  background: rgba(27, 94, 78, 0.14);
-}
-
-.sdk-badge-offramp {
-  border-color: rgba(163, 124, 58, 0.22);
-  background: rgba(163, 124, 58, 0.07);
-  color: rgba(110, 74, 14, 0.88);
-}
-
-.sdk-badge-offramp:hover {
-  background: rgba(163, 124, 58, 0.13);
-}
-
-/* ─────────────────────────────────────────
-   SDK Overview grid
-───────────────────────────────────────── */
-
-.sdk-overview {
-  display: grid;
-  gap: 16px;
-  margin-bottom: 40px;
-  grid-template-columns: 1fr 1fr;
-}
-
-.sdk-card {
-  padding: 24px;
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 252, 0.9) 0%,
-    rgba(255, 255, 249, 0.74) 100%
-  );
-  box-shadow:
-    var(--shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.68);
-}
-
-.sdk-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-}
-
-.sdk-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 12px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 11px;
-  letter-spacing: 0.01em;
-}
-
-.badge-peerlytics {
-  border-color: rgba(27, 94, 78, 0.2);
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.badge-offramp {
-  border-color: rgba(163, 124, 58, 0.22);
-  background: rgba(163, 124, 58, 0.07);
-  color: rgba(110, 74, 14, 0.88);
-}
-
-.sdk-docs-link {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 11px;
-  color: var(--text-faint);
-  text-decoration: none;
-  transition: color 140ms ease;
-}
-
-.sdk-docs-link:hover {
-  color: var(--text-soft);
-}
-
-.sdk-card h3 {
-  margin: 0 0 8px;
-  font-size: 1.16rem;
-  font-weight: 600;
-  letter-spacing: -0.04em;
-  line-height: 1.1;
-}
-
-.sdk-desc {
-  margin: 0 0 16px;
-  color: var(--text-soft);
-  font-size: 13px;
-  line-height: 1.65;
-}
-
-.sdk-features {
-  margin: 0 0 18px;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 6px;
-}
-
-.sdk-features li {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  color: var(--text-soft);
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.sdk-features li::before {
-  content: "—";
-  color: var(--accent);
-  flex-shrink: 0;
-  font-size: 11px;
-}
-
-/* ─────────────────────────────────────────
-   Install command
-───────────────────────────────────────── */
-
-.install-cmd {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 11px 14px;
-  border: 1px solid rgba(27, 94, 78, 0.12);
-  border-radius: 12px;
-  background: rgba(27, 94, 78, 0.04);
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 12.5px;
-  text-align: left;
-  cursor: pointer;
-  color: inherit;
-  transition:
-    background-color 140ms ease,
-    border-color 140ms ease;
-  margin-bottom: 2px;
-}
-
-.install-cmd:hover {
-  background: rgba(27, 94, 78, 0.08);
-  border-color: rgba(27, 94, 78, 0.2);
-}
-
-.install-prompt {
-  color: var(--accent);
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.install-copy {
-  margin-left: auto;
-  font-size: 11px;
-  color: var(--text-faint);
-  transition: color 140ms ease;
-}
-
-.install-cmd:hover .install-copy {
-  color: var(--text-soft);
-}
-
-/* ─────────────────────────────────────────
-   Code toggle + block
-───────────────────────────────────────── */
-
-.code-toggle {
-  width: 100%;
-  padding: 10px 0 0;
-  background: none;
-  border: none;
-  font-size: 12px;
-  color: var(--text-faint);
-  cursor: pointer;
-  text-align: left;
-  transition: color 140ms ease;
-}
-
-.code-toggle:hover {
-  color: var(--text-soft);
-}
-
-.code-block {
-  position: relative;
-  margin-top: 10px;
-  border-radius: 14px;
-  background: #1c1b19;
-  overflow: hidden;
-}
-
-.code-block pre {
-  margin: 0;
-  padding: 18px 20px;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 12px;
-  line-height: 1.7;
-  color: #ccc8be;
-  overflow-x: auto;
-  white-space: pre;
-  tab-size: 2;
-}
-
-.code-copy-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 4px 10px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 11px;
-  color: rgba(204, 200, 190, 0.5);
-  cursor: pointer;
-  transition:
-    background-color 140ms ease,
-    color 140ms ease;
-}
-
-.code-copy-btn:hover {
-  background: rgba(255, 255, 255, 0.13);
-  color: rgba(204, 200, 190, 0.85);
-}
-
-/* ─────────────────────────────────────────
-   Demo section header
-───────────────────────────────────────── */
-
-.demo-header {
-  margin-bottom: 18px;
-}
-
-.demo-header h2 {
-  margin-top: 6px;
-}
-
-.demo-subtitle {
-  margin-top: 8px;
-  color: var(--text-soft);
-  font-size: 13px;
-  line-height: 1.65;
-  max-width: 46rem;
-}
-
-/* ─────────────────────────────────────────
-   Powered-by label
-───────────────────────────────────────── */
-
-.powered-by {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 9px;
-  border: 1px solid rgba(27, 94, 78, 0.14);
-  border-radius: 999px;
-  background: var(--accent-soft);
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  color: var(--accent);
-}
-
-/* ─────────────────────────────────────────
-   Loading dot + wallet dot
-───────────────────────────────────────── */
-
-.loading-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  margin-left: 7px;
-  vertical-align: middle;
-  animation: blink 1.4s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% {
-    opacity: 0.25;
-    transform: scale(0.8);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.wallet-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--success);
-  flex-shrink: 0;
-}
-
-.chain-label {
-  font-size: 11px;
-  color: var(--text-faint);
-}
-
-.chain-wrong {
-  color: var(--danger);
-}
-
-/* ─────────────────────────────────────────
-   Value tile accent
-───────────────────────────────────────── */
-
-.accent-value {
-  color: var(--accent);
-}
-
-/* ─────────────────────────────────────────
-   Step dot
-───────────────────────────────────────── */
-
-.step-dot {
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-  margin: 0 auto 5px;
-  opacity: 0.5;
-}
-
-.step-item.active .step-dot {
-  opacity: 1;
-}
-
-.step-item.complete .step-dot {
-  opacity: 1;
-}
-
-/* ─────────────────────────────────────────
-   Responsive additions
-───────────────────────────────────────── */
-
-@media (max-width: 900px) {
-  .sdk-overview {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .hero {
-    padding: 28px 0 24px;
-  }
-
-  .sdk-card {
-    padding: 18px;
-    border-radius: 20px;
   }
 
   .install-cmd {

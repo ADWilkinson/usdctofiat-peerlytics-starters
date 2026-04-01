@@ -114,6 +114,11 @@ export default function App() {
   const [isDepositsLoading, setIsDepositsLoading] = useState(false);
   const [depositsError, setDepositsError] = useState<string | null>(null);
 
+  const [copiedPeerlyticsInstall, setCopiedPeerlyticsInstall] = useState(false);
+  const [copiedOfframpInstall, setCopiedOfframpInstall] = useState(false);
+  const [copiedPeerlyticsCode, setCopiedPeerlyticsCode] = useState(false);
+  const [copiedOfframpCode, setCopiedOfframpCode] = useState(false);
+
   const {
     offramp,
     deposits: loadDeposits,
@@ -377,6 +382,34 @@ export default function App() {
     }
   }
 
+  function handleCopyPeerlyticsInstall() {
+    void navigator.clipboard.writeText("npm install @peerlytics/sdk").then(() => {
+      setCopiedPeerlyticsInstall(true);
+      setTimeout(() => setCopiedPeerlyticsInstall(false), 1500);
+    });
+  }
+
+  function handleCopyOfframpInstall() {
+    void navigator.clipboard.writeText("npm install @usdctofiat/offramp").then(() => {
+      setCopiedOfframpInstall(true);
+      setTimeout(() => setCopiedOfframpInstall(false), 1500);
+    });
+  }
+
+  function handleCopyPeerlyticsCode() {
+    void navigator.clipboard.writeText(PEERLYTICS_SNIPPET).then(() => {
+      setCopiedPeerlyticsCode(true);
+      setTimeout(() => setCopiedPeerlyticsCode(false), 1500);
+    });
+  }
+
+  function handleCopyOfframpCode() {
+    void navigator.clipboard.writeText(USDCTOFIAT_SNIPPET).then(() => {
+      setCopiedOfframpCode(true);
+      setTimeout(() => setCopiedOfframpCode(false), 1500);
+    });
+  }
+
   return (
     <div className="page">
       <main className="app-shell">
@@ -408,14 +441,12 @@ export default function App() {
           </div>
         </header>
 
-        {/* ── Hero ── */}
-        <section className="hero">
-          <p className="eyebrow">Developer starter</p>
+        {/* ── Page header ── */}
+        <div className="page-header">
           <h1>Build on ZKP2P.</h1>
-          <p className="hero-subtitle">
-            Two production-ready SDKs for P2P FX markets on Base. Server-side
-            orderbook analytics and wallet-native delegated off-ramping in a
-            single repo.
+          <p className="page-subheading">
+            Two production-ready SDKs for P2P FX markets on Base.
+            Server-side orderbook analytics and wallet-native delegated off-ramps.
           </p>
           <div className="sdk-badges">
             <a
@@ -435,264 +466,347 @@ export default function App() {
               @usdctofiat/offramp
             </a>
           </div>
-        </section>
-
-        {/* ── SDK Overview ── */}
-        <section className="sdk-overview">
-          <SdkCard
-            badge="@peerlytics/sdk"
-            badgeVariant="peerlytics"
-            name="Peerlytics"
-            description="Real-time analytics for the ZKP2P protocol. Query live orderbook data, activity feeds, and maker stats from your server with a single API key."
-            features={[
-              "Live orderbook with rate levels and depth",
-              "Activity feed with typed event filtering",
-              "Maker portfolio and volume analytics",
-            ]}
-            pkg="@peerlytics/sdk"
-            code={PEERLYTICS_SNIPPET}
-            docsUrl="https://www.npmjs.com/package/@peerlytics/sdk"
-          />
-          <SdkCard
-            badge="@usdctofiat/offramp"
-            badgeVariant="offramp"
-            name="USDCtoFiat"
-            description="Delegated off-ramp for Base. Sell USDC to fiat via Revolut and Venmo with a single React hook — resumable, idempotent, and battle-tested."
-            features={[
-              "Revolut (GBP, USD, EUR) and Venmo (USD)",
-              "Resumable multi-step deposit flows",
-              "React hook: approve, register, deposit, delegate",
-            ]}
-            pkg="@usdctofiat/offramp"
-            code={USDCTOFIAT_SNIPPET}
-            docsUrl="https://www.npmjs.com/package/@usdctofiat/offramp"
-          />
-        </section>
-
-        {/* ── Demo header ── */}
-        <div className="demo-header">
-          <p className="eyebrow">Live demo</p>
-          <h2>Try it now.</h2>
-          <p className="demo-subtitle">
-            The orderbook is fetched server-side via Peerlytics. The deposit
-            form calls the USDCtoFiat React hook directly in your browser.
-          </p>
         </div>
 
-        {/* ── Main workspace ── */}
-        <section className="workspace">
-
-          {/* Deposit form */}
-          <article className="card">
-            <div className="section-head">
-              <div>
-                <p className="eyebrow">
-                  <span className="powered-by">@usdctofiat/offramp</span>
-                </p>
-                <h2>Create deposit</h2>
-              </div>
-              {!isBaseNetwork && walletSession && (
-                <button
-                  type="button"
-                  className="button button-secondary"
-                  onClick={handleSwitchToBase}
-                >
-                  Switch to Base
-                </button>
-              )}
+        {/* ── SDK Strip 1: Peerlytics ── */}
+        <section className="sdk-strip sdk-strip-peerlytics">
+          <div className="strip-left">
+            <div className="strip-meta">
+              <span className="sdk-pill badge-peerlytics">@peerlytics/sdk</span>
+              <a
+                href="https://www.npmjs.com/package/@peerlytics/sdk"
+                target="_blank"
+                rel="noreferrer"
+                className="sdk-docs-link"
+              >
+                npm ↗
+              </a>
             </div>
 
-            <form className="form-grid" onSubmit={handleSubmit}>
-              <label className="field">
-                <span>Amount (USDC)</span>
-                <input
-                  type="number"
-                  min="1"
-                  inputMode="decimal"
-                  value={amount}
-                  onChange={(event) => setAmount(event.target.value)}
-                  placeholder="100"
-                />
-              </label>
+            <h3 className="strip-name">Peerlytics</h3>
+            <p className="strip-desc">
+              Real-time analytics for the ZKP2P protocol. Query live orderbook
+              data, activity feeds, and maker stats from your server with a single
+              API key.
+            </p>
 
-              <label className="field">
-                <span>Platform</span>
-                <select
-                  value={selectedMarket.platform.id}
-                  onChange={(event) => {
-                    setSelectedPlatformId(event.target.value as AllowedPlatformId);
-                    setIdentifier("");
-                  }}
-                >
-                  {allowedMarkets.map((entry) => (
-                    <option key={entry.platform.id} value={entry.platform.id}>
-                      {entry.platform.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+            <ul className="strip-features">
+              <li>Live orderbook with rate levels and depth</li>
+              <li>Activity feed with typed event filtering</li>
+              <li>Maker portfolio and volume analytics</li>
+            </ul>
 
-              <label className="field">
-                <span>Currency</span>
-                <select
-                  value={currency.code}
-                  onChange={(event) => setSelectedCurrencyCode(event.target.value)}
-                >
-                  {currencyOptions.map((entry) => (
-                    <option key={entry.code} value={entry.code}>
-                      {entry.code}
-                    </option>
-                  ))}
-                </select>
-              </label>
+            <button
+              type="button"
+              className="install-cmd"
+              onClick={handleCopyPeerlyticsInstall}
+            >
+              <span className="install-prompt">$</span>
+              <span>npm install @peerlytics/sdk</span>
+              <span className="install-copy">
+                {copiedPeerlyticsInstall ? "✓ copied" : "copy"}
+              </span>
+            </button>
 
-              <label className="field field-wide">
-                <span>{selectedMarket.platform.identifier.label}</span>
-                <input
-                  type="text"
-                  value={identifier}
-                  placeholder={selectedMarket.platform.identifier.placeholder}
-                  onChange={(event) => setIdentifier(event.target.value)}
-                />
-                <small>{selectedMarket.platform.identifier.help}</small>
-              </label>
+            <div className="code-block strip-code">
+              <button
+                type="button"
+                className="code-copy-btn"
+                onClick={handleCopyPeerlyticsCode}
+              >
+                {copiedPeerlyticsCode ? "✓" : "copy"}
+              </button>
+              <pre>{PEERLYTICS_SNIPPET}</pre>
+            </div>
+          </div>
 
-              {validation && !validation.valid && (
-                <div className="field-error">{validation.error}</div>
-              )}
-
-              <div className="submit-row">
-                <div className="route-note">
-                  Route: <strong>{routeLabel}</strong>
-                </div>
-                <button
-                  type="submit"
-                  className="button button-primary"
-                  disabled={!canSubmit}
-                >
-                  {isLoading ? "Creating..." : "Create deposit"}
-                </button>
-              </div>
-            </form>
-
-            {walletError && <InlineMessage tone="error">{walletError}</InlineMessage>}
-
-            {step && step !== "done" && (
-              <div className="step-rail">
-                {flowSteps.map((item, index) => {
-                  const activeIndex = flowSteps.findIndex((s) => s.id === step);
-                  const isComplete = activeIndex > index;
-                  const isActive = step === item.id;
-                  return (
-                    <div
-                      key={item.id}
-                      className={`step-item${isActive ? " active" : ""}${isComplete ? " complete" : ""}`}
-                    >
-                      <span className="step-dot" />
-                      <span>{item.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {step === "done" && depositId && txHash && (
-              <InlineMessage tone="success">
-                Deposit #{depositId} created.{" "}
-                <a
-                  href={`https://basescan.org/tx/${txHash}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View on Basescan →
-                </a>
-              </InlineMessage>
-            )}
-
-            {error && (
-              <InlineMessage tone="error">
-                {error.code}: {error.message}
-              </InlineMessage>
-            )}
-          </article>
-
-          {/* Live orderbook */}
-          <aside className="card">
-            <div className="section-head">
-              <div>
-                <p className="eyebrow">
-                  <span className="powered-by">@peerlytics/sdk</span>
+          <div className="strip-demo">
+            <aside className="card">
+              <div className="section-head">
+                <h2>
+                  {routeLabel}
                   {isOrderbookLoading && <span className="loading-dot" />}
-                </p>
-                <h2>{routeLabel}</h2>
-              </div>
-            </div>
-
-            {orderbookError && (
-              <InlineMessage tone="error">{orderbookError}</InlineMessage>
-            )}
-
-            <div className="book-summary">
-              <ValueTile
-                label="Best rate"
-                value={isOrderbookLoading ? "..." : formatRate(orderbookState.orderbook?.bestRate)}
-                accent={!isOrderbookLoading && Boolean(orderbookState.orderbook?.bestRate)}
-              />
-              <ValueTile
-                label="Liquidity"
-                value={formatUsd(orderbookState.orderbook?.totalLiquidityUsd)}
-              />
-              <ValueTile
-                label="Updated"
-                value={
-                  orderbookState.updatedAt
-                    ? formatRelativeTime(orderbookState.updatedAt)
-                    : "--"
-                }
-              />
-            </div>
-
-            {visibleLevels.length > 0 ? (
-              <div className="book-table">
-                <div className="book-header">
-                  <span>Rate</span>
-                  <span>Liquidity</span>
-                  <span>Deposits</span>
-                </div>
-                {visibleLevels.map((level) => (
-                  <div
-                    key={`${level.rate}-${level.topDeposit.depositId}`}
-                    className="book-row"
+                </h2>
+                <div className="route-controls">
+                  <select
+                    className="route-select"
+                    value={selectedMarket.platform.id}
+                    onChange={(event) => {
+                      setSelectedPlatformId(event.target.value as AllowedPlatformId);
+                      setIdentifier("");
+                    }}
                   >
-                    <div className="book-cell book-rate">
-                      <strong>{formatRate(level.rate)}</strong>
-                    </div>
-                    <div className="book-cell">
-                      <span>{formatUsd(level.totalLiquidityUsd)}</span>
-                      <div className="book-bar">
-                        <span
-                          style={{
-                            width: `${(level.totalLiquidityUsd / maxLiquidity) * 100}%`,
-                          }}
-                        />
+                    {allowedMarkets.map((entry) => (
+                      <option key={entry.platform.id} value={entry.platform.id}>
+                        {entry.platform.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    className="route-select"
+                    value={currency.code}
+                    onChange={(event) => setSelectedCurrencyCode(event.target.value)}
+                  >
+                    {currencyOptions.map((entry) => (
+                      <option key={entry.code} value={entry.code}>
+                        {entry.code}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {orderbookError && (
+                <InlineMessage tone="error">{orderbookError}</InlineMessage>
+              )}
+
+              <div className="book-summary">
+                <ValueTile
+                  label="Best rate"
+                  value={isOrderbookLoading ? "..." : formatRate(orderbookState.orderbook?.bestRate)}
+                  accent={!isOrderbookLoading && Boolean(orderbookState.orderbook?.bestRate)}
+                />
+                <ValueTile
+                  label="Liquidity"
+                  value={formatUsd(orderbookState.orderbook?.totalLiquidityUsd)}
+                />
+                <ValueTile
+                  label="Updated"
+                  value={
+                    orderbookState.updatedAt
+                      ? formatRelativeTime(orderbookState.updatedAt)
+                      : "--"
+                  }
+                />
+              </div>
+
+              {visibleLevels.length > 0 ? (
+                <div className="book-table">
+                  <div className="book-header">
+                    <span>Rate</span>
+                    <span>Liquidity</span>
+                    <span>Deposits</span>
+                  </div>
+                  {visibleLevels.map((level) => (
+                    <div
+                      key={`${level.rate}-${level.topDeposit.depositId}`}
+                      className="book-row"
+                    >
+                      <div className="book-cell book-rate">
+                        <strong>{formatRate(level.rate)}</strong>
+                      </div>
+                      <div className="book-cell">
+                        <span>{formatUsd(level.totalLiquidityUsd)}</span>
+                        <div className="book-bar">
+                          <span
+                            style={{
+                              width: `${(level.totalLiquidityUsd / maxLiquidity) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="book-cell book-count">
+                        {formatNumber(level.depositCount)}
                       </div>
                     </div>
-                    <div className="book-cell book-count">
-                      {formatNumber(level.depositCount)}
-                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <p>
+                    {isOrderbookLoading
+                      ? "Loading orderbook..."
+                      : "No visible levels for this route right now."}
+                  </p>
+                </div>
+              )}
+            </aside>
+          </div>
+        </section>
+
+        {/* ── SDK Strip 2: USDCtoFiat ── */}
+        <section className="sdk-strip sdk-strip-offramp">
+          <div className="strip-left">
+            <div className="strip-meta">
+              <span className="sdk-pill badge-offramp">@usdctofiat/offramp</span>
+              <a
+                href="https://www.npmjs.com/package/@usdctofiat/offramp"
+                target="_blank"
+                rel="noreferrer"
+                className="sdk-docs-link"
+              >
+                npm ↗
+              </a>
+            </div>
+
+            <h3 className="strip-name">USDCtoFiat</h3>
+            <p className="strip-desc">
+              Delegated off-ramp for Base. Sell USDC to fiat via Revolut and
+              Venmo with a single React hook — resumable, idempotent, and
+              battle-tested.
+            </p>
+
+            <ul className="strip-features">
+              <li>Revolut (GBP, USD, EUR) and Venmo (USD)</li>
+              <li>Resumable multi-step deposit flows</li>
+              <li>React hook: approve, register, deposit, delegate</li>
+            </ul>
+
+            <button
+              type="button"
+              className="install-cmd install-cmd-offramp"
+              onClick={handleCopyOfframpInstall}
+            >
+              <span className="install-prompt install-prompt-offramp">$</span>
+              <span>npm install @usdctofiat/offramp</span>
+              <span className="install-copy">
+                {copiedOfframpInstall ? "✓ copied" : "copy"}
+              </span>
+            </button>
+
+            <div className="code-block strip-code">
+              <button
+                type="button"
+                className="code-copy-btn"
+                onClick={handleCopyOfframpCode}
+              >
+                {copiedOfframpCode ? "✓" : "copy"}
+              </button>
+              <pre>{USDCTOFIAT_SNIPPET}</pre>
+            </div>
+          </div>
+
+          <div className="strip-demo">
+            <article className="card">
+              <div className="section-head">
+                <div>
+                  <h2>Create deposit</h2>
+                </div>
+                {!isBaseNetwork && walletSession && (
+                  <button
+                    type="button"
+                    className="button button-secondary"
+                    onClick={handleSwitchToBase}
+                  >
+                    Switch to Base
+                  </button>
+                )}
+              </div>
+
+              <form className="form-grid" onSubmit={handleSubmit}>
+                <label className="field">
+                  <span>Amount (USDC)</span>
+                  <input
+                    type="number"
+                    min="1"
+                    inputMode="decimal"
+                    value={amount}
+                    onChange={(event) => setAmount(event.target.value)}
+                    placeholder="100"
+                  />
+                </label>
+
+                <label className="field">
+                  <span>Platform</span>
+                  <select
+                    value={selectedMarket.platform.id}
+                    onChange={(event) => {
+                      setSelectedPlatformId(event.target.value as AllowedPlatformId);
+                      setIdentifier("");
+                    }}
+                  >
+                    {allowedMarkets.map((entry) => (
+                      <option key={entry.platform.id} value={entry.platform.id}>
+                        {entry.platform.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="field">
+                  <span>Currency</span>
+                  <select
+                    value={currency.code}
+                    onChange={(event) => setSelectedCurrencyCode(event.target.value)}
+                  >
+                    {currencyOptions.map((entry) => (
+                      <option key={entry.code} value={entry.code}>
+                        {entry.code}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="field field-wide">
+                  <span>{selectedMarket.platform.identifier.label}</span>
+                  <input
+                    type="text"
+                    value={identifier}
+                    placeholder={selectedMarket.platform.identifier.placeholder}
+                    onChange={(event) => setIdentifier(event.target.value)}
+                  />
+                  <small>{selectedMarket.platform.identifier.help}</small>
+                </label>
+
+                {validation && !validation.valid && (
+                  <div className="field-error">{validation.error}</div>
+                )}
+
+                <div className="submit-row">
+                  <div className="route-note">
+                    Route: <strong>{routeLabel}</strong>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <p>
-                  {isOrderbookLoading
-                    ? "Loading orderbook..."
-                    : "No visible levels for this route right now."}
-                </p>
-              </div>
-            )}
-          </aside>
+                  <button
+                    type="submit"
+                    className="button button-primary"
+                    disabled={!canSubmit}
+                  >
+                    {isLoading ? "Creating..." : "Create deposit"}
+                  </button>
+                </div>
+              </form>
+
+              {walletError && <InlineMessage tone="error">{walletError}</InlineMessage>}
+
+              {step && step !== "done" && (
+                <div className="step-rail">
+                  {flowSteps.map((item, index) => {
+                    const activeIndex = flowSteps.findIndex((s) => s.id === step);
+                    const isComplete = activeIndex > index;
+                    const isActive = step === item.id;
+                    return (
+                      <div
+                        key={item.id}
+                        className={`step-item${isActive ? " active" : ""}${isComplete ? " complete" : ""}`}
+                      >
+                        <span className="step-dot" />
+                        <span>{item.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {step === "done" && depositId && txHash && (
+                <InlineMessage tone="success">
+                  Deposit #{depositId} created.{" "}
+                  <a
+                    href={`https://basescan.org/tx/${txHash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    View on Basescan →
+                  </a>
+                </InlineMessage>
+              )}
+
+              {error && (
+                <InlineMessage tone="error">
+                  {error.code}: {error.message}
+                </InlineMessage>
+              )}
+            </article>
+          </div>
         </section>
 
         {/* ── Active deposits ── */}
@@ -820,98 +934,6 @@ export default function App() {
 }
 
 // === Sub-components ===
-
-type SdkCardProps = {
-  badge: string;
-  badgeVariant: "peerlytics" | "offramp";
-  name: string;
-  description: string;
-  features: readonly string[];
-  pkg: string;
-  code: string;
-  docsUrl: string;
-};
-
-function SdkCard({
-  badge,
-  badgeVariant,
-  name,
-  description,
-  features,
-  pkg,
-  code,
-  docsUrl,
-}: SdkCardProps) {
-  const [showCode, setShowCode] = useState(false);
-  const [copiedInstall, setCopiedInstall] = useState(false);
-  const [copiedCode, setCopiedCode] = useState(false);
-
-  function handleCopyInstall() {
-    void navigator.clipboard.writeText(`npm install ${pkg}`).then(() => {
-      setCopiedInstall(true);
-      setTimeout(() => setCopiedInstall(false), 1500);
-    });
-  }
-
-  function handleCopyCode() {
-    void navigator.clipboard.writeText(code).then(() => {
-      setCopiedCode(true);
-      setTimeout(() => setCopiedCode(false), 1500);
-    });
-  }
-
-  return (
-    <div className="sdk-card">
-      <div className="sdk-card-header">
-        <span className={`sdk-pill badge-${badgeVariant}`}>{badge}</span>
-        <a
-          href={docsUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="sdk-docs-link"
-        >
-          npm ↗
-        </a>
-      </div>
-
-      <h3>{name}</h3>
-      <p className="sdk-desc">{description}</p>
-
-      <ul className="sdk-features">
-        {features.map((f) => (
-          <li key={f}>{f}</li>
-        ))}
-      </ul>
-
-      <button type="button" className="install-cmd" onClick={handleCopyInstall}>
-        <span className="install-prompt">$</span>
-        <span>npm install {pkg}</span>
-        <span className="install-copy">{copiedInstall ? "✓ copied" : "copy"}</span>
-      </button>
-
-      <button
-        type="button"
-        className="code-toggle"
-        onClick={() => setShowCode((v) => !v)}
-      >
-        {showCode ? "Hide example" : "Show example"}
-      </button>
-
-      {showCode && (
-        <div className="code-block">
-          <button
-            type="button"
-            className="code-copy-btn"
-            onClick={handleCopyCode}
-          >
-            {copiedCode ? "✓" : "copy"}
-          </button>
-          <pre>{code}</pre>
-        </div>
-      )}
-    </div>
-  );
-}
 
 function InlineMessage({
   children,

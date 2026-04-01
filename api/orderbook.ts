@@ -14,7 +14,14 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  const apiKey = process.env.PEERLYTICS_API_KEY?.trim();
+  const env =
+    (
+      globalThis as {
+        process?: { env?: Record<string, string | undefined> };
+      }
+    ).process?.env ?? {};
+
+  const apiKey = env.PEERLYTICS_API_KEY?.trim();
   const platform = typeof req.query.platform === "string" ? req.query.platform : "";
   const currency = typeof req.query.currency === "string" ? req.query.currency : "";
 

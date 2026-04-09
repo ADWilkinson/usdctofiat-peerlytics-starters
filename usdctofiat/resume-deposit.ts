@@ -75,6 +75,7 @@ async function main() {
         depositing: fmt.yellow("⏳"),
         confirming: fmt.yellow("⏳"),
         delegating: fmt.yellow("⏳"),
+        restricting: fmt.yellow("⏳"),
         done: fmt.green("✓"),
       };
       console.log(`  ${icons[progress.step] ?? "·"} ${progress.step}${progress.depositId ? ` #${progress.depositId}` : ""}`);

@@ -44,6 +44,7 @@ const STEP_LABELS: Record<string, string> = {
   depositing: "Creating deposit on-chain",
   confirming: "Waiting for confirmation",
   delegating: "Delegating to vault",
+  restricting: "Restricting to OTC taker",
   done: "Complete",
 };
 

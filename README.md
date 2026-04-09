@@ -28,6 +28,7 @@ usdctofiat/                  @usdctofiat/offramp examples
   create-deposit.ts            create and delegate a USDC deposit
   close-deposit.ts             withdraw remaining USDC and close a deposit
   resume-deposit.ts            resume an interrupted deposit flow
+  otc-deposit.ts               create an OTC deposit restricted to a single taker
   manage-deposits.ts           list and inspect deposits for a wallet
   platform-explorer.ts         enumerate platforms, currencies, and validation
   react-example.tsx            useOfframp hook usage in React
@@ -111,6 +112,8 @@ await offramp(walletClient, {
   identifier: "alice",
 });
 ```
+
+Need a private order? Pass `otcTaker` to restrict the deposit to a single wallet — or use `enableOtc` / `disableOtc` / `getOtcLink` to retrofit restriction on an existing deposit. See `usdctofiat/otc-deposit.ts` for both paths.
 
 Supported platforms: Revolut, Venmo, CashApp, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
 

@@ -1,7 +1,7 @@
 /**
  * react-example.tsx
  *
- * Reference React component for @usdctofiat/offramp v1.0.
+ * Reference React component for @usdctofiat/offramp v1.1.
  * Copy-paste template — not runnable standalone.
  */
 
@@ -52,6 +52,7 @@ export function OfframpWidget() {
           {step === "depositing" && "Creating deposit..."}
           {step === "confirming" && "Waiting for confirmation..."}
           {step === "delegating" && "Delegating to vault..."}
+          {step === "restricting" && "Restricting to OTC taker..."}
         </p>
       </div>
     );

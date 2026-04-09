@@ -1,6 +1,6 @@
-# @usdctofiat/offramp v1.0
+# @usdctofiat/offramp v1.1
 
-USDC-to-fiat offramp SDK for Base. 3 functions + 2 const objects.
+USDC-to-fiat offramp SDK for Base. 6 functions + 2 const objects.
 
 ## Install
 
@@ -9,7 +9,16 @@ bun add @usdctofiat/offramp
 ## API
 
 ```ts
-import { offramp, deposits, close, PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
+import {
+  offramp,
+  deposits,
+  close,
+  enableOtc,
+  disableOtc,
+  getOtcLink,
+  PLATFORMS,
+  CURRENCIES,
+} from "@usdctofiat/offramp";
 
 // Create deposit + delegate (resumable)
 const result = await offramp(walletClient, {
@@ -19,6 +28,23 @@ const result = await offramp(walletClient, {
   identifier: "alice",
 });
 // { depositId: "362", txHash: "0x...", resumed: false }
+
+// One-call OTC: create a deposit only one taker wallet can fill
+const otc = await offramp(walletClient, {
+  amount: "100",
+  platform: PLATFORMS.REVOLUT,
+  currency: CURRENCIES.EUR,
+  identifier: "alice",
+  otcTaker: "0xTakerAddress",
+});
+// { depositId, txHash, resumed, otcLink: "https://usdctofiat.xyz/deposit/<escrow>/<depositId>" }
+
+// Retrofit OTC onto an existing deposit
+await enableOtc(walletClient, "362", "0xTakerAddress");
+const link = getOtcLink("362");
+
+// Make a deposit public again
+await disableOtc(walletClient, "362");
 
 // List deposits (read-only)
 const list = await deposits("0x...");
@@ -66,15 +92,31 @@ interface OfframpParams {
   platform: PlatformEntry;  // PLATFORMS.REVOLUT etc
   currency: CurrencyEntry;  // CURRENCIES.EUR etc
   identifier: string;       // platform-specific
+  otcTaker?: string;        // restrict deposit to a single taker wallet
 }
 
 interface OfframpResult {
   depositId: string;
   txHash: string;
   resumed: boolean;  // true if existing undelegated deposit was resumed
+  otcLink?: string;  // present when otcTaker was provided
 }
 
-type OfframpStep = "approving" | "registering" | "depositing" | "confirming" | "delegating" | "resuming" | "done";
+interface EnableOtcResult {
+  depositId: string;
+  takerAddress: string;
+  otcLink: string;
+}
+
+type OfframpStep =
+  | "approving"
+  | "registering"
+  | "depositing"
+  | "confirming"
+  | "delegating"
+  | "restricting"  // only when otcTaker is provided
+  | "resuming"
+  | "done";
 
 interface DepositInfo {
   depositId: string;       // pass to close()
@@ -106,14 +148,19 @@ Recovery: call offramp() again — it detects undelegated deposits and resumes.
 
 offramp() is resumable. Before creating a new deposit, it checks for an existing undelegated deposit. If found, skips to delegation.
 
-Full flow (5 steps, 3 wallet signatures):
+Full flow (5 steps, 3 wallet signatures — 4 when otcTaker is supplied):
 1. Approve USDC allowance (wallet tx)
 2. Register payee details (API call)
 3. Create deposit on-chain (wallet tx)
 4. Confirm deposit ID (automatic)
 5. Delegate to vault (wallet tx)
+6. Restrict to OTC taker (wallet tx, only when `otcTaker` is set)
 
 All deposits are delegated, market-tracking, auto-closing, on Base (8453).
+
+## OTC private orders
+
+Pass `otcTaker` to `offramp()` to whitelist a single taker wallet at creation time, or use `enableOtc` / `disableOtc` to toggle restriction on an existing deposit. Hand the returned `otcLink` (or `getOtcLink(depositId)`) to the taker — it deep-links into usdctofiat.xyz to the restricted deposit.
 
 ## Links
 

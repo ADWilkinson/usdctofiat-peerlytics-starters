@@ -57,9 +57,9 @@ function formatValue(value: number): string {
 }
 
 function sparkbar(value: number, max: number, width = 36): string {
-  if (max <= 0) return " ".repeat(width);
+  if (max <= 0) return "░".repeat(width);
   const scaled = Math.round((value / max) * width);
-  return "█".repeat(Math.min(width, scaled)) + " ".repeat(Math.max(0, width - scaled));
+  return "█".repeat(Math.min(width, scaled)) + "░".repeat(Math.max(0, width - scaled));
 }
 
 /** Accept either ISO-8601 or unix seconds; leave undefined to let the API default. */
@@ -100,7 +100,7 @@ async function main(): Promise<void> {
     const label = granularity === "hour" ? bucket.bucket.slice(5, 16) : bucket.bucket;
     const bar = sparkbar(bucket.value, max);
     const value = formatValue(bucket.value);
-    console.log(`  ${fmt.dim(label.padEnd(14))} ${fmt.green(bar)} ${value}`);
+    console.log(`  ${fmt.dim(label.padEnd(14))} ${fmt.green(bar)} ${fmt.cyan(value)}`);
   }
 
   console.log();

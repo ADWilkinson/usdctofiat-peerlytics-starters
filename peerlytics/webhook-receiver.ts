@@ -153,6 +153,13 @@ createServer((req, res) => {
   console.log();
   console.log(fmt.bold("  Peerlytics webhook receiver"));
   console.log(fmt.dim(`  Listening on http://localhost:${PORT}`));
-  console.log(fmt.dim(`  Tolerance:  ${TOLERANCE_SECONDS}s`));
+  console.log(fmt.dim(`  Secret length: ${SECRET!.length} chars`));
+  console.log(fmt.dim(`  Tolerance:     ${TOLERANCE_SECONDS}s`));
+  console.log();
+  console.log("  Next steps:");
+  console.log("    1. Expose this port publicly (ngrok http " + PORT + ", cloudflared, etc.)");
+  console.log("    2. Register the public URL at https://peerlytics.xyz/developers");
+  console.log("    3. Choose events like intent.filled or rate.updated");
+  console.log("    4. Save the secret returned on register — use it as WEBHOOK_SECRET");
   console.log();
 });

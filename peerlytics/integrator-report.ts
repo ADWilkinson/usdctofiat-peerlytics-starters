@@ -34,6 +34,12 @@ const fmt = {
   green: (s: string) => `\x1b[32m${s}\x1b[0m`,
   bold: (s: string) => `\x1b[1m${s}\x1b[0m`,
   cyan: (s: string) => `\x1b[36m${s}\x1b[0m`,
+  pad: (s: string, n: number) => (s.length >= n ? s.slice(0, n) : s + " ".repeat(n - s.length)),
+  rpad: (s: string, n: number) => (s.length >= n ? s.slice(0, n) : " ".repeat(n - s.length) + s),
+  bar: (ratio: number, width: number) => {
+    const filled = Math.round(Math.max(0, Math.min(1, ratio)) * width);
+    return "█".repeat(filled) + "░".repeat(width - filled);
+  },
 };
 
 function usdc(n: number): string {
@@ -71,10 +77,12 @@ async function main(): Promise<void> {
 
   if (data.topMakers.length) {
     console.log(fmt.bold("  Top makers"));
-    for (const maker of data.topMakers.slice(0, 5)) {
+    const topMakers = data.topMakers.slice(0, 5);
+    const maxMakerVolume = Math.max(...topMakers.map((maker) => maker.volumeUsd), 1);
+    for (const maker of topMakers) {
       const short = `${maker.address.slice(0, 6)}…${maker.address.slice(-4)}`;
       console.log(
-        `  ${fmt.cyan(short)}  ${usdc(maker.volumeUsd).padStart(10)}  ${maker.deposits} deposits`,
+        `  ${fmt.cyan(fmt.pad(short, 12))} ${fmt.green(fmt.bar(maker.volumeUsd / maxMakerVolume, 12))} ${fmt.rpad(usdc(maker.volumeUsd), 10)}  ${maker.deposits} deposits`,
       );
     }
     console.log();
@@ -82,9 +90,12 @@ async function main(): Promise<void> {
 
   if (data.topMarkets.length) {
     console.log(fmt.bold("  Top markets"));
-    for (const market of data.topMarkets.slice(0, 5)) {
+    const topMarkets = data.topMarkets.slice(0, 5);
+    const maxMarketVolume = Math.max(...topMarkets.map((market) => market.volumeUsd), 1);
+    for (const market of topMarkets) {
+      const label = `${market.platformLabel}/${market.currencyLabel}`;
       console.log(
-        `  ${market.platformLabel.padEnd(12)} ${market.currencyLabel.padEnd(6)} ${usdc(market.volumeUsd).padStart(10)}  ${market.fulfilledIntents} fills`,
+        `  ${fmt.pad(label, 20)} ${fmt.green(fmt.bar(market.volumeUsd / maxMarketVolume, 12))} ${fmt.rpad(usdc(market.volumeUsd), 10)}  ${market.fulfilledIntents} fills`,
       );
     }
     console.log();

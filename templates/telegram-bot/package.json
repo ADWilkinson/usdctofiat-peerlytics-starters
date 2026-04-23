@@ -1,0 +1,21 @@
+{
+  "name": "offramp-telegram-bot-starter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "start": "node --enable-source-maps dist/index.js",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@usdctofiat/offramp": "^1.2.0",
+    "grammy": "^1.38.3",
+    "viem": "^2.45.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.0"
+  }
+}

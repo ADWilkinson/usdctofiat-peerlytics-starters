@@ -1,0 +1,25 @@
+{
+  "name": "offramp-vite-starter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --port 3000",
+    "build": "vite build",
+    "preview": "vite preview --host --port 3000"
+  },
+  "dependencies": {
+    "@privy-io/react-auth": "^3.21.2",
+    "@usdctofiat/offramp": "^1.2.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "viem": "^2.48.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "^6.0.0",
+    "vite": "^8.0.0"
+  }
+}

@@ -1,0 +1,44 @@
+:root {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: #ecf4ef;
+  background: radial-gradient(circle at 0 0, #214a3b, #091110 42%);
+}
+
+main {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+section {
+  border: 1px solid rgba(236, 244, 239, 0.16);
+  border-radius: 18px;
+  background: rgba(5, 10, 9, 0.68);
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 0.4rem;
+}
+
+.muted {
+  opacity: 0.82;
+  margin-top: 0;
+}
+
+.btn-secondary {
+  min-height: 40px;
+}

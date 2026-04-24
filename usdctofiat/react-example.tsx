@@ -1,12 +1,12 @@
 /**
  * react-example.tsx
  *
- * Reference React component for @usdctofiat/offramp v1.1.
+ * Reference React component for @usdctofiat/offramp v2.
  * Copy-paste template — not runnable standalone.
  */
 
 import { useOfframp } from "@usdctofiat/offramp/react";
-import { PLATFORMS, CURRENCIES, type OfframpError } from "@usdctofiat/offramp";
+import { PLATFORMS, CURRENCIES, OFFRAMP_ERROR_CODES } from "@usdctofiat/offramp";
 import { useState } from "react";
 // import { useWalletClient } from "wagmi"; // Your wallet library
 
@@ -14,7 +14,7 @@ export function OfframpWidget() {
   // const { data: walletClient } = useWalletClient();
   const walletClient = null as any; // Replace with your wallet hook
 
-  const { offramp, step, error, isLoading, reset } = useOfframp();
+  const { offramp, step, lastError, isLoading } = useOfframp();
 
   const [amount, setAmount] = useState("100");
   const platform = PLATFORMS.REVOLUT;
@@ -32,9 +32,9 @@ export function OfframpWidget() {
       });
       console.log(`Deposit #${result.depositId} ${result.resumed ? "resumed" : "created"}`);
     } catch (err) {
-      const e = err as OfframpError;
-      if (e.code === "USER_CANCELLED") return;
-      console.error(e.code, e.message);
+      // The hook already surfaces errors via `lastError`; the throw is for
+      // callers that want to short-circuit their own flow.
+      console.error(err);
     }
   };
 
@@ -79,7 +79,9 @@ export function OfframpWidget() {
       <button type="submit" disabled={isLoading || !walletClient}>
         {isLoading ? "Creating..." : `Sell USDC for ${currency.symbol}`}
       </button>
-      {error && <p style={{ color: "red" }}>{error.message}</p>}
+      {lastError && lastError.code !== OFFRAMP_ERROR_CODES.USER_CANCELLED && (
+        <p style={{ color: "red" }}>{lastError.message}</p>
+      )}
     </form>
   );
 }

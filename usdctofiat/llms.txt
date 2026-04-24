@@ -1,6 +1,6 @@
-# @usdctofiat/offramp v1.3
+# @usdctofiat/offramp v2
 
-USDC-to-fiat offramp SDK for Base. 6 functions + 2 const objects. Also ships outbound HMAC-signed webhooks for `deposit.*` and `otc.*` events (see Webhooks section below).
+USDC-to-fiat offramp SDK for Base. Also ships outbound HMAC-signed webhooks for `deposit.*` and `otc.*` events (see Webhooks section below).
 
 ## Install
 
@@ -61,6 +61,14 @@ PLATFORMS.REVOLUT.name          // "Revolut"
 PLATFORMS.REVOLUT.currencies    // ["AED", "AUD", "CAD", ..., "USD", "ZAR"]
 PLATFORMS.REVOLUT.identifier    // { label: "Revtag", placeholder: "revtag (no @)", help: "Revtag without @ (must be public)" }
 PLATFORMS.REVOLUT.validate("@alice")  // { valid: true, normalized: "alice" }
+
+// PayPal uses paypal.me USERNAMES now, not emails (v2 BREAKING):
+PLATFORMS.PAYPAL.identifier     // { label: "PayPal.me Username", placeholder: "paypal.me/your-username", help: "Your PayPal.me username, not your email" }
+PLATFORMS.PAYPAL.validate("https://paypal.me/Alice")  // { valid: true, normalized: "alice" }
+
+// Extension-registration metadata (PayPal and Wise only):
+PLATFORMS.PAYPAL.extensionRegistration
+// { providerId: "paypal", requiredPrompt: "This PayPal username is not registered yet...", ctaLabel: "Install Peer Extension", ctaSubtext: "PayPal Business accounts are not supported at this time.", minExtensionVersion: "0.4.14" }
 ```
 
 Keys: VENMO, CASHAPP, CHIME, REVOLUT, WISE, MERCADO_PAGO, ZELLE, PAYPAL, MONZO, N26
@@ -76,12 +84,18 @@ CURRENCIES.EUR.countryCode // "eu"
 
 34 currencies: AED, ARS, AUD, BRL, CAD, CHF, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, JPY, KES, MXN, MYR, NOK, NZD, PHP, PLN, RON, SAR, SEK, SGD, THB, TRY, UGX, USD, VND, ZAR
 
-## React Hook
+## React Hooks
 
 ```ts
-import { useOfframp } from "@usdctofiat/offramp/react";
-const { offramp, deposits, close, step, txHash, depositId, error, isLoading, reset } = useOfframp();
-// error is OfframpError | null — has .code, .step, .txHash, .depositId
+import { useOfframp, usePeerExtensionRegistration } from "@usdctofiat/offramp/react";
+
+const { offramp, deposits, close, step, txHash, depositId, lastError, isLoading, reset } = useOfframp();
+// lastError is OfframpError | null — has .code, .step, .txHash, .depositId
+
+// PayPal + Wise extension handshake driver:
+const peer = usePeerExtensionRegistration(PLATFORMS.PAYPAL);
+// { phase, info, busy, error, refresh, installExtension, connectExtension, openVerifySidebar }
+// phase: "checking" | "needs_install" | "needs_connection" | "ready" | "unsupported"
 ```
 
 ## Types
@@ -91,7 +105,7 @@ interface OfframpParams {
   amount: string;           // USDC decimal, min 1
   platform: PlatformEntry;  // PLATFORMS.REVOLUT etc
   currency: CurrencyEntry;  // CURRENCIES.EUR etc
-  identifier: string;       // platform-specific
+  identifier: string;       // platform-specific (PayPal is paypal.me USERNAME, not email)
   otcTaker?: string;        // restrict deposit to a single taker wallet
 }
 
@@ -137,12 +151,66 @@ interface DepositInfo {
 ## Errors
 
 ```ts
-import { OfframpError } from "@usdctofiat/offramp";
-// error.code: VALIDATION | APPROVAL_FAILED | REGISTRATION_FAILED | DEPOSIT_FAILED | CONFIRMATION_FAILED | DELEGATION_FAILED | USER_CANCELLED | UNSUPPORTED
+import { OfframpError, OFFRAMP_ERROR_CODES } from "@usdctofiat/offramp";
+// error.code values:
+//   VALIDATION
+//   APPROVAL_FAILED
+//   REGISTRATION_FAILED
+//   EXTENSION_REGISTRATION_REQUIRED   // NEW in v2 — PayPal / Wise Peer extension gate
+//   DEPOSIT_FAILED
+//   CONFIRMATION_FAILED
+//   DELEGATION_FAILED
+//   USER_CANCELLED
+//   UNSUPPORTED
 // error.step, error.txHash, error.depositId
 ```
 
-Recovery: call offramp() again — it detects undelegated deposits and resumes.
+Generic recovery: call offramp() again — it detects undelegated deposits and resumes.
+
+`EXTENSION_REGISTRATION_REQUIRED` recovery: walk the user through
+`usePeerExtensionRegistration(platform)` (React) or `peerExtensionSdk` directly
+(see Peer Extension section below), then call offramp() with the same handle.
+
+## Peer Extension (PayPal, Wise)
+
+PayPal and Wise makers must register their handle inside the Peer (PeerAuth)
+browser extension before curator's `/v2/makers/create` accepts them. `offramp()`
+throws `OfframpError` with code `EXTENSION_REGISTRATION_REQUIRED` when this
+happens. The SDK re-exports the driver from `@zkp2p/sdk` so you don't need a
+direct dep on it:
+
+```ts
+import { peerExtensionSdk } from "@usdctofiat/offramp";
+
+const state = await peerExtensionSdk.getState();
+// "needs_install" | "needs_connection" | "ready"
+
+if (state === "needs_install") peerExtensionSdk.openInstallPage();
+else if (state === "needs_connection") await peerExtensionSdk.requestConnection();
+else peerExtensionSdk.openSidebar("/verify/paypal");
+```
+
+React wrapper:
+
+```tsx
+import { PLATFORMS, OFFRAMP_ERROR_CODES } from "@usdctofiat/offramp";
+import { useOfframp, usePeerExtensionRegistration } from "@usdctofiat/offramp/react";
+
+const { offramp, lastError } = useOfframp();
+const peer = usePeerExtensionRegistration(PLATFORMS.PAYPAL);
+
+const needsExt = lastError?.code === OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED;
+// peer.phase-aware CTAs:
+//   peer.phase === "needs_install"    → peer.installExtension()
+//   peer.phase === "needs_connection" → peer.connectExtension()
+//   peer.phase === "ready"            → peer.openVerifySidebar()
+// After the user confirms: call offramp() again with the same identifier.
+```
+
+Only PayPal and Wise require this today. The `extensionRegistration` field on
+the platform entry is `undefined` for every other platform.
+
+See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`.
 
 ## How It Works
 
@@ -150,7 +218,7 @@ offramp() is resumable. Before creating a new deposit, it checks for an existing
 
 Full flow (5 steps, 3 wallet signatures — 4 when otcTaker is supplied):
 1. Approve USDC allowance (wallet tx)
-2. Register payee details (API call)
+2. Register payee details (`POST /v2/makers/create` — flat `{ offchainId, telegramUsername? }` payload)
 3. Create deposit on-chain (wallet tx)
 4. Confirm deposit ID (automatic)
 5. Delegate to vault (wallet tx)
@@ -175,8 +243,17 @@ Delivery headers:
 
 Verification: recompute HMAC-SHA256 over `${timestamp}.${rawBody}` with your stored secret, `timingSafeEqual` against the `v1=` hex. Reject timestamps older than 5 minutes to defend against replay. Reference receiver: `usdctofiat/webhook-receiver.ts` (~150 LOC, `node:crypto` only).
 
+## v2 migration
+
+v1.x is broken against the live curator — the old `POST /v1/makers/create` endpoint and legacy payload blobs (`paypalEmail`, `venmoUsername`, `wisetag`, …) are no longer accepted. If you were on v1, upgrade and:
+
+1. Re-prompt PayPal users for their paypal.me USERNAME (not email).
+2. Handle `OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED` on PayPal and Wise — walk the user through `usePeerExtensionRegistration(...)` and retry.
+3. If you hand-rolled `POST /v1/makers/create`, switch to `POST /v2/makers/create` with `{ processorName, offchainId, telegramUsername? }`.
+
 ## Links
 
 - npm: https://www.npmjs.com/package/@usdctofiat/offramp
 - usdctofiat.xyz: https://usdctofiat.xyz
+- usdctofiat.xyz/developers: canonical SDK docs (includes Peer extension flow)
 - @usdctofiat: https://x.com/usdctofiat

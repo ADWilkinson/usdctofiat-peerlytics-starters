@@ -119,6 +119,8 @@ await offramp(walletClient, {
 
 Need a private order? Pass `otcTaker` to restrict the deposit to a single wallet — or use `enableOtc` / `disableOtc` / `getOtcLink` to retrofit restriction on an existing deposit. See `usdctofiat/otc-deposit.ts` for both paths.
 
+**PayPal and Wise** makers must register their handle in the Peer (PeerAuth) browser extension before the first deposit. v2 adds a new `EXTENSION_REGISTRATION_REQUIRED` error code plus `usePeerExtensionRegistration(platform)` to drive the install / connect / verify flow. See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`. PayPal uses the `paypal.me` **username** — not the account email.
+
 Supported platforms: Revolut, Venmo, CashApp, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
 
 [npm](https://www.npmjs.com/package/@usdctofiat/offramp) | [usdctofiat.xyz](https://usdctofiat.xyz) | [Register webhooks](https://usdctofiat.xyz/developers)

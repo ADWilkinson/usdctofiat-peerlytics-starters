@@ -11,7 +11,8 @@
  *   CODE=usdctofiat npx tsx peerlytics/integrator-report.ts
  *
  * Optional env:
- *   WINDOW_DAYS         Lookback in days (default 90, max 365)
+ *   WINDOW_DAYS         Lookback in days. Currently materialized for 90 only —
+ *                        omit or set to 90 (the SDK throws for any other value).
  *   PEERLYTICS_API_KEY  If set, uses API-key auth and consumes credits.
  *                        Omit for anonymous (rate-limited, free).
  *   PEERLYTICS_BASE_URL Default https://peerlytics.xyz

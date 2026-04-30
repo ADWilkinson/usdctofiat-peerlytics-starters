@@ -141,6 +141,11 @@ Explorer:
 - `getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? })` — query intents. **Requires at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`**. Returns `{ intents, count, hasMore, ... }`.
 - `getAddress(address, { limit?, offset? })` — address profile with stats
 - `getMaker(address)` — maker portfolio with allocations and profit
+- `getTaker(address)` — taker portfolio: fills, tier, lock score, currency/platform mix
+- `getIntegrator(code, { windowDays? })` — ERC-8021 integrator rollup. `windowDays` is currently materialized for 90 only (omit or pass 90).
+- `getIntegratorIntents(code, opts?)` / `getIntegratorReferralFees(code, opts?)` — convenience wrappers over `getIntegrator()` returning `recentIntents` / `recentReferralFees`.
+- `getPlatform(platform, { windowDays? })` — platform rollup: currencies, makers, takers, recent intents. Same 90-day rule as `getIntegrator`.
+- `getDelegate(address)` — delegate rollup: rate managers, delegated deposits, PnL
 - `getVerifier(address, { limit?, offset? })` — verifier stats and breakdown
 - `getVault(id, { days? })` — vault detail with snapshots
 - `search(query, { type?, role?, limit?, offset? })` — multi-type search
@@ -150,8 +155,8 @@ Activity:
 - `streamActivity({ type?, rateManagerId?, since?, intervalMs?, limit? }, { signal? })` — SSE real-time event stream (returns ReadableStream<LiveEvent>)
 
 History:
-- `getMakerHistory(address)` — maker historical stats
-- `getTakerHistory(address)` — taker historical stats
+- `getMakerHistory(address, { from?, to?, range?, limit?, offset? })` — maker historical stats with optional date window + pagination cursor
+- `getTakerHistory(address, { from?, to?, range?, limit?, offset? })` — taker history, same window semantics as `getMakerHistory`
 
 Metadata:
 - `getCurrencies()` — supported fiat currencies

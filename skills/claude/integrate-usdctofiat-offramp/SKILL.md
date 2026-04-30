@@ -87,7 +87,7 @@ const { depositId, otcLink } = await offramp(walletClient, {
   identifier: "alice",
   otcTaker: "0xBuyerWallet",
 });
-// otcLink: https://otc.usdctofiat.xyz/d/<escrow>/<depositId> -- share with the approved buyer
+// otcLink: https://usdctofiat.xyz/deposit/<escrow>/<depositId> -- share with the approved buyer
 ```
 
 Retrofit OTC onto an existing public deposit:

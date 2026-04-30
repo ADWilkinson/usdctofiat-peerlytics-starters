@@ -14,15 +14,16 @@ const client = new Peerlytics({ apiKey: "pk_live_..." }); // required (each key 
 
 ## Response shapes (SDK vs raw HTTP)
 
-The SDK methods below return the inner payload directly — you don't see any envelope. If you're calling the HTTP API without the SDK, note:
+The SDK targets the Stripe-style v2 wire format (snake_case fields, Unix-seconds timestamps, `{ data, ... }` envelopes) but exposes an idiomatic camelCase TS surface — methods below return the inner payload directly. If you're calling the HTTP API without the SDK, note:
 
-- Most `/api/v1/*` endpoints wrap the payload in `{ success, data }` — read `response.data`
+- v1.0 dropped the `success: true` envelope flag — payloads are wrapped in `{ data, ... }` only. (The SDK already unwraps `data` for you.)
 - List endpoints return a paginated object inside `data`, not a raw array:
   - `/deposits` → `{ deposits, count, hasMore, limit, offset, filters }`
   - `/intents` → `{ intents, count, hasMore, limit, offset, filters }`
   - `/activity` → `{ events, count, hasMore, limit, offset, filters }` (iterate over `events`, not the top level)
   - `/market/summary` → `{ markets, count, hasMore, ... }`
-- Exceptions with no envelope: `/analytics/summary|overview|leaderboard` and `/account/*`
+- Some timestamp fields (`ApiKeyInfo.createdAt`, `lastUsedAt`, `freeCreditsResetAt`) are now Unix seconds (integer) on v2; the TS type is `number | string` because the v1-compat path still emits ISO strings. Convert with `Number(value) * 1000` when you need a JS `Date`.
+- `getTimeseries(...)` returns `{ buckets: TimeseriesBucket[] | null, series: TimeseriesSeries[] | null, ... }` — `buckets` is populated when `groupBy` is unset, `series` when it's set. Default with `data.buckets ?? []` before iterating.
 
 ## Required filters (throws `ValidationError` client-side)
 
@@ -59,8 +60,8 @@ Explorer:
 - client.getAddress(address, { limit?, offset? }) - address profile with stats
 - client.getMaker(address) - maker portfolio with allocations and profit
 - client.getTaker(address) - taker portfolio: fills, tier, lock score, currency/platform mix
-- client.getIntegrator(code, { windowDays? }) - ERC-8021 integrator rollup: volume, unique makers, top markets, recent deposits
-- client.getPlatform(platform, { windowDays? }) - platform rollup: currencies, makers, takers, recent intents
+- client.getIntegrator(code, { windowDays? }) - ERC-8021 integrator rollup: volume, unique makers, top markets, recent deposits. `windowDays` is currently materialized for 90 only — omit or pass 90 (any other value throws).
+- client.getPlatform(platform, { windowDays? }) - platform rollup: currencies, makers, takers, recent intents. Same 90-day materialization rule as `getIntegrator`.
 - client.getDelegate(address) - delegate rollup: rate managers, delegated deposits, PnL
 - client.getVerifier(address, { limit?, offset? }) - verifier stats and breakdown
 - client.getVault(id, { days? }) - vault detail with snapshots
@@ -87,13 +88,27 @@ Vaults:
 - client.getVaultsOverview() - all vaults with AUM, fees, snapshots
 - client.getVault(id, { days? }) - vault detail with snapshots
 
-Account:
-- client.listKeys() - list API keys
-- client.createKey(label?) - create key
-- client.rotateKey(oldKey) - rotate key
-- client.deleteKey(key) - delete key
-- client.getCredits() - credit balance and packages
+Account & keys (SDK ≥ 1.0 takes the opaque `id` from `listKeys()`, not the raw key):
+- client.listKeys() - list API keys; each entry exposes `id` (sha256 of the raw key) for the methods below
+- client.createKey(label?) - create key (hits dedicated POST /account/keys)
+- client.rotateKey(idOrKey) - rotate key; accepts either the opaque `id` or the raw key
+- client.deleteKey(id) - delete key by `id` from listKeys() (raw key is no longer accepted)
+- client.getCredits() - credit balance, free-tier window, and purchase history
 - client.createCheckout(pkg) - purchase credits (starter/growth/scale)
+
+Webhooks (SDK ≥ 1.0):
+- client.listWebhooks() - list registered endpoints
+- client.createWebhook({ url, events, label? }) - register endpoint; returns the `secret` once
+- client.updateWebhook(id, { status }) - pause/resume an endpoint
+- client.deleteWebhook(id) - unregister
+
+Canonical webhook event names (aligned with `LiveEvent.type`):
+- deposit.created
+- intent.signaled
+- intent.fulfilled
+- deposit.rate_updated
+
+Legacy aliases (`intent.created`, `intent.filled`, `rate.updated`) are still accepted on register but normalized server-side. Type: `WebhookEventName`.
 
 ## Auth
 
@@ -106,7 +121,7 @@ Account:
 import { PeerlyticsError, RateLimitError, NotFoundError, ValidationError } from "@peerlytics/sdk";
 ```
 
-Types: ActivityStreamFilters, ActivityStreamEvent (for streamActivity)
+Types: ActivityStreamFilters, ActivityStreamEvent (for streamActivity), WebhookEventName, WebhookEndpoint (for webhook lifecycle), TimeseriesData, TimeseriesParams, TimeseriesBucket, TimeseriesSeries (for getTimeseries).
 
 ## Examples in this repo
 

@@ -54,7 +54,9 @@ function peerlyticsOrderbookProxy(): Plugin {
 
         try {
           const payload = await fetchOrderbookSnapshot(platform, currency);
-          sendJson(res, 200, payload);
+          sendJson(res, 200, payload, {
+            "Cache-Control": "s-maxage=30, stale-while-revalidate=300",
+          });
         } catch (error) {
           const message =
             error instanceof Error ? error.message : "Unable to load orderbook.";
@@ -69,8 +71,12 @@ function sendJson(
   res: { statusCode: number; setHeader: (name: string, value: string) => void; end: (body: string) => void },
   status: number,
   body: unknown,
+  headers: Record<string, string> = {},
 ): void {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json");
+  for (const [name, value] of Object.entries(headers)) {
+    res.setHeader(name, value);
+  }
   res.end(JSON.stringify(body));
 }

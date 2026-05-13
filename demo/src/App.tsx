@@ -116,6 +116,7 @@ export default function App() {
   const [copiedOfframpInstall, setCopiedOfframpInstall] = useState(false);
   const [copiedPeerlyticsCode, setCopiedPeerlyticsCode] = useState(false);
   const [copiedOfframpCode, setCopiedOfframpCode] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
 
   const [closingDepositId, setClosingDepositId] = useState<string | null>(null);
   const [closeError, setCloseError] = useState<string | null>(null);
@@ -398,32 +399,34 @@ export default function App() {
     }
   }
 
+  function markCopied(setCopied: (value: boolean) => void) {
+    setCopyError(null);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
+
   function handleCopyPeerlyticsInstall() {
-    void navigator.clipboard.writeText("npm install @peerlytics/sdk").then(() => {
-      setCopiedPeerlyticsInstall(true);
-      setTimeout(() => setCopiedPeerlyticsInstall(false), 1500);
-    });
+    void copyText("npm install @peerlytics/sdk")
+      .then(() => markCopied(setCopiedPeerlyticsInstall))
+      .catch(() => setCopyError("Copy failed. Select the command manually."));
   }
 
   function handleCopyOfframpInstall() {
-    void navigator.clipboard.writeText("npm install @usdctofiat/offramp").then(() => {
-      setCopiedOfframpInstall(true);
-      setTimeout(() => setCopiedOfframpInstall(false), 1500);
-    });
+    void copyText("npm install @usdctofiat/offramp")
+      .then(() => markCopied(setCopiedOfframpInstall))
+      .catch(() => setCopyError("Copy failed. Select the command manually."));
   }
 
   function handleCopyPeerlyticsCode() {
-    void navigator.clipboard.writeText(PEERLYTICS_SNIPPET).then(() => {
-      setCopiedPeerlyticsCode(true);
-      setTimeout(() => setCopiedPeerlyticsCode(false), 1500);
-    });
+    void copyText(PEERLYTICS_SNIPPET)
+      .then(() => markCopied(setCopiedPeerlyticsCode))
+      .catch(() => setCopyError("Copy failed. Select the snippet manually."));
   }
 
   function handleCopyOfframpCode() {
-    void navigator.clipboard.writeText(USDCTOFIAT_SNIPPET).then(() => {
-      setCopiedOfframpCode(true);
-      setTimeout(() => setCopiedOfframpCode(false), 1500);
-    });
+    void copyText(USDCTOFIAT_SNIPPET)
+      .then(() => markCopied(setCopiedOfframpCode))
+      .catch(() => setCopyError("Copy failed. Select the snippet manually."));
   }
 
   return (
@@ -483,6 +486,7 @@ export default function App() {
               @usdctofiat/offramp
             </a>
           </div>
+          {copyError && <InlineMessage tone="error">{copyError}</InlineMessage>}
         </div>
 
         {/* ── SDK Strip 1: USDCtoFiat ── */}
@@ -996,6 +1000,28 @@ function ValueTile({
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return "Something unexpected happened.";
+}
+
+async function copyText(value: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    const copied = document.execCommand("copy");
+    if (!copied) throw new Error("Copy command was rejected.");
+  } finally {
+    document.body.removeChild(textarea);
+  }
 }
 
 function getOrderbookCacheKey(

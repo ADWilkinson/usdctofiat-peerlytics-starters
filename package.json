@@ -5,6 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check": "npm run typecheck && npm run validate",
+    "validate": "node scripts/validate-starters.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

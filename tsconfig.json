@@ -12,6 +12,12 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["peerlytics/**/*.ts", "usdctofiat/**/*.ts", "usdctofiat/**/*.tsx"],
-  "exclude": ["demo", "node_modules", "**/node_modules", "**/dist"]
+  "include": [
+    "demo/api/**/*.ts",
+    "demo/server/**/*.ts",
+    "peerlytics/**/*.ts",
+    "usdctofiat/**/*.ts",
+    "usdctofiat/**/*.tsx"
+  ],
+  "exclude": ["node_modules", "**/node_modules", "**/dist", "demo/src", "demo/vite.config.ts"]
 }

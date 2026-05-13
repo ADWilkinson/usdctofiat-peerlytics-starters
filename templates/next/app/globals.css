@@ -34,3 +34,8 @@ section {
 a {
   color: #9ddca9;
 }
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}

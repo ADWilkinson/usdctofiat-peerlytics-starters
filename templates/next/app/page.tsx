@@ -52,6 +52,8 @@ function useWalletClient(): WalletClient | null {
 export default function HomePage() {
   const { ready, authenticated, login, logout } = usePrivy();
   const walletClient = useWalletClient();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
   const status = useMemo(() => {
     if (!ready) return "Loading Privy…";
@@ -79,7 +81,10 @@ export default function HomePage() {
 
         {walletClient ? (
           <button
+            disabled={isSubmitting}
             onClick={() => {
+              setIsSubmitting(true);
+              setSubmitMessage("Creating deposit on Base...");
               offramp(walletClient, {
                 amount: "100",
                 currency: CURRENCIES.USD,
@@ -87,17 +92,25 @@ export default function HomePage() {
                 identifier: "alice",
                 integratorId: INTEGRATOR_ID,
                 referralId: REFERRAL_ID,
-              }).catch((error: Error) => {
-                console.error(error.message);
-              });
+              })
+                .then((result) => {
+                  setSubmitMessage(`Deposit #${result.depositId} created.`);
+                })
+                .catch((error: Error) => {
+                  setSubmitMessage(error.message);
+                })
+                .finally(() => {
+                  setIsSubmitting(false);
+                });
             }}
             style={{ minHeight: 40 }}
           >
-            Sell 100 USDC
+            {isSubmitting ? "Creating..." : "Sell 100 USDC"}
           </button>
         ) : (
           <p style={{ marginBottom: 0, opacity: 0.8 }}>Connect a wallet to start an offramp.</p>
         )}
+        {submitMessage ? <p style={{ marginBottom: 0 }}>{submitMessage}</p> : null}
       </section>
     </main>
   );

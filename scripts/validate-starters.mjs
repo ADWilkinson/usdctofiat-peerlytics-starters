@@ -12,6 +12,10 @@ function readText(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
 }
 
+function exists(relativePath) {
+  return fs.existsSync(path.join(root, relativePath));
+}
+
 function assert(condition, message) {
   if (!condition) failures.push(message);
 }
@@ -67,6 +71,46 @@ for (const file of templateEntrypoints) {
   assert(text.includes("__INTEGRATOR_ID__"), `${file} must keep the CLI integrator placeholder`);
   assert(text.includes("TODO_SET_REFERRAL_ID"), `${file} must keep the referral placeholder visible`);
 }
+
+const templateReadmes = [
+  ["templates/next/README.md", "NEXT_PUBLIC_PRIVY_APP_ID"],
+  ["templates/vite/README.md", "VITE_PRIVY_APP_ID"],
+  ["templates/telegram-bot/README.md", "TELEGRAM_BOT_TOKEN"],
+];
+
+for (const [file, envKey] of templateReadmes) {
+  assert(exists(file), `${file} must exist`);
+  if (!exists(file)) continue;
+
+  const text = readText(file);
+  assert(text.includes("## Run"), `${file} must document local run steps`);
+  assert(text.includes("## Customize"), `${file} must document customization points`);
+  assert(text.includes("## Deploy"), `${file} must document deploy notes`);
+  assert(text.includes(envKey), `${file} must document ${envKey}`);
+  assert(text.includes("__INTEGRATOR_ID__"), `${file} must mention the integrator placeholder`);
+  assert(text.includes("TODO_SET_REFERRAL_ID"), `${file} must mention the referral placeholder`);
+}
+
+const nextTemplate = readText("templates/next/app/page.tsx");
+const viteTemplate = readText("templates/vite/src/App.tsx");
+const telegramTemplate = readText("templates/telegram-bot/src/index.ts");
+
+assert(
+  nextTemplate.includes("setSubmitMessage"),
+  "templates/next/app/page.tsx must surface submit success/failure to users",
+);
+assert(
+  viteTemplate.includes("setSubmitMessage"),
+  "templates/vite/src/App.tsx must surface submit success/failure to users",
+);
+assert(
+  telegramTemplate.includes("Usage: /sell <amount> <identifier>"),
+  "templates/telegram-bot/src/index.ts must reject incomplete /sell commands",
+);
+assert(
+  !telegramTemplate.includes('identifierRaw || "alice"'),
+  "templates/telegram-bot/src/index.ts must not silently default payment identifiers",
+);
 
 const demoServer = readText("demo/server/peerlytics.ts");
 const demoApi = readText("demo/api/orderbook.ts");

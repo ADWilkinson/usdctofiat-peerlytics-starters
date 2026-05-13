@@ -42,3 +42,8 @@ h1 {
 .btn-secondary {
   min-height: 40px;
 }
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}

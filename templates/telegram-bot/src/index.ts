@@ -25,6 +25,28 @@ const walletClient = createWalletClient({
 
 const bot = new Bot(BOT_TOKEN);
 
+function parseSellCommand(text: string): { amount: string; identifier: string } {
+  const [, amountRaw, identifierRaw] = text.trim().split(/\s+/);
+  const amount = amountRaw?.trim() ?? "";
+  const identifier = identifierRaw?.trim() ?? "";
+
+  if (!amount || !identifier) {
+    throw new Error("Usage: /sell <amount> <identifier>");
+  }
+
+  if (!/^\d+(\.\d+)?$/.test(amount)) {
+    throw new Error("Amount must be a positive USDC number.");
+  }
+
+  const parsedAmount = Number.parseFloat(amount);
+
+  if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+    throw new Error("Amount must be a positive USDC number.");
+  }
+
+  return { amount, identifier };
+}
+
 bot.command("start", (ctx) => {
   void ctx.reply(
     "USDC offramp bot online. Use /sell <amount> <identifier>. Example: /sell 50 alice",
@@ -34,9 +56,7 @@ bot.command("start", (ctx) => {
 bot.command("sell", async (ctx) => {
   try {
     const text = ctx.message?.text || "";
-    const [, amountRaw, identifierRaw] = text.trim().split(/\s+/);
-    const amount = amountRaw || "10";
-    const identifier = identifierRaw || "alice";
+    const { amount, identifier } = parseSellCommand(text);
 
     const sdk = createOfframp({
       walletClient,

@@ -50,13 +50,49 @@ function useWalletClient(): WalletClient | null {
 export function App() {
   const { ready, authenticated, login, logout } = usePrivy();
   const walletClient = useWalletClient();
+  const [amount, setAmount] = useState("100");
+  const [identifier, setIdentifier] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
   const status = useMemo(() => {
-    if (!ready) return "Loading Privy…";
+    if (!ready) return "Loading Privy...";
     return authenticated ? "Wallet connected" : "Not connected";
   }, [authenticated, ready]);
+
+  const amountValue = Number(amount);
+  const validation = identifier ? PLATFORMS.VENMO.validate(identifier) : null;
+  const canSubmit =
+    Boolean(walletClient) &&
+    !isSubmitting &&
+    Number.isFinite(amountValue) &&
+    amountValue > 0 &&
+    Boolean(identifier.trim()) &&
+    (!validation || validation.valid);
+
+  async function handleSubmit() {
+    if (!walletClient || !canSubmit) return;
+
+    setIsSubmitting(true);
+    setSubmitMessage("Creating deposit on Base...");
+
+    try {
+      const result = await offramp(walletClient, {
+        amount,
+        currency: CURRENCIES.USD,
+        platform: PLATFORMS.VENMO,
+        identifier: identifier.trim(),
+        integratorId: INTEGRATOR_ID,
+        referralId: REFERRAL_ID,
+      });
+
+      setSubmitMessage(`Deposit #${result.depositId} created.`);
+    } catch (error) {
+      setSubmitMessage(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <main>
@@ -77,33 +113,38 @@ export function App() {
 
         <div style={{ marginTop: 14 }}>
           {walletClient ? (
-            <button
-              className="btn-primary"
-              disabled={isSubmitting}
-              onClick={() => {
-                setIsSubmitting(true);
-                setSubmitMessage("Creating deposit on Base...");
-                offramp(walletClient, {
-                  amount: "100",
-                  currency: CURRENCIES.USD,
-                  platform: PLATFORMS.VENMO,
-                  identifier: "alice",
-                  integratorId: INTEGRATOR_ID,
-                  referralId: REFERRAL_ID,
-                })
-                  .then((result) => {
-                    setSubmitMessage(`Deposit #${result.depositId} created.`);
-                  })
-                  .catch((error: Error) => {
-                    setSubmitMessage(error.message);
-                  })
-                  .finally(() => {
-                    setIsSubmitting(false);
-                  });
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                void handleSubmit();
               }}
             >
-              {isSubmitting ? "Creating..." : "Sell 100 USDC"}
-            </button>
+              <label>
+                USDC amount
+                <input
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(event) => setAmount(event.target.value)}
+                />
+              </label>
+              <label>
+                Venmo username
+                <input
+                  placeholder={PLATFORMS.VENMO.identifier.placeholder}
+                  value={identifier}
+                  onChange={(event) => setIdentifier(event.target.value)}
+                />
+              </label>
+              {validation && !validation.valid ? (
+                <p className="error">{validation.error}</p>
+              ) : null}
+              <button className="btn-primary" disabled={!canSubmit} type="submit">
+                {isSubmitting ? "Creating..." : `Sell ${amount || "0"} USDC`}
+              </button>
+            </form>
           ) : (
             <p className="muted" style={{ marginBottom: 0 }}>
               Connect a wallet to start an offramp.

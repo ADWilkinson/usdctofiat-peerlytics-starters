@@ -14,7 +14,7 @@ Set `VITE_PRIVY_APP_ID` before opening the app. The template keeps `__INTEGRATOR
 
 ## Customize
 
-- Edit `src/App.tsx` to change the amount, platform, currency, and payment identifier.
+- Edit `src/App.tsx` to change the default platform/currency and input labels.
 - Keep `integratorId` on every `offramp()` call so deposits can be attributed.
 - Replace `TODO_SET_REFERRAL_ID` before shipping partner traffic.
 

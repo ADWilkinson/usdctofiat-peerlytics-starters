@@ -27,23 +27,54 @@ function dependencyVersion(pkg, name) {
 const rootPkg = readJson("package.json");
 const rootOfframpVersion = dependencyVersion(rootPkg, "@usdctofiat/offramp");
 const rootPeerlyticsVersion = dependencyVersion(rootPkg, "@peerlytics/sdk");
+const rootZkp2pSdkOverride = rootPkg.overrides?.["@zkp2p/sdk"];
 
 const packageChecks = [
   ["demo/package.json", ["@peerlytics/sdk", "@usdctofiat/offramp"]],
-  ["templates/next/package.json", ["@usdctofiat/offramp"]],
-  ["templates/vite/package.json", ["@usdctofiat/offramp"]],
+  [
+    "templates/next/package.json",
+    [
+      "@usdctofiat/offramp",
+      "@privy-io/react-auth",
+      "@solana-program/system",
+      "@solana-program/token",
+      "@solana/kit",
+    ],
+  ],
+  [
+    "templates/vite/package.json",
+    [
+      "@usdctofiat/offramp",
+      "@privy-io/react-auth",
+      "@solana-program/system",
+      "@solana-program/token",
+      "@solana/kit",
+    ],
+  ],
   ["templates/telegram-bot/package.json", ["@usdctofiat/offramp"]],
 ];
+
+const privyTemplateDeps = readJson("templates/next/package.json").dependencies;
 
 for (const [pkgPath, names] of packageChecks) {
   const pkg = readJson(pkgPath);
   for (const name of names) {
-    const expected = name === "@peerlytics/sdk" ? rootPeerlyticsVersion : rootOfframpVersion;
+    const expected =
+      name === "@peerlytics/sdk"
+        ? rootPeerlyticsVersion
+        : name === "@usdctofiat/offramp"
+          ? rootOfframpVersion
+          : privyTemplateDeps[name];
     assert(
       dependencyVersion(pkg, name) === expected,
       `${pkgPath} must keep ${name} at ${expected}`,
     );
   }
+
+  assert(
+    pkg.overrides?.["@zkp2p/sdk"] === rootZkp2pSdkOverride,
+    `${pkgPath} must keep @zkp2p/sdk override at ${rootZkp2pSdkOverride}`,
+  );
 }
 
 const envFiles = {
@@ -104,6 +135,14 @@ assert(
   "templates/vite/src/App.tsx must surface submit success/failure to users",
 );
 assert(
+  !nextTemplate.includes('identifier: "alice"'),
+  "templates/next/app/page.tsx must not hardcode a payment identifier",
+);
+assert(
+  !viteTemplate.includes('identifier: "alice"'),
+  "templates/vite/src/App.tsx must not hardcode a payment identifier",
+);
+assert(
   telegramTemplate.includes("Usage: /sell <amount> <identifier>"),
   "templates/telegram-bot/src/index.ts must reject incomplete /sell commands",
 );
@@ -122,6 +161,19 @@ assert(
 assert(
   !demoApi.includes("const supportedRoutes"),
   "demo/api/orderbook.ts must use the shared route registry instead of duplicating it",
+);
+
+const installClaudeScript = readText("demo/scripts/install-claude.sh");
+assert(
+  installClaudeScript.includes("${SCRIPT_DIR}/../..") &&
+    installClaudeScript.includes("pwd)/skills/claude"),
+  "demo/scripts/install-claude.sh must install skills from the repo-level skills/claude directory",
+);
+
+const nextGitignore = readText("templates/next/.gitignore");
+assert(
+  nextGitignore.includes("next-env.d.ts"),
+  "templates/next/.gitignore must ignore Next's generated next-env.d.ts",
 );
 
 if (failures.length > 0) {

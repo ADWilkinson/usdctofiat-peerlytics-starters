@@ -9,10 +9,13 @@
     "preview": "vite preview --host --port 3000"
   },
   "dependencies": {
-    "@privy-io/react-auth": "^3.21.2",
+    "@privy-io/react-auth": "^3.26.1",
+    "@solana-program/system": "^0.12.0",
+    "@solana-program/token": "^0.13.0",
+    "@solana/kit": "^6.9.0",
     "@usdctofiat/offramp": "^3.0.2",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "viem": "^2.48.8"
   },
   "overrides": {
@@ -21,8 +24,8 @@
   "devDependencies": {
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "@vitejs/plugin-react": "^6.0.1",
+    "@vitejs/plugin-react": "^6.0.2",
     "typescript": "^6.0.0",
-    "vite": "^8.0.0"
+    "vite": "^8.0.13"
   }
 }

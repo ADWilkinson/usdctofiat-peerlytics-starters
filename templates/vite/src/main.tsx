@@ -8,7 +8,7 @@ import "./styles.css";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <PrivyProvider
-      appId={import.meta.env.VITE_PRIVY_APP_ID || "pk_test_missing"}
+      appId={import.meta.env.VITE_PRIVY_APP_ID || "privy_template_app_id_000"}
       config={{ appearance: { theme: "dark", accentColor: "#82c97e" } }}
     >
       <App />

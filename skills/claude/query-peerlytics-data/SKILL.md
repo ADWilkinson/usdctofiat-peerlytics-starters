@@ -35,6 +35,8 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 ```
 
 **x402** (keyless): Pay per request with USDC on Base. No account needed.
+Pass `auth: { mode: "x402", signer }` and the SDK handles the 402 challenge,
+payment payload, paid retry, and settlement callback.
 
 ## Response shapes & required filters
 
@@ -72,6 +74,12 @@ const rates = await client.getMarketSummary({ currency: "EUR" });
 ```typescript
 const orderbook = await client.getOrderbook({ currency: "GBP" });
 // Orderbook grouped by rate level: rate, totalLiquidity, depositCount
+
+const takerView = await client.getOrderbook({
+  currency: "GBP",
+  taker: "0xBuyerWallet",
+});
+// Includes private deposits whitelisted for that taker wallet.
 ```
 
 ### Maker portfolio
@@ -132,7 +140,7 @@ Analytics:
 
 Market:
 - `getMarketSummary({ currency?, platform?, includeRates?, limit?, offset? })` — rate stats per pair
-- `getOrderbook({ currency?, platform?, minSize? })` — live orderbook by rate level
+- `getOrderbook({ currency?, platform?, minSize?, taker? })` — live orderbook by rate level; `taker` includes private deposits whitelisted for that wallet
 
 Explorer:
 - `getDeposit(id, { limit?, offset? })` — deposit detail with intents

@@ -9,12 +9,9 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@usdctofiat/offramp": "^3.0.2",
+    "@usdctofiat/offramp": "^3.0.3",
     "grammy": "^1.38.3",
     "viem": "^2.48.8"
-  },
-  "overrides": {
-    "@zkp2p/sdk": "0.4.0"
   },
   "devDependencies": {
     "@types/node": "^25.0.0",

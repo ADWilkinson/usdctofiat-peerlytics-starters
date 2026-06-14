@@ -60,7 +60,7 @@ async function main() {
   const walletClient = createWalletClient({
     account,
     chain: base,
-    transport: http("https://mainnet.base.org"),
+    transport: http(process.env.RPC_URL ?? "https://mainnet.base.org"),
   });
 
   // Validate + normalize locally before sending anything onchain. The SDK
@@ -118,8 +118,8 @@ async function main() {
       console.log(fmt.dim("    1. Install the Peer (PeerAuth) browser extension"));
       console.log(fmt.dim("       https://chromewebstore.google.com/detail/peerauth-authenticate-and/ijpgccednehjpeclfcllnjjcmiohdjih"));
       console.log(fmt.dim("    2. Open usdctofiat.xyz, approve the Peer connection prompt"));
-      console.log(fmt.dim("    3. Finish the /verify/paypal flow in the sidebar with the SAME"));
-      console.log(fmt.dim("       paypal.me username you passed to this script"));
+      console.log(fmt.dim("    3. Complete PayPal registration in the Peer extension with the"));
+      console.log(fmt.dim("       SAME paypal.me username you passed to this script"));
       console.log(fmt.dim("    4. Re-run this script"));
       if (info?.ctaSubtext) {
         console.log();

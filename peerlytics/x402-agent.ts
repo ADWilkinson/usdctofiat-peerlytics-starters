@@ -79,7 +79,7 @@ async function main(): Promise<void> {
   console.log();
   console.log(`     Network     ${first?.network ?? "eip155:8453"}`);
   console.log(`     Token       USDC (${first?.asset ?? "0x833589..."})`);
-  console.log(`     Amount      ${first?.amount ?? "unknown"} (raw units)`);
+  console.log(`     Amount      ${first?.maxAmountRequired ?? "unknown"} (raw units)`);
   console.log(`     Pay to      ${first?.payTo ?? "unknown"}`);
   console.log();
   console.log(`  ${fmt.green("3.")} Run a paid SDK request`);

@@ -5,7 +5,7 @@
  * (PeerAuth) browser extension before curator's /v2/makers/create will
  * accept the deposit. This example demonstrates how to catch the
  * EXTENSION_REGISTRATION_REQUIRED error from @usdctofiat/offramp and
- * walk the user through the install → connect → verify handshake via
+ * walk the user through the install → connect → capture handshake via
  * the usePeerExtensionRegistration hook.
  *
  * Copy-paste template — not runnable standalone.
@@ -31,15 +31,17 @@ export function PayPalSellForm() {
 
   const validation = identifier ? PLATFORMS.PAYPAL.validate(identifier) : null;
 
+  const depositParams = {
+    amount,
+    platform: PLATFORMS.PAYPAL,
+    currency: CURRENCIES.USD,
+    identifier,
+  };
+
   const handleSell = async () => {
     if (!walletClient) return;
     try {
-      const result = await offramp(walletClient, {
-        amount,
-        platform: PLATFORMS.PAYPAL,
-        currency: CURRENCIES.USD,
-        identifier,
-      });
+      const result = await offramp(walletClient, depositParams);
       console.log(`Deposit #${result.depositId} created`);
     } catch (err) {
       // lastError is already surfaced by the hook — the throw is for callers
@@ -117,19 +119,32 @@ export function PayPalSellForm() {
           )}
 
           {peer.phase === "ready" && (
-            <button type="button" onClick={() => peer.openVerifySidebar()}>
-              Verify PayPal in Peer
+            <button type="button" disabled={peer.busy} onClick={() => peer.startRegistrationCapture()}>
+              {peer.info.ctaLabel ?? "Register PayPal in Peer"}
             </button>
           )}
 
+          {/* Once the extension captures the seller credential, finish
+              registration and retry the deposit in one call. */}
+          {peer.capturedMetadata?.sarCredentialCapture?.credentialBundle &&
+            !peer.error && (
+              <button
+                type="button"
+                onClick={() => peer.completeRegistration(walletClient, depositParams)}
+              >
+                Continue registration
+              </button>
+            )}
+
+          {/* Manual fallback if the user finished capture out of band. */}
           <button
             type="button"
-            onClick={() => {
-              peer.refresh();
-              handleSell(); // retry makers/create after the user verified
+            onClick={async () => {
+              await peer.refresh();
+              await handleSell(); // retry makers/create after registration
             }}
           >
-            I have completed verification
+            I have completed registration
           </button>
 
           {peer.info.ctaSubtext && <small>{peer.info.ctaSubtext}</small>}

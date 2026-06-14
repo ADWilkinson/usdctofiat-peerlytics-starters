@@ -1,4 +1,4 @@
-# @usdctofiat/offramp v3
+# @usdctofiat/offramp v4
 
 USDC-to-fiat offramp SDK for Base. Also ships outbound HMAC-signed webhooks for `deposit.*` and `otc.*` events (see Webhooks section below).
 
@@ -101,8 +101,13 @@ const {
 
 // PayPal + Wise extension handshake driver:
 const peer = usePeerExtensionRegistration(PLATFORMS.PAYPAL);
-// { phase, info, busy, error, refresh, installExtension, connectExtension, openVerifySidebar }
+// { phase, info, busy, error, capturedMetadata, refresh, installExtension,
+//   connectExtension, startRegistrationCapture, completeRegistration }
 // phase: "checking" | "needs_install" | "needs_connection" | "ready" | "unsupported"
+// startRegistrationCapture() launches headless metadata capture; once
+//   capturedMetadata.sarCredentialCapture.credentialBundle is set, call
+//   completeRegistration(walletClient, params) to upload + retry in one shot.
+// (openVerifySidebar() is a deprecated alias of startRegistrationCapture().)
 ```
 
 ## Types
@@ -191,14 +196,32 @@ happens. The SDK re-exports the driver from `@zkp2p/sdk` so you don't need a
 direct dep on it:
 
 ```ts
-import { peerExtensionSdk } from "@usdctofiat/offramp";
+import {
+  peerExtensionSdk,
+  getPeerExtensionRegistrationAuthParams,
+  completePeerExtensionRegistration,
+} from "@usdctofiat/offramp";
 
 const state = await peerExtensionSdk.getState();
 // "needs_install" | "needs_connection" | "ready"
 
 if (state === "needs_install") peerExtensionSdk.openInstallPage();
 else if (state === "needs_connection") await peerExtensionSdk.requestConnection();
-else peerExtensionSdk.openSidebar("/verify/paypal");
+else {
+  // Headless metadata capture (v4 — the sidepanel openSidebar() flow is gone):
+  const params = getPeerExtensionRegistrationAuthParams("paypal");
+  const unsubscribe = peerExtensionSdk.onMetadataMessage(async (message) => {
+    if (message.platform !== params.platform) return;
+    if (!message.sarCredentialCapture?.credentialBundle) return;
+    await completePeerExtensionRegistration({
+      platform: PLATFORMS.PAYPAL,
+      identifier: "alicepay",
+      capturedMetadata: message,
+    });
+    // then call offramp() again with the same handle
+  });
+  peerExtensionSdk.authenticate(params);
+}
 ```
 
 React wrapper:
@@ -214,8 +237,10 @@ const needsExt = lastError?.code === OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_
 // peer.phase-aware CTAs:
 //   peer.phase === "needs_install"    → peer.installExtension()
 //   peer.phase === "needs_connection" → peer.connectExtension()
-//   peer.phase === "ready"            → peer.openVerifySidebar()
-// After the user confirms: call offramp() again with the same identifier.
+//   peer.phase === "ready"            → peer.startRegistrationCapture()
+// When peer.capturedMetadata.sarCredentialCapture.credentialBundle is set:
+//   peer.completeRegistration(walletClient, params)  (uploads + retries deposit)
+// Or after the user confirms: call offramp() again with the same identifier.
 ```
 
 Only PayPal and Wise require this today. The `extensionRegistration` field on
@@ -223,15 +248,20 @@ the platform entry is `undefined` for every other platform.
 
 See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`.
 
-## Peer Extension v3 direct-driver changes
+## Peer Extension v4 direct-driver changes
 
-If you use the re-exported `peerExtensionSdk` directly, v3 follows
-`@zkp2p/sdk@0.4.x`: `peerExtensionSdk.onramp(params, callback)` returns
-prepared calldata through the callback and the host app broadcasts that
-transaction with its wallet client. `intentHash` is required in onramp params,
-`onIntentFulfilled()` is removed, and
-`peerExtensionSdk.getOnrampTransaction(intentHash)` is the recovery path when a
-callback was missed.
+If you use the re-exported `peerExtensionSdk` directly, v4 follows
+`@zkp2p/sdk@0.5.0`. The upstream sidepanel onramp contract was removed:
+`peerExtensionSdk.onramp()`, `getOnrampTransaction()`, and `openSidebar()` are
+gone, along with the `PeerExtensionOnrampParams` /
+`PeerOnrampPreparedTransaction*` types. Capture now runs through the headless
+metadata bridge — register `onMetadataMessage(callback)`, then call
+`authenticate({ actionType, captureMode, platform, providerConfig })`. Build the
+buyer-TEE proof from the captured message, prepare fulfill calldata via
+`fulfillIntent.prepare`, and broadcast it yourself. There is no pull-recovery
+path — re-run `authenticate` for the active intent if a callback is missed.
+`PeerSarCredentialBundle` is now an alias of `@zkp2p/sdk`'s
+`SellerCredentialBundle`.
 
 ## How It Works
 
@@ -274,11 +304,14 @@ v1.x is broken against the live curator — the old `POST /v1/makers/create` end
 2. Handle `OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED` on PayPal and Wise — walk the user through `usePeerExtensionRegistration(...)` and retry.
 3. If you hand-rolled `POST /v1/makers/create`, switch to `POST /v2/makers/create` with `{ processorName, offchainId, telegramUsername? }`.
 
-## v3 migration
+## v4 migration
 
-The core `offramp()` / `useOfframp()` flow remains stable. Only direct
-`peerExtensionSdk` drivers need to migrate to the prepared-calldata callback
-model described above.
+The core `offramp()` / `useOfframp()` flow remains stable — just bump the
+version. Only direct `peerExtensionSdk` drivers are affected: `onramp()`,
+`getOnrampTransaction()`, and `openSidebar()` are removed. Migrate to the
+`@zkp2p/sdk@0.5.0` `authenticate()` + `onMetadataMessage()` bridge described
+above. For seller registration use `getPeerExtensionRegistrationAuthParams` /
+`completePeerExtensionRegistration` (or the `usePeerExtensionRegistration` hook).
 
 ## Links
 

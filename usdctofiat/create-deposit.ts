@@ -50,7 +50,7 @@ const STEP_LABELS: Record<string, string> = {
 
 async function main() {
   const account = privateKeyToAccount(PRIVATE_KEY as `0x${string}`);
-  const walletClient = createWalletClient({ account, chain: base, transport: http("https://mainnet.base.org") });
+  const walletClient = createWalletClient({ account, chain: base, transport: http(process.env.RPC_URL ?? "https://mainnet.base.org") });
 
   console.log();
   console.log(fmt.bold("  USDCtoFiat Offramp"));

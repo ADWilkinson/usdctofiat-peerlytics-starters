@@ -1,8 +1,9 @@
 /**
  * live-activity.ts
  *
- * Polls the activity feed and streams real-time protocol events
- * (signals, fills, rate updates) with color-coded output.
+ * Polls the activity feed for near-real-time protocol events
+ * (signals, fills, rate updates) with color-coded output. For a true
+ * push stream, use client.streamActivity() (SSE) instead of polling.
  *
  * Usage:
  *   PEERLYTICS_API_KEY=pk_live_... npx tsx peerlytics/live-activity.ts

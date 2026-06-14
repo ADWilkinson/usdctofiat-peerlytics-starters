@@ -29,6 +29,11 @@ const rootOfframpVersion = dependencyVersion(rootPkg, "@usdctofiat/offramp");
 const rootPeerlyticsVersion = dependencyVersion(rootPkg, "@peerlytics/sdk");
 const rootZkp2pSdkOverride = rootPkg.overrides?.["@zkp2p/sdk"];
 
+// The @solana-program/* and @solana/kit pins are intentional, not dead weight:
+// @privy-io/react-auth statically imports them in its ESM bundle (e.g.
+// FundSolWalletWithExternalSolanaWallet, useSolanaRpcClient). They are optional
+// peer deps at install time, but next build / vite build fail with
+// module-not-found if they are absent. Keep them pinned in next + vite.
 const packageChecks = [
   ["demo/package.json", ["@peerlytics/sdk", "@usdctofiat/offramp"]],
   [

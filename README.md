@@ -90,6 +90,9 @@ npx tsx peerlytics/live-activity.ts
 npx tsx usdctofiat/platform-explorer.ts
 ```
 
+The deposit scripts default to the public Base RPC. Set `RPC_URL` to a private
+endpoint (Alchemy, QuickNode, etc.) to avoid rate limits on real deposit runs.
+
 Get a free API key at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) — same key authenticates the Peerlytics paid API _and_ outbound webhooks for both products.
 
 ## Run the demo locally
@@ -126,7 +129,7 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "revolut" });
 ```
 
-Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base. SDK 1.2 can drive x402 directly with `auth: { mode: "x402", signer }`.
+Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base. SDK ≥ 1.0 can drive x402 directly with `auth: { mode: "x402", signer }`.
 
 **Gotchas worth knowing** (SDK ≥ 1.0, Stripe-style v2 wire format):
 

@@ -20,22 +20,32 @@ The CLI prompts for your `integratorId` and substitutes it into the template fil
 
 ## What ships in each template
 
-- `package.json` pinned to the latest `@usdctofiat/offramp` v3.x
+- `package.json` pinned to the latest `@usdctofiat/offramp` v4.x
 - A working `offramp()` call wired to `PLATFORMS.VENMO` / `CURRENCIES.USD` — edit to taste
 - Your `integratorId` baked in via the CLI prompt
 - A `TODO_SET_REFERRAL_ID` placeholder for partner attribution — replace before shipping
 - Type-checked TypeScript
 - A README inside the template covering run, deploy, and customize
 
-## Upgrading from v1.x
+## What surface these templates use
 
-v2.0.0 was a breaking change: PayPal makers now use the `paypal.me` username (not email), maker registration moved to `POST /v2/makers/create`, and PayPal + Wise must drive the Peer browser-extension handshake before the first deposit. These templates already use the v2 surface (`useOfframp` + `usePeerExtensionRegistration`). For forks of older templates, see the [SDK v2 migration guide](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md#200---2026-04-24).
+The `next` and `vite` templates call the standalone `offramp(walletClient, params)`
+function; `telegram-bot` uses `createOfframp({ walletClient }).createDeposit(params)`
+for a server-managed maker wallet. None of them touch the React hooks or the
+low-level `peerExtensionSdk` — so SDK upgrades that only change those surfaces
+need no template edits.
 
-## Upgrading from v2.x
+## Upgrading to v4.x
 
-The template-level `offramp()` and `useOfframp()` flow stays the same on v3.
-Only direct `peerExtensionSdk` integrations need to migrate to the
-`@zkp2p/sdk@0.4.x` prepared-calldata callback model.
+The template-level `offramp()` / `createOfframp()` flow is unchanged on v4 — just
+raise the version. v4 only affects direct `peerExtensionSdk` drivers: the
+`onramp()`, `getOnrampTransaction()`, and `openSidebar()` methods were removed in
+favour of the `@zkp2p/sdk@0.5.0` `authenticate()` + `onMetadataMessage()` bridge.
+See the [SDK CHANGELOG](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md).
+
+PayPal + Wise makers still register their handle through the Peer browser
+extension before the first deposit; in React that is driven by
+`usePeerExtensionRegistration`. PayPal uses the `paypal.me` username, not email.
 
 ## Manual install (no CLI)
 

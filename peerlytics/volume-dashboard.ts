@@ -67,8 +67,8 @@ async function main(): Promise<void> {
 
   console.log();
 
-  // Protocol summary
-  box("Protocol Summary");
+  // Protocol summary (month-to-date bucket from getProtocolSummary)
+  box("Protocol Summary (Month-to-Date)");
   row("Total Volume", fmt.green(fmt.usd(summary.mtd.settledVolumeUsd)));
   row("Active Liquidity", fmt.usd(summary.mtd.activeLiquidityUsd));
   row("Active Deposits", String(summary.mtd.activeDeposits));

@@ -70,7 +70,7 @@ async function main() {
   const walletClient = createWalletClient({
     account,
     chain: base,
-    transport: http("https://mainnet.base.org"),
+    transport: http(process.env.RPC_URL ?? "https://mainnet.base.org"),
   });
 
   console.log();

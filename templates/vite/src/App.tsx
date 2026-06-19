@@ -1,11 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { CURRENCIES, PLATFORMS, offramp } from "@usdctofiat/offramp";
+import {
+  CURRENCIES,
+  OFFRAMP_DEVELOPER_RESOURCES,
+  PLATFORMS,
+  offramp,
+} from "@usdctofiat/offramp";
 import { createWalletClient, custom, type WalletClient } from "viem";
 import { base } from "viem/chains";
 
 const INTEGRATOR_ID = "__INTEGRATOR_ID__";
 const REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const resourceLinks = [
+  ["SDK guide", OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide],
+  ["App guide", OFFRAMP_DEVELOPER_RESOURCES.links.appGuide],
+  ["Webhooks", OFFRAMP_DEVELOPER_RESOURCES.links.webhooksGuide],
+  ["Agent skill", OFFRAMP_DEVELOPER_RESOURCES.links.agentSkill],
+] as const;
 
 function useWalletClient(): WalletClient | null {
   const { wallets } = useWallets();
@@ -98,6 +109,11 @@ export function App() {
     <main>
       <h1>Offramp Vite Starter</h1>
       <p className="muted">Integrator: {INTEGRATOR_ID}</p>
+      <p className="muted max-copy">
+        Uses {OFFRAMP_DEVELOPER_RESOURCES.packageName} v
+        {OFFRAMP_DEVELOPER_RESOURCES.sdkVersion} on Base. Deposits are wallet-signed
+        and must delegate to the managed rate manager.
+      </p>
 
       <section>
         <p>Status: {status}</p>
@@ -151,6 +167,17 @@ export function App() {
             </p>
           )}
           {submitMessage ? <p className="muted">{submitMessage}</p> : null}
+        </div>
+      </section>
+
+      <section className="resource-panel">
+        <h2>Canonical resources</h2>
+        <div className="resource-links">
+          {resourceLinks.map(([label, href]) => (
+            <a key={href} href={href} rel="noreferrer" target="_blank">
+              {label}
+            </a>
+          ))}
         </div>
       </section>
     </main>

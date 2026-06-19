@@ -9,7 +9,8 @@ import {
 export default defineConfig({
   plugins: [react(), peerlyticsOrderbookProxy()],
   build: {
-    rollupOptions: {
+    chunkSizeWarningLimit: 1300,
+    rolldownOptions: {
       output: {
         manualChunks(id) {
           if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {

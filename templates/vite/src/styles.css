@@ -39,6 +39,10 @@ h1 {
   margin-top: 0;
 }
 
+.max-copy {
+  max-width: 620px;
+}
+
 form {
   display: grid;
   gap: 12px;
@@ -59,6 +63,12 @@ input {
   padding: 0 12px;
 }
 
+code {
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+}
+
 .error {
   color: #ffb4a8;
   margin: 0;
@@ -71,4 +81,50 @@ input {
 button:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+
+.resource-panel {
+  margin-top: 16px;
+}
+
+.resource-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.resource-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid rgba(236, 244, 239, 0.16);
+  border-radius: 999px;
+  color: #9ddca9;
+  text-decoration: none;
+}
+
+.resource-links a:hover,
+.resource-links a:focus-visible {
+  border-color: rgba(157, 220, 169, 0.48);
+  outline: none;
+}
+
+.setup-screen {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+}
+
+.setup-screen section {
+  max-width: 620px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: #9ddca9;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }

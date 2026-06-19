@@ -2,12 +2,23 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { CURRENCIES, PLATFORMS, offramp } from "@usdctofiat/offramp";
+import {
+  CURRENCIES,
+  OFFRAMP_DEVELOPER_RESOURCES,
+  PLATFORMS,
+  offramp,
+} from "@usdctofiat/offramp";
 import { createWalletClient, custom, type WalletClient } from "viem";
 import { base } from "viem/chains";
 
 const INTEGRATOR_ID = "__INTEGRATOR_ID__";
 const REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const resourceLinks = [
+  ["SDK guide", OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide],
+  ["App guide", OFFRAMP_DEVELOPER_RESOURCES.links.appGuide],
+  ["Webhooks", OFFRAMP_DEVELOPER_RESOURCES.links.webhooksGuide],
+  ["Agent skill", OFFRAMP_DEVELOPER_RESOURCES.links.agentSkill],
+] as const;
 
 function useWalletClient(): WalletClient | null {
   const { wallets } = useWallets();
@@ -100,6 +111,11 @@ export default function HomePage() {
     <main>
       <h1 style={{ fontSize: "2.35rem", marginBottom: "0.5rem" }}>Offramp Starter</h1>
       <p style={{ marginTop: 0, opacity: 0.9 }}>Integrator: {INTEGRATOR_ID}</p>
+      <p style={{ marginTop: 0, maxWidth: 620, opacity: 0.84 }}>
+        Uses {OFFRAMP_DEVELOPER_RESOURCES.packageName} v
+        {OFFRAMP_DEVELOPER_RESOURCES.sdkVersion} on Base. Deposits are created by
+        the connected wallet and must delegate to the managed rate manager.
+      </p>
 
       <section>
         <p style={{ marginTop: 0 }}>Status: {status}</p>
@@ -155,6 +171,30 @@ export default function HomePage() {
           <p style={{ marginBottom: 0, opacity: 0.8 }}>Connect a wallet to start an offramp.</p>
         )}
         {submitMessage ? <p style={{ marginBottom: 0 }}>{submitMessage}</p> : null}
+      </section>
+
+      <section style={{ marginTop: 16 }}>
+        <h2 style={{ marginTop: 0 }}>Ship from the canonical resources</h2>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+          {resourceLinks.map(([label, href]) => (
+            <a
+              key={href}
+              href={href}
+              rel="noreferrer"
+              target="_blank"
+              style={{
+                border: "1px solid rgba(236, 243, 239, 0.16)",
+                borderRadius: 999,
+                color: "#9ddca9",
+                minHeight: 40,
+                padding: "9px 12px",
+                textDecoration: "none",
+              }}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
       </section>
     </main>
   );

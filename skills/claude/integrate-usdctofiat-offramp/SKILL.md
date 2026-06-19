@@ -7,11 +7,16 @@ description: Integrate the @usdctofiat/offramp SDK (v4.x) into a dApp to add USD
 
 ## Overview
 
-Guide the user to integrate `@usdctofiat/offramp` v4.x. Surface area: 1 primary function (`offramp()`), 7 helpers (`deposits`, `close`, `enableOtc`, `disableOtc`, `getOtcLink`, `getPeerExtensionRegistrationAuthParams`, `completePeerExtensionRegistration`), 2 const objects (`PLATFORMS`, `CURRENCIES`), 2 React hooks (`useOfframp`, `usePeerExtensionRegistration`).
+Guide the user to integrate `@usdctofiat/offramp` v4.x. Surface area: 1 primary function (`offramp()`), deposit/OTC helpers (`deposits`, `close`, `enableOtc`, `disableOtc`, `getOtcLink`), Peer extension helpers (`getPeerExtensionRegistrationAuthParams`, `completePeerExtensionRegistration`), platform constants (`PLATFORMS`, `CURRENCIES`), developer resource exports (`OFFRAMP_DEVELOPER_RESOURCES`, `OFFRAMP_RESOURCE_LINKS`, `OFFRAMP_INTEGRATION_PLAYBOOKS`, `getOfframpDeveloperResources`), and 2 React hooks (`useOfframp`, `usePeerExtensionRegistration`).
 
 Companion docs:
 
 - Developer portal: https://usdctofiat.xyz/developers
+- SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
+- App guide: https://usdctofiat.xyz/developers/apps/
+- Bot guide: https://usdctofiat.xyz/developers/bots/
+- Agent guide: https://usdctofiat.xyz/developers/agents/
+- Webhooks guide: https://usdctofiat.xyz/developers/webhooks/
 - llms-full.txt (canonical machine reference): https://usdctofiat.xyz/llms-full.txt
 - Skill: https://usdctofiat.xyz/skills/usdctofiat.md
 - Starters: https://github.com/ADWilkinson/usdctofiat-peerlytics-starters
@@ -26,6 +31,21 @@ npx create-offramp-app@latest my-offramp --template=next|vite|telegram-bot
 ```
 
 React hooks live at the `/react` subpath: `import { useOfframp } from "@usdctofiat/offramp/react"`.
+
+## Resource bundle
+
+```typescript
+import { OFFRAMP_DEVELOPER_RESOURCES, getOfframpDeveloperResources } from "@usdctofiat/offramp";
+
+const allResources = OFFRAMP_DEVELOPER_RESOURCES;
+const botPlaybook = getOfframpDeveloperResources("bot");
+console.log(allResources.links.agentSkill, botPlaybook);
+```
+
+Use this export when generating docs, scaffolding apps, or giving coding agents
+canonical links. It includes Base chain metadata, mandatory delegation config,
+developer pages, the agent skill, `llms.txt`, starter repo, and Peerlytics
+upgrade links.
 
 ## Core pattern (server / Node / bot)
 
@@ -238,7 +258,7 @@ Error codes:
 
 ## Webhooks
 
-Subscribe to `deposit.*` and `otc.*` events at https://usdctofiat.xyz/developers
+Subscribe to `deposit.*` and `otc.*` events at https://usdctofiat.xyz/developers/webhooks/
 with your Peerlytics API key. Webhook registration is Pro-only; the same
 `paid-api-keys` Firestore collection serves both products.
 

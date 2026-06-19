@@ -10,14 +10,21 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Set `NEXT_PUBLIC_PRIVY_APP_ID` before opening the app. The template keeps `__INTEGRATOR_ID__` and `TODO_SET_REFERRAL_ID` visible until the scaffold CLI replaces them or you set your production values.
+Set `NEXT_PUBLIC_PRIVY_APP_ID` before opening the wallet flow. The template builds without secrets and shows a setup screen until the app ID is present. It keeps `__INTEGRATOR_ID__` and `TODO_SET_REFERRAL_ID` visible until the scaffold CLI replaces them or you set your production values.
 
 ## Customize
 
 - Edit `app/page.tsx` to change the default platform/currency and input labels.
 - Keep `integratorId` on every `offramp()` call so deposits can be attributed.
 - Replace `TODO_SET_REFERRAL_ID` before shipping partner traffic.
+- Keep `OFFRAMP_DEVELOPER_RESOURCES` visible somewhere in your developer/admin surface so future maintainers and agents have canonical SDK, webhook, and Peerlytics links.
 
 ## Deploy
 
 Deploy like any standard Next.js app. In Vercel, set `NEXT_PUBLIC_PRIVY_APP_ID` for Preview and Production.
+
+## Resources
+
+- SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
+- App guide: https://usdctofiat.xyz/developers/apps/
+- Webhooks: https://usdctofiat.xyz/developers/webhooks/

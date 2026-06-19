@@ -16,6 +16,10 @@ import {
   enableOtc,
   disableOtc,
   getOtcLink,
+  OFFRAMP_DEVELOPER_RESOURCES,
+  OFFRAMP_RESOURCE_LINKS,
+  OFFRAMP_INTEGRATION_PLAYBOOKS,
+  getOfframpDeveloperResources,
   PLATFORMS,
   CURRENCIES,
 } from "@usdctofiat/offramp";
@@ -51,7 +55,23 @@ const list = await deposits("0x...");
 
 // Close deposit
 await close(walletClient, "362");
+
+// Canonical resources for apps, bots, agents, webhooks, OTC, and Peerlytics
+console.log(OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide);
+console.log(OFFRAMP_RESOURCE_LINKS.agentSkill);
+console.log(OFFRAMP_INTEGRATION_PLAYBOOKS.map((entry) => entry.profile));
+console.log(getOfframpDeveloperResources("agent"));
 ```
+
+## Resource bundle
+
+`OFFRAMP_DEVELOPER_RESOURCES` includes:
+- packageName, sdkVersion, Base chain metadata, referrer
+- mandatory delegation config (`rateManagerId`, registry address, manager fee bps, escrow)
+- links: developerPortal, sdkGuide, appGuide, botGuide, agentGuide, webhooksGuide, privateOtcGuide, peerlyticsGuide, agentSkill, llms references, starters, Peerlytics, npm
+- playbooks for `app`, `bot`, `agent`, `private-otc`, `webhooks`, and `peerlytics`
+
+Use `getOfframpDeveloperResources(profile)` to retrieve one playbook. Valid profiles: `app`, `bot`, `agent`, `private-otc`, `webhooks`, `peerlytics`.
 
 ## PLATFORMS constant
 
@@ -283,7 +303,7 @@ Pass `otcTaker` to `offramp()` to whitelist a single taker wallet at creation ti
 
 ## Webhooks
 
-Register outbound HMAC-SHA256 signed webhooks at https://usdctofiat.xyz/developers. Auth uses the same Peerlytics API key (same `paid-api-keys` collection, same `api-credits` pool). Registration is a Pro-plan feature — free-tier keys get `402 webhooks_require_pro`.
+Register outbound HMAC-SHA256 signed webhooks at https://usdctofiat.xyz/developers/webhooks/. Auth uses the same Peerlytics API key (same `paid-api-keys` collection, same `api-credits` pool). Registration is a Pro-plan feature — free-tier keys get `402 webhooks_require_pro`.
 
 Events:
 - Live (delivered today): `deposit.created`, `deposit.filled`, `deposit.partially_filled`, `deposit.closed`, `otc.taken`.
@@ -317,5 +337,7 @@ above. For seller registration use `getPeerExtensionRegistrationAuthParams` /
 
 - npm: https://www.npmjs.com/package/@usdctofiat/offramp
 - usdctofiat.xyz: https://usdctofiat.xyz
-- usdctofiat.xyz/developers: canonical SDK docs (includes Peer extension flow)
+- usdctofiat.xyz/developers: developer hub
+- usdctofiat.xyz/developers/offramp-sdk: canonical SDK docs
+- usdctofiat.xyz/developers/agents: coding-agent integration guide
 - @usdctofiat: https://x.com/usdctofiat

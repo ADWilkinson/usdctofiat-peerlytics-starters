@@ -1,5 +1,10 @@
 import { Bot } from "grammy";
-import { CURRENCIES, PLATFORMS, createOfframp } from "@usdctofiat/offramp";
+import {
+  CURRENCIES,
+  OFFRAMP_DEVELOPER_RESOURCES,
+  PLATFORMS,
+  createOfframp,
+} from "@usdctofiat/offramp";
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { base } from "viem/chains";
@@ -49,7 +54,24 @@ function parseSellCommand(text: string): { amount: string; identifier: string } 
 
 bot.command("start", (ctx) => {
   void ctx.reply(
-    "USDC offramp bot online. Use /sell <amount> <identifier>. Example: /sell 50 alice",
+    "USDC offramp bot online. Use /sell <amount> <identifier>. Example: /sell 50 alice\n\nUse /resources for SDK docs, webhook docs, and the agent skill.",
+  );
+});
+
+bot.command("resources", (ctx) => {
+  const links = OFFRAMP_DEVELOPER_RESOURCES.links;
+  void ctx.reply(
+    [
+      `${OFFRAMP_DEVELOPER_RESOURCES.packageName} v${OFFRAMP_DEVELOPER_RESOURCES.sdkVersion}`,
+      `Chain: Base mainnet (${OFFRAMP_DEVELOPER_RESOURCES.chainId})`,
+      `Delegation required: ${OFFRAMP_DEVELOPER_RESOURCES.delegation.required ? "yes" : "no"}`,
+      "",
+      `SDK guide: ${links.sdkGuide}`,
+      `Bot guide: ${links.botGuide}`,
+      `Webhooks: ${links.webhooksGuide}`,
+      `Agent skill: ${links.agentSkill}`,
+      `Peerlytics: ${links.peerlyticsDevelopers}`,
+    ].join("\n"),
   );
 });
 

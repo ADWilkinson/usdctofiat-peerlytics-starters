@@ -35,7 +35,31 @@ a {
   color: #9ddca9;
 }
 
+code {
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+}
+
 button:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+
+.setup-screen {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+}
+
+.setup-screen section {
+  max-width: 620px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: #9ddca9;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }

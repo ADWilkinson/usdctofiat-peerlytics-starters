@@ -106,6 +106,10 @@ for (const file of templateEntrypoints) {
   const text = readText(file);
   assert(text.includes("__INTEGRATOR_ID__"), `${file} must keep the CLI integrator placeholder`);
   assert(text.includes("TODO_SET_REFERRAL_ID"), `${file} must keep the referral placeholder visible`);
+  assert(
+    text.includes("OFFRAMP_DEVELOPER_RESOURCES"),
+    `${file} must expose OFFRAMP_DEVELOPER_RESOURCES so generated apps keep canonical docs and agent links`,
+  );
 }
 
 const templateReadmes = [
@@ -158,6 +162,7 @@ assert(
 
 const demoServer = readText("demo/server/peerlytics.ts");
 const demoApi = readText("demo/api/orderbook.ts");
+const developerResources = readText("usdctofiat/developer-resources.ts");
 
 assert(
   demoServer.includes("const supportedRoutes"),
@@ -166,6 +171,11 @@ assert(
 assert(
   !demoApi.includes("const supportedRoutes"),
   "demo/api/orderbook.ts must use the shared route registry instead of duplicating it",
+);
+assert(
+  developerResources.includes("getOfframpDeveloperResources") &&
+    developerResources.includes("OFFRAMP_DEVELOPER_RESOURCES"),
+  "usdctofiat/developer-resources.ts must demonstrate the SDK resource bundle",
 );
 
 const installClaudeScript = readText("demo/scripts/install-claude.sh");

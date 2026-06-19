@@ -25,6 +25,7 @@ The CLI prompts for your `integratorId` and substitutes it into the template fil
 - Your `integratorId` baked in via the CLI prompt
 - A `TODO_SET_REFERRAL_ID` placeholder for partner attribution — replace before shipping
 - Type-checked TypeScript
+- `OFFRAMP_DEVELOPER_RESOURCES` exposed in-app so generated projects keep canonical SDK, webhook, agent, and Peerlytics links
 - A README inside the template covering run, deploy, and customize
 
 ## What surface these templates use
@@ -53,7 +54,8 @@ Copy a template directory into your project, replace `__INTEGRATOR_ID__` with yo
 
 ## See also
 
-- SDK reference: [usdctofiat.xyz/developers/api](https://usdctofiat.xyz/developers/api)
-- Quickstart: [usdctofiat.xyz/developers/docs/quickstart](https://usdctofiat.xyz/developers/docs/quickstart)
-- Webhook contract: [usdctofiat.xyz/developers/docs/webhooks](https://usdctofiat.xyz/developers/docs/webhooks)
+- SDK guide: [usdctofiat.xyz/developers/offramp-sdk](https://usdctofiat.xyz/developers/offramp-sdk/)
+- App guide: [usdctofiat.xyz/developers/apps](https://usdctofiat.xyz/developers/apps/)
+- Bot guide: [usdctofiat.xyz/developers/bots](https://usdctofiat.xyz/developers/bots/)
+- Webhook contract: [usdctofiat.xyz/developers/webhooks](https://usdctofiat.xyz/developers/webhooks/)
 - One-shot scripts that don't need scaffolding: [`/usdctofiat`](../usdctofiat) at the repo root

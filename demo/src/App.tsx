@@ -2,6 +2,7 @@ import { startTransition, useEffect, useState } from "react";
 import type { OrderbookCurrency } from "@peerlytics/sdk";
 import {
   CURRENCIES,
+  OFFRAMP_DEVELOPER_RESOURCES,
   PLATFORMS,
   type CurrencyEntry,
   type DepositInfo,
@@ -85,6 +86,7 @@ await offramp(walletClient, {
   platform: PLATFORMS.REVOLUT,
   currency: CURRENCIES.GBP,
   identifier: "alice",
+  integratorId: "your-app",
 });`;
 
 // === App ===
@@ -478,12 +480,20 @@ export default function App() {
               @peerlytics/sdk
             </a>
             <a
-              href="https://www.npmjs.com/package/@usdctofiat/offramp"
+              href={OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide}
               target="_blank"
               rel="noreferrer"
               className="sdk-badge sdk-badge-offramp"
             >
-              @usdctofiat/offramp
+              @usdctofiat/offramp v{OFFRAMP_DEVELOPER_RESOURCES.sdkVersion}
+            </a>
+            <a
+              href={OFFRAMP_DEVELOPER_RESOURCES.links.agentGuide}
+              target="_blank"
+              rel="noreferrer"
+              className="sdk-badge"
+            >
+              agent resources
             </a>
           </div>
           {copyError && <InlineMessage tone="error">{copyError}</InlineMessage>}
@@ -513,6 +523,7 @@ export default function App() {
 
             <ul className="strip-features">
               <li>Resumable multi-step deposit flow</li>
+              <li>Mandatory delegated pricing for monetizable deposits</li>
               <li>OTC private orders with a single taker wallet</li>
               <li>Demo wired for Revolut and Venmo</li>
             </ul>

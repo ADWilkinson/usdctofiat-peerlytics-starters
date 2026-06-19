@@ -11,17 +11,18 @@ Examples and a live demo for the two SDKs covering the ZKP2P protocol on Base: s
 ## 60-second deposit
 
 ```ts
-import { offramp, PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
+import { CURRENCIES, PLATFORMS, offramp } from "@usdctofiat/offramp";
 
 const { depositId, txHash } = await offramp(walletClient, {
   amount: "100",
   platform: PLATFORMS.REVOLUT,
   currency: CURRENCIES.EUR,
   identifier: "alice",
+  integratorId: "your-app",
 });
 ```
 
-That single call approves USDC, creates the escrow deposit on Base, and delegates pricing to the managed vault. Settlement runs on Revolut, Venmo, Wise, CashApp, Zelle, Monzo, or PayPal — your users never leave your app.
+That single call approves USDC, creates the escrow deposit on Base, and delegates pricing to the managed vault. Settlement runs on Revolut, Venmo, Wise, CashApp, Zelle, Monzo, or PayPal — your users never leave your app. Use the `integratorId` on every call so deposits are attributable.
 
 Need a fresh app skeleton instead of dropping into an existing one?
 
@@ -62,6 +63,7 @@ usdctofiat/                  @usdctofiat/offramp examples
   react-example.tsx            useOfframp hook usage in React (Revolut)
   paypal-react-example.tsx     useOfframp + usePeerExtensionRegistration handshake
   webhook-receiver.ts          HMAC-verified HTTPS receiver for deposit/otc events
+  developer-resources.ts       print SDK links, delegation config, and app/bot/agent playbooks
   llms.txt                     LLM-friendly SDK reference
 
 templates/                   Scaffold-ready integrations (used by create-offramp-app)
@@ -166,7 +168,18 @@ Pass `otcTaker` to restrict a deposit to one wallet, or use `enableOtc` / `disab
 
 Supported platforms: Revolut, Venmo, CashApp, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
 
-[npm](https://www.npmjs.com/package/@usdctofiat/offramp) · [Developer portal](https://usdctofiat.xyz/developers) · [API reference](https://usdctofiat.xyz/developers/api)
+[npm](https://www.npmjs.com/package/@usdctofiat/offramp) · [Developer portal](https://usdctofiat.xyz/developers) · [SDK guide](https://usdctofiat.xyz/developers/offramp-sdk/)
+
+The SDK also exports the canonical self-serve resource bundle, so apps, bots, CLIs, and coding agents do not need to hardcode docs URLs:
+
+```ts
+import { OFFRAMP_DEVELOPER_RESOURCES, getOfframpDeveloperResources } from "@usdctofiat/offramp";
+
+console.log(OFFRAMP_DEVELOPER_RESOURCES.links.agentSkill);
+console.log(getOfframpDeveloperResources("bot"));
+```
+
+Run `npx tsx usdctofiat/developer-resources.ts` or `npx tsx usdctofiat/developer-resources.ts agent` to print the full map.
 
 ## Webhooks
 
@@ -184,7 +197,9 @@ Verification is identical across both: `t=<unix>,v1=<hex>` header, HMAC-SHA256 o
 
 ## Links
 
-- [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) — offramp SDK landing + API reference
+- [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) — self-serve developer hub
+- [usdctofiat.xyz/developers/offramp-sdk](https://usdctofiat.xyz/developers/offramp-sdk/) — SDK guide
+- [usdctofiat.xyz/developers/webhooks](https://usdctofiat.xyz/developers/webhooks/) — webhook contract
 - [peerlytics.xyz/developers](https://peerlytics.xyz/developers) — analytics SDK + API key dashboard
 - [Peerlytics Explorer](https://peerlytics.xyz/explorer) — protocol explorer and market intel
 - [ZKP2P Protocol](https://zkp2p.xyz)

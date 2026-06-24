@@ -9,13 +9,13 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@usdctofiat/offramp": "^4.2.0",
-    "grammy": "^1.38.3",
-    "viem": "^2.48.8"
+    "@usdctofiat/offramp": "^4.4.0",
+    "grammy": "^1.44.0",
+    "viem": "^2.53.1"
   },
   "devDependencies": {
-    "@types/node": "^25.0.0",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.0"
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
   }
 }

@@ -16,6 +16,9 @@ import {
   enableOtc,
   disableOtc,
   getOtcLink,
+  getTakerTier,
+  findTakerPlatformLimit,
+  resolveTakerPlatformLimit,
   OFFRAMP_DEVELOPER_RESOURCES,
   OFFRAMP_RESOURCE_LINKS,
   OFFRAMP_INTEGRATION_PLAYBOOKS,
@@ -61,6 +64,11 @@ console.log(OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide);
 console.log(OFFRAMP_RESOURCE_LINKS.agentSkill);
 console.log(OFFRAMP_INTEGRATION_PLAYBOOKS.map((entry) => entry.profile));
 console.log(getOfframpDeveloperResources("agent"));
+
+// Live Curator taker tier/cap surface for take-side UIs
+const tier = await getTakerTier({ owner: "0xTakerAddress" });
+const paypalLimit = findTakerPlatformLimit(tier, { platform: "paypal" });
+const resolved = resolveTakerPlatformLimit(tier, { platform: "paypal" });
 ```
 
 ## Resource bundle
@@ -86,9 +94,13 @@ PLATFORMS.REVOLUT.validate("@alice")  // { valid: true, normalized: "alice" }
 PLATFORMS.PAYPAL.identifier     // { label: "PayPal.me Username", placeholder: "paypal.me/your-username", help: "Your PayPal.me username, not your email" }
 PLATFORMS.PAYPAL.validate("https://paypal.me/Alice")  // { valid: true, normalized: "alice" }
 
-// Extension-registration metadata (PayPal and Wise only):
+// Extension-registration metadata (PayPal, Wise, Venmo, Cash App):
 PLATFORMS.PAYPAL.extensionRegistration
-// { providerId: "paypal", requiredPrompt: "This PayPal username is not registered yet...", ctaLabel: "Install Peer Extension", ctaSubtext: "PayPal Business accounts are not supported at this time.", minExtensionVersion: "0.4.14" }
+// { providerId: "paypal", requiredPrompt: "This PayPal username is not registered yet...", ctaLabel: "Register PayPal Username", ctaSubtext: "PayPal Business accounts are not supported at this time." }
+PLATFORMS.VENMO.extensionRegistration
+// { providerId: "venmo", requiredPrompt: "This Venmo username is not registered yet...", ctaLabel: "Register Venmo Username" }
+PLATFORMS.CASHAPP.extensionRegistration
+// { providerId: "cashapp", requiredPrompt: "This Cash App cashtag is not registered yet...", ctaLabel: "Register Cash App Cashtag" }
 ```
 
 Keys: VENMO, CASHAPP, CHIME, REVOLUT, WISE, MERCADO_PAGO, ZELLE, PAYPAL, MONZO, N26
@@ -119,7 +131,7 @@ const {
 // lastError: OfframpError | null — has .code, .step, .txHash, .depositId, .cause
 // (`error` is also returned for legacy callers but is deprecated — use `lastError`.)
 
-// PayPal + Wise extension handshake driver:
+// Extension-gated seller registration driver:
 const peer = usePeerExtensionRegistration(PLATFORMS.PAYPAL);
 // { phase, info, busy, error, capturedMetadata, refresh, installExtension,
 //   connectExtension, startRegistrationCapture, completeRegistration }
@@ -192,7 +204,7 @@ import { OfframpError, OFFRAMP_ERROR_CODES } from "@usdctofiat/offramp";
 //   VALIDATION
 //   APPROVAL_FAILED
 //   REGISTRATION_FAILED
-//   EXTENSION_REGISTRATION_REQUIRED   // PayPal / Wise Peer extension gate
+//   EXTENSION_REGISTRATION_REQUIRED   // PeerAuth seller registration gate
 //   DEPOSIT_FAILED
 //   CONFIRMATION_FAILED
 //   DELEGATION_FAILED
@@ -207,13 +219,13 @@ Generic recovery: call offramp() again — it detects undelegated deposits and r
 `usePeerExtensionRegistration(platform)` (React) or `peerExtensionSdk` directly
 (see Peer Extension section below), then call offramp() with the same handle.
 
-## Peer Extension (PayPal, Wise)
+## Peer Extension (PayPal, Wise, Venmo, Cash App)
 
-PayPal and Wise makers must register their handle inside the Peer (PeerAuth)
-browser extension before curator's `/v2/makers/create` accepts them. `offramp()`
-throws `OfframpError` with code `EXTENSION_REGISTRATION_REQUIRED` when this
-happens. The SDK re-exports the driver from `@zkp2p/sdk` so you don't need a
-direct dep on it:
+PayPal, Wise, Venmo, and Cash App makers may need to register their handle
+inside the PeerAuth browser extension before curator's `/v2/makers/create`
+accepts them. `offramp()` throws `OfframpError` with code
+`EXTENSION_REGISTRATION_REQUIRED` when this happens. The SDK re-exports the
+driver from `@zkp2p/sdk` so you don't need a direct dep on it:
 
 ```ts
 import {
@@ -263,15 +275,34 @@ const needsExt = lastError?.code === OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_
 // Or after the user confirms: call offramp() again with the same identifier.
 ```
 
-Only PayPal and Wise require this today. The `extensionRegistration` field on
-the platform entry is `undefined` for every other platform.
+Check `platform.extensionRegistration` to decide whether to surface a PeerAuth
+CTA. PayPal, Wise, Venmo, and Cash App currently ship that metadata.
 
 See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`.
+
+## Dynamic taker tiers
+
+Curator computes taker caps, cooldowns, and platform locks dynamically. Use
+`getTakerTier()` plus `findTakerPlatformLimit()` when a take-side UI needs the
+current buyer limit for a wallet:
+
+```ts
+import { findTakerPlatformLimit, getTakerTier } from "@usdctofiat/offramp";
+
+const tier = await getTakerTier({ owner: takerAddress });
+const venmoLimit = findTakerPlatformLimit(tier, { platform: "venmo" });
+
+if (venmoLimit?.isLocked) {
+  console.log(`Unlocks at ${venmoLimit.minTierRequired} tier`);
+} else {
+  console.log(venmoLimit?.effectiveCapDisplay);
+}
+```
 
 ## Peer Extension v4 direct-driver changes
 
 If you use the re-exported `peerExtensionSdk` directly, v4 follows
-`@zkp2p/sdk@0.5.0`. The upstream sidepanel onramp contract was removed:
+`@zkp2p/sdk@0.5.7`. The upstream sidepanel onramp contract was removed:
 `peerExtensionSdk.onramp()`, `getOnrampTransaction()`, and `openSidebar()` are
 gone, along with the `PeerExtensionOnrampParams` /
 `PeerOnrampPreparedTransaction*` types. Capture now runs through the headless
@@ -321,7 +352,7 @@ Verification: recompute HMAC-SHA256 over `${timestamp}.${rawBody}` with your sto
 v1.x is broken against the live curator — the old `POST /v1/makers/create` endpoint and legacy payload blobs (`paypalEmail`, `venmoUsername`, `wisetag`, …) are no longer accepted. If you were on v1, upgrade and:
 
 1. Re-prompt PayPal users for their paypal.me USERNAME (not email).
-2. Handle `OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED` on PayPal and Wise — walk the user through `usePeerExtensionRegistration(...)` and retry.
+2. Handle `OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED` on PayPal, Wise, Venmo, and Cash App — walk the user through `usePeerExtensionRegistration(...)` and retry.
 3. If you hand-rolled `POST /v1/makers/create`, switch to `POST /v2/makers/create` with `{ processorName, offchainId, telegramUsername? }`.
 
 ## v4 migration
@@ -329,7 +360,7 @@ v1.x is broken against the live curator — the old `POST /v1/makers/create` end
 The core `offramp()` / `useOfframp()` flow remains stable — just bump the
 version. Only direct `peerExtensionSdk` drivers are affected: `onramp()`,
 `getOnrampTransaction()`, and `openSidebar()` are removed. Migrate to the
-`@zkp2p/sdk@0.5.0` `authenticate()` + `onMetadataMessage()` bridge described
+`@zkp2p/sdk@0.5.7` `authenticate()` + `onMetadataMessage()` bridge described
 above. For seller registration use `getPeerExtensionRegistrationAuthParams` /
 `completePeerExtensionRegistration` (or the `usePeerExtensionRegistration` hook).
 

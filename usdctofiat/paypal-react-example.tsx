@@ -1,9 +1,9 @@
 /**
  * paypal-react-example.tsx
  *
- * PayPal and Wise makers must register their handle inside the Peer
- * (PeerAuth) browser extension before curator's /v2/makers/create will
- * accept the deposit. This example demonstrates how to catch the
+ * PayPal, Wise, Venmo, and Cash App makers may need to register their handle
+ * inside the PeerAuth browser extension before curator's /v2/makers/create will
+ * accept the deposit. This PayPal example demonstrates how to catch the
  * EXTENSION_REGISTRATION_REQUIRED error from @usdctofiat/offramp and
  * walk the user through the install → connect → capture handshake via
  * the usePeerExtensionRegistration hook.

@@ -41,12 +41,13 @@ need no template edits.
 The template-level `offramp()` / `createOfframp()` flow is unchanged on v4 — just
 raise the version. v4 only affects direct `peerExtensionSdk` drivers: the
 `onramp()`, `getOnrampTransaction()`, and `openSidebar()` methods were removed in
-favour of the `@zkp2p/sdk@0.5.0` `authenticate()` + `onMetadataMessage()` bridge.
+favour of the `@zkp2p/sdk@0.5.7` `authenticate()` + `onMetadataMessage()` bridge.
 See the [SDK CHANGELOG](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md).
 
-PayPal + Wise makers still register their handle through the Peer browser
-extension before the first deposit; in React that is driven by
-`usePeerExtensionRegistration`. PayPal uses the `paypal.me` username, not email.
+PayPal, Wise, Venmo, and Cash App makers may need to register their handle
+through the PeerAuth browser extension before the first deposit; in React that
+is driven by `usePeerExtensionRegistration`. PayPal uses the `paypal.me`
+username, not email.
 
 ## Manual install (no CLI)
 

@@ -22,7 +22,7 @@ const { depositId, txHash } = await offramp(walletClient, {
 });
 ```
 
-That single call approves USDC, creates the escrow deposit on Base, and delegates pricing to the managed vault. Settlement runs on Revolut, Venmo, Wise, CashApp, Zelle, Monzo, or PayPal — your users never leave your app. Use the `integratorId` on every call so deposits are attributable.
+That single call approves USDC, creates the escrow deposit on Base, and delegates pricing to the managed vault. Settlement runs on Revolut, Venmo, Wise, Cash App, Zelle, Monzo, or PayPal — your users never leave your app. Use the `integratorId` on every call so deposits are attributable.
 
 Need a fresh app skeleton instead of dropping into an existing one?
 
@@ -147,7 +147,7 @@ Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 reque
 
 ### @usdctofiat/offramp
 
-Delegated USDC-to-fiat off-ramp on Base. Revolut, Venmo, Wise, PayPal, CashApp, Zelle, Monzo, and more.
+Delegated USDC-to-fiat off-ramp on Base. Revolut, Venmo, Wise, PayPal, Cash App, Zelle, Monzo, and more.
 
 ```ts
 import { useOfframp } from "@usdctofiat/offramp/react";
@@ -164,9 +164,21 @@ await offramp(walletClient, {
 
 Pass `otcTaker` to restrict a deposit to one wallet, or use `enableOtc` / `disableOtc` / `getOtcLink` to retrofit a public deposit. Both paths are in `usdctofiat/otc-deposit.ts`.
 
-**PayPal and Wise** makers must register their handle in the Peer (PeerAuth) browser extension before the first deposit. The SDK throws `EXTENSION_REGISTRATION_REQUIRED` and ships `usePeerExtensionRegistration(platform)` to drive the install / connect / verify flow. See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`. PayPal uses the `paypal.me` **username**, not the account email.
+**PayPal, Wise, Venmo, and Cash App** makers may need to register their handle in the PeerAuth browser extension before the first deposit. The SDK throws `EXTENSION_REGISTRATION_REQUIRED` and ships `usePeerExtensionRegistration(platform)` to drive the install / connect / verify flow. See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts` for the PayPal-shaped recovery pattern. PayPal uses the `paypal.me` **username**, not the account email.
 
-Supported platforms: Revolut, Venmo, CashApp, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
+Take-side UIs should ask Curator for live platform caps and locks before presenting a fill amount. `@usdctofiat/offramp@4.4` exports `getTakerTier`, `findTakerPlatformLimit`, and `resolveTakerPlatformLimit` for the `/v2/taker/tier` surface:
+
+```ts
+import { findTakerPlatformLimit, getTakerTier } from "@usdctofiat/offramp";
+
+const tier = await getTakerTier({ owner: takerAddress });
+const paypalLimit = findTakerPlatformLimit(tier, { platform: "paypal" });
+if (paypalLimit?.isLocked) {
+  console.log(`PayPal unlocks at ${paypalLimit.minTierRequired} tier`);
+}
+```
+
+Supported platforms: Revolut, Venmo, Cash App, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
 
 [npm](https://www.npmjs.com/package/@usdctofiat/offramp) · [Developer portal](https://usdctofiat.xyz/developers) · [SDK guide](https://usdctofiat.xyz/developers/offramp-sdk/)
 

@@ -7,7 +7,7 @@ description: Integrate the @usdctofiat/offramp SDK (v4.x) into a dApp to add USD
 
 ## Overview
 
-Guide the user to integrate `@usdctofiat/offramp` v4.x. Surface area: 1 primary function (`offramp()`), deposit/OTC helpers (`deposits`, `close`, `enableOtc`, `disableOtc`, `getOtcLink`), Peer extension helpers (`getPeerExtensionRegistrationAuthParams`, `completePeerExtensionRegistration`), platform constants (`PLATFORMS`, `CURRENCIES`), developer resource exports (`OFFRAMP_DEVELOPER_RESOURCES`, `OFFRAMP_RESOURCE_LINKS`, `OFFRAMP_INTEGRATION_PLAYBOOKS`, `getOfframpDeveloperResources`), and 2 React hooks (`useOfframp`, `usePeerExtensionRegistration`).
+Guide the user to integrate `@usdctofiat/offramp` v4.x. Surface area: 1 primary function (`offramp()`), deposit/OTC helpers (`deposits`, `close`, `enableOtc`, `disableOtc`, `getOtcLink`), taker-tier helpers (`getTakerTier`, `findTakerPlatformLimit`, `resolveTakerPlatformLimit`), Peer extension helpers (`getPeerExtensionRegistrationAuthParams`, `completePeerExtensionRegistration`), platform constants (`PLATFORMS`, `CURRENCIES`), developer resource exports (`OFFRAMP_DEVELOPER_RESOURCES`, `OFFRAMP_RESOURCE_LINKS`, `OFFRAMP_INTEGRATION_PLAYBOOKS`, `getOfframpDeveloperResources`), and 2 React hooks (`useOfframp`, `usePeerExtensionRegistration`).
 
 Companion docs:
 
@@ -122,10 +122,30 @@ const link = getOtcLink("362"); // no tx, just the share URL
 
 Buyer rejection happens at the `WhitelistPreIntentHook` contract before payment starts — non-approved wallets cannot signal intent.
 
-## PayPal + Wise (Peer extension handshake)
+## Dynamic taker tiers
 
-PayPal and Wise makers must register their handle inside the Peer (PeerAuth)
-browser extension before the first deposit. The SDK throws
+Take-side UIs should fetch the buyer's live Curator tier before presenting a
+fillable amount. Platform caps, cooldowns, and locks are dynamic and depend on
+the taker's wallet:
+
+```typescript
+import { findTakerPlatformLimit, getTakerTier } from "@usdctofiat/offramp";
+
+const tier = await getTakerTier({ owner: takerAddress });
+const limit = findTakerPlatformLimit(tier, { platform: "paypal" });
+
+if (limit?.isLocked) {
+  // Hide/disable the platform until the user reaches the required tier.
+  console.log(`PayPal unlocks at ${limit.minTierRequired} tier`);
+} else {
+  console.log(limit?.effectiveCapDisplay);
+}
+```
+
+## PeerAuth seller registration
+
+PayPal, Wise, Venmo, and Cash App makers may need to register their handle
+inside the PeerAuth browser extension before the first deposit. The SDK throws
 `OfframpError` with code `EXTENSION_REGISTRATION_REQUIRED` when curator rejects
 a maker for this reason. Drive recovery with the React hook:
 
@@ -208,7 +228,7 @@ just call `offramp()` again.
 ## Peer extension capture changes in v4
 
 If you drive the re-exported `peerExtensionSdk` directly, v4 follows
-`@zkp2p/sdk@0.5.0`. The upstream Peer extension removed the sidepanel onramp
+`@zkp2p/sdk@0.5.7`. The upstream Peer extension removed the sidepanel onramp
 contract entirely — `peerExtensionSdk.onramp()`, `getOnrampTransaction()`, and
 `openSidebar()` are gone, along with the `PeerExtensionOnrampParams` /
 `PeerOnrampPreparedTransaction*` types. Capture now goes through the headless
@@ -249,7 +269,7 @@ Error codes:
 - `VALIDATION` — invalid parameter shape or unsupported platform/currency pair
 - `APPROVAL_FAILED` — USDC allowance transaction failed
 - `REGISTRATION_FAILED` — `POST /v2/makers/create` rejected (non-extension reason)
-- `EXTENSION_REGISTRATION_REQUIRED` — PayPal / Wise maker needs the Peer extension handshake
+- `EXTENSION_REGISTRATION_REQUIRED` — seller needs the PeerAuth registration handshake
 - `DEPOSIT_FAILED` — escrow `createDeposit` transaction failed
 - `CONFIRMATION_FAILED` — could not parse the deposit ID from receipt logs
 - `DELEGATION_FAILED` — delegation transaction failed
@@ -288,7 +308,7 @@ Reference verifier (Node, ~150 LOC, `node:crypto` only):
 If you drive `peerExtensionSdk` directly, the `onramp()`,
 `getOnrampTransaction()`, and `openSidebar()` methods plus the
 `PeerExtensionOnrampParams` / `PeerOnrampPreparedTransaction*` types are removed.
-Migrate to the `@zkp2p/sdk@0.5.0` `authenticate()` + `onMetadataMessage()`
+Migrate to the `@zkp2p/sdk@0.5.7` `authenticate()` + `onMetadataMessage()`
 bridge. For seller registration use `captureMode: "sellerCredential"` via
 `getPeerExtensionRegistrationAuthParams` / `completePeerExtensionRegistration`
 (or the `usePeerExtensionRegistration` React hook). If you only use `offramp()`
@@ -301,7 +321,7 @@ If migrating from `@usdctofiat/offramp@1.x`:
 1. Re-prompt PayPal users for their `paypal.me` USERNAME (not email).
    `PLATFORMS.PAYPAL.validate(...)` accepts the username, `paypal.me/<user>`, or
    `@<user>` and rejects emails.
-2. Handle the new `EXTENSION_REGISTRATION_REQUIRED` error on PayPal + Wise via
+2. Handle the new `EXTENSION_REGISTRATION_REQUIRED` error on PayPal, Wise, Venmo, and Cash App via
    `usePeerExtensionRegistration(platform)`.
 3. If you hand-rolled `POST /v1/makers/create`, switch to `POST /v2/makers/create`
    with `{ processorName, offchainId, telegramUsername? }`.

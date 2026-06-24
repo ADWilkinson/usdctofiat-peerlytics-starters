@@ -9,20 +9,20 @@
     "preview": "vite preview --host --port 3000"
   },
   "dependencies": {
-    "@privy-io/react-auth": "^3.26.1",
-    "@solana-program/system": "^0.12.0",
-    "@solana-program/token": "^0.13.0",
-    "@solana/kit": "^6.9.0",
-    "@usdctofiat/offramp": "^4.2.0",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "viem": "^2.48.8"
+    "@privy-io/react-auth": "^3.32.2",
+    "@solana-program/system": "^0.12.2",
+    "@solana-program/token": "^0.14.0",
+    "@solana/kit": "^6.10.0",
+    "@usdctofiat/offramp": "^4.4.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "viem": "^2.53.1"
   },
   "devDependencies": {
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "@vitejs/plugin-react": "^6.0.2",
-    "typescript": "^6.0.0",
-    "vite": "^8.0.13"
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.0"
   }
 }

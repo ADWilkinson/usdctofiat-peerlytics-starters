@@ -104,8 +104,9 @@ async function main() {
       process.exit(1);
     }
 
-    // Curator rejects PayPal and Wise makers until the user has
-    // registered their handle inside the Peer (PeerAuth) browser extension.
+    // Curator rejects extension-gated makers until the user has registered
+    // their handle inside the PeerAuth browser extension. This example uses
+    // PayPal, but the same recovery shape applies to Wise, Venmo, and Cash App.
     // A Node CLI can't drive that handshake; print a clear recovery path.
     if (err.code === OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED) {
       const info = getPeerExtensionRegistrationInfo("paypal");

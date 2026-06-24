@@ -41,7 +41,7 @@ need no template edits.
 The template-level `offramp()` / `createOfframp()` flow is unchanged on v4 — just
 raise the version. v4 only affects direct `peerExtensionSdk` drivers: the
 `onramp()`, `getOnrampTransaction()`, and `openSidebar()` methods were removed in
-favour of the `@zkp2p/sdk@0.5.7` `authenticate()` + `onMetadataMessage()` bridge.
+favour of the `@zkp2p/sdk@0.5.8` `authenticate()` + `onMetadataMessage()` bridge.
 See the [SDK CHANGELOG](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md).
 
 PayPal, Wise, Venmo, and Cash App makers may need to register their handle

@@ -13,7 +13,7 @@
     "@solana-program/system": "^0.12.2",
     "@solana-program/token": "^0.14.0",
     "@solana/kit": "^6.10.0",
-    "@usdctofiat/offramp": "^4.4.0",
+    "@usdctofiat/offramp": "^4.4.1",
     "next": "16.2.9",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

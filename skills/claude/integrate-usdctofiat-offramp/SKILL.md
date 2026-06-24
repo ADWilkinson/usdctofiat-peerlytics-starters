@@ -228,7 +228,7 @@ just call `offramp()` again.
 ## Peer extension capture changes in v4
 
 If you drive the re-exported `peerExtensionSdk` directly, v4 follows
-`@zkp2p/sdk@0.5.7`. The upstream Peer extension removed the sidepanel onramp
+`@zkp2p/sdk@0.5.8`. The upstream Peer extension removed the sidepanel onramp
 contract entirely — `peerExtensionSdk.onramp()`, `getOnrampTransaction()`, and
 `openSidebar()` are gone, along with the `PeerExtensionOnrampParams` /
 `PeerOnrampPreparedTransaction*` types. Capture now goes through the headless
@@ -308,7 +308,7 @@ Reference verifier (Node, ~150 LOC, `node:crypto` only):
 If you drive `peerExtensionSdk` directly, the `onramp()`,
 `getOnrampTransaction()`, and `openSidebar()` methods plus the
 `PeerExtensionOnrampParams` / `PeerOnrampPreparedTransaction*` types are removed.
-Migrate to the `@zkp2p/sdk@0.5.7` `authenticate()` + `onMetadataMessage()`
+Migrate to the `@zkp2p/sdk@0.5.8` `authenticate()` + `onMetadataMessage()`
 bridge. For seller registration use `captureMode: "sellerCredential"` via
 `getPeerExtensionRegistrationAuthParams` / `completePeerExtensionRegistration`
 (or the `usePeerExtensionRegistration` React hook). If you only use `offramp()`

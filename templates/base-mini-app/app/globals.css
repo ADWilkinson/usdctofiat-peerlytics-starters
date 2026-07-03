@@ -1,0 +1,108 @@
+:root {
+  color-scheme: dark;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #101413;
+  color: #edf3ef;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 8px;
+  background: #85d985;
+  color: #07100c;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+a {
+  color: #9ee7a3;
+}
+
+.shell {
+  width: min(100%, 520px);
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.panel {
+  border: 1px solid rgba(237, 243, 239, 0.14);
+  border-radius: 10px;
+  background: #151b19;
+  padding: 16px;
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.muted {
+  color: #9ca8a2;
+}
+
+.fine {
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field span {
+  color: #cad5cf;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.field input,
+.field select {
+  min-height: 42px;
+  width: 100%;
+  border: 1px solid rgba(237, 243, 239, 0.16);
+  border-radius: 8px;
+  background: #0e1211;
+  color: #edf3ef;
+  padding: 0 10px;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

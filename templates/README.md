@@ -8,13 +8,14 @@ Scaffolds for `@usdctofiat/offramp`. Each template is a working app with the wal
 npx create-offramp-app@latest my-offramp --template=next
 ```
 
-The CLI prompts for your `integratorId` and substitutes it into the template files. Templates: `next`, `vite`, `telegram-bot`. Default is `next`.
+The CLI prompts for your `integratorId` and substitutes it into the template files. Templates: `next`, `base-mini-app`, `vite`, `telegram-bot`. Default is `next`.
 
 ## Templates
 
 | Template | Stack | Best for |
 |---|---|---|
 | [`next`](./next) | Next.js 16 App Router + Privy | Production web apps with embedded wallet auth |
+| [`base-mini-app`](./base-mini-app) | Next.js 16 + Base Account | Compact Base app surfaces and distribution experiments |
 | [`vite`](./vite) | Vite + React 19 + viem | Lean SPA without Next conventions |
 | [`telegram-bot`](./telegram-bot) | Node 22 + grammy + viem | Server-side maker bots with a managed wallet |
 

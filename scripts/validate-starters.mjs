@@ -47,6 +47,10 @@ const packageChecks = [
     ],
   ],
   [
+    "templates/base-mini-app/package.json",
+    ["@usdctofiat/offramp", "@base-org/account"],
+  ],
+  [
     "templates/vite/package.json",
     [
       "@usdctofiat/offramp",
@@ -60,6 +64,7 @@ const packageChecks = [
 ];
 
 const privyTemplateDeps = readJson("templates/next/package.json").dependencies;
+const baseMiniAppTemplateDeps = readJson("templates/base-mini-app/package.json").dependencies;
 
 for (const [pkgPath, names] of packageChecks) {
   const pkg = readJson(pkgPath);
@@ -69,6 +74,8 @@ for (const [pkgPath, names] of packageChecks) {
         ? rootPeerlyticsVersion
         : name === "@usdctofiat/offramp"
           ? rootOfframpVersion
+          : name === "@base-org/account"
+            ? baseMiniAppTemplateDeps[name]
           : privyTemplateDeps[name];
     assert(
       dependencyVersion(pkg, name) === expected,
@@ -85,6 +92,7 @@ for (const [pkgPath, names] of packageChecks) {
 const envFiles = {
   "demo/.env.example": ["PEERLYTICS_API_KEY"],
   "templates/next/.env.example": ["NEXT_PUBLIC_PRIVY_APP_ID"],
+  "templates/base-mini-app/.env.example": ["NEXT_PUBLIC_APP_URL"],
   "templates/vite/.env.example": ["VITE_PRIVY_APP_ID"],
   "templates/telegram-bot/.env.example": ["TELEGRAM_BOT_TOKEN", "MAKER_PRIVATE_KEY"],
 };
@@ -98,6 +106,7 @@ for (const [file, keys] of Object.entries(envFiles)) {
 
 const templateEntrypoints = [
   "templates/next/app/page.tsx",
+  "templates/base-mini-app/app/mini-app-cashout.tsx",
   "templates/vite/src/App.tsx",
   "templates/telegram-bot/src/index.ts",
 ];
@@ -114,6 +123,7 @@ for (const file of templateEntrypoints) {
 
 const templateReadmes = [
   ["templates/next/README.md", "NEXT_PUBLIC_PRIVY_APP_ID"],
+  ["templates/base-mini-app/README.md", "NEXT_PUBLIC_APP_URL"],
   ["templates/vite/README.md", "VITE_PRIVY_APP_ID"],
   ["templates/telegram-bot/README.md", "TELEGRAM_BOT_TOKEN"],
 ];
@@ -132,12 +142,27 @@ for (const [file, envKey] of templateReadmes) {
 }
 
 const nextTemplate = readText("templates/next/app/page.tsx");
+const baseMiniAppTemplate = readText("templates/base-mini-app/app/mini-app-cashout.tsx");
 const viteTemplate = readText("templates/vite/src/App.tsx");
 const telegramTemplate = readText("templates/telegram-bot/src/index.ts");
 
 assert(
   nextTemplate.includes("setSubmitMessage"),
   "templates/next/app/page.tsx must surface submit success/failure to users",
+);
+assert(
+  baseMiniAppTemplate.includes("createBaseAccountSDK") &&
+    baseMiniAppTemplate.includes("wallet_connect"),
+  "templates/base-mini-app/app/mini-app-cashout.tsx must use Base Account instead of a generic wallet selector",
+);
+assert(
+  !baseMiniAppTemplate.toLowerCase().includes("far" + "caster") &&
+    !exists("templates/base-mini-app/app/.well-known/" + "far" + "caster.json/route.ts"),
+  "templates/base-mini-app must not include unsupported social-mini-app wiring",
+);
+assert(
+  baseMiniAppTemplate.includes("setSubmitMessage"),
+  "templates/base-mini-app/app/mini-app-cashout.tsx must surface submit success/failure to users",
 );
 assert(
   viteTemplate.includes("setSubmitMessage"),

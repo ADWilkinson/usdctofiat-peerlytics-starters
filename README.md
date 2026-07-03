@@ -27,7 +27,7 @@ That single call approves USDC, creates the escrow deposit on Base, and delegate
 Need a fresh app skeleton instead of dropping into an existing one?
 
 ```bash
-npx create-offramp-app@latest my-offramp --template=next         # next | vite | telegram-bot
+npx create-offramp-app@latest my-offramp --template=next         # next | base-mini-app | vite | telegram-bot
 ```
 
 **Agent skills (Claude Code, Cursor):** [`integrate-usdctofiat-offramp`](skills/claude/integrate-usdctofiat-offramp/SKILL.md) · [`query-peerlytics-data`](skills/claude/query-peerlytics-data/SKILL.md). For other assistants, hand them the canonical `llms-full.txt`: [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt) · [peerlytics.xyz/llms-full.txt](https://peerlytics.xyz/llms-full.txt).
@@ -68,6 +68,7 @@ usdctofiat/                  @usdctofiat/offramp examples
 
 templates/                   Scaffold-ready integrations (used by create-offramp-app)
   next/                        Next.js 16 App Router + Privy
+  base-mini-app/               Next.js 16 + Base Account compact cash-out app
   vite/                        Vite + React 19 + viem
   telegram-bot/                Node 22 + grammy + viem (server-side maker bot)
   README.md                    template selection + v1/v2 upgrade notes

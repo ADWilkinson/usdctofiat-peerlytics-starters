@@ -16,6 +16,22 @@ function exists(relativePath) {
   return fs.existsSync(path.join(root, relativePath));
 }
 
+function listFiles(relativeDir, excludedNames = new Set()) {
+  const absoluteDir = path.join(root, relativeDir);
+  const entries = fs.readdirSync(absoluteDir, { withFileTypes: true });
+  const out = [];
+  for (const entry of entries) {
+    if (excludedNames.has(entry.name)) continue;
+    const relativePath = path.join(relativeDir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...listFiles(relativePath, excludedNames));
+    } else if (entry.isFile()) {
+      out.push(relativePath);
+    }
+  }
+  return out;
+}
+
 function assert(condition, message) {
   if (!condition) failures.push(message);
 }
@@ -65,6 +81,7 @@ const packageChecks = [
 
 const privyTemplateDeps = readJson("templates/next/package.json").dependencies;
 const baseMiniAppTemplateDeps = readJson("templates/base-mini-app/package.json").dependencies;
+const baseMiniAppPackage = readJson("templates/base-mini-app/package.json");
 
 for (const [pkgPath, names] of packageChecks) {
   const pkg = readJson(pkgPath);
@@ -101,6 +118,39 @@ for (const [file, keys] of Object.entries(envFiles)) {
   const text = readText(file);
   for (const key of keys) {
     assert(text.includes(`${key}=`), `${file} must document ${key}`);
+  }
+}
+
+const baseMiniAppAuthoredFiles = listFiles(
+  "templates/base-mini-app",
+  new Set([".next", ".vercel", "node_modules"]),
+);
+const forbiddenBaseMiniAppTerms = [
+  "@far" + "caster/",
+  ".well-known/far" + "caster",
+  "fc:frame",
+  "frame-sdk",
+  "miniapp-sdk",
+  "neynar",
+];
+
+for (const [depName] of Object.entries({
+  ...(baseMiniAppPackage.dependencies ?? {}),
+  ...(baseMiniAppPackage.devDependencies ?? {}),
+})) {
+  const normalized = depName.toLowerCase();
+  for (const term of forbiddenBaseMiniAppTerms) {
+    assert(
+      !normalized.includes(term),
+      `templates/base-mini-app/package.json must not depend on ${depName}`,
+    );
+  }
+}
+
+for (const file of baseMiniAppAuthoredFiles) {
+  const text = readText(file).toLowerCase();
+  for (const term of forbiddenBaseMiniAppTerms) {
+    assert(!text.includes(term), `${file} must stay on the standard Base web app path`);
   }
 }
 
@@ -169,9 +219,22 @@ assert(
   "templates/base-mini-app/app/mini-app-cashout.tsx must expose a public app icon to Base Account",
 );
 assert(
-  !baseMiniAppTemplate.toLowerCase().includes("far" + "caster") &&
-    !exists("templates/base-mini-app/app/.well-known/" + "far" + "caster.json/route.ts"),
+  !exists("templates/base-mini-app/app/.well-known/" + "far" + "caster.json/route.ts"),
   "templates/base-mini-app must not include unsupported social-mini-app wiring",
+);
+assert(
+  readText("templates/base-mini-app/README.md").includes(
+    "https://docs.base.org/apps/guides/migrate-to-standard-web-app",
+  ),
+  "templates/base-mini-app/README.md must cite the current standard Base web app path",
+);
+assert(
+  readText("templates/base-mini-app/app/layout.tsx").includes("metadataBase"),
+  "templates/base-mini-app/app/layout.tsx must set metadataBase for public discovery images",
+);
+assert(
+  readText("templates/base-mini-app/app/page.tsx").includes("openGraph"),
+  "templates/base-mini-app/app/page.tsx must keep Open Graph metadata for Base.dev discovery",
 );
 assert(
   baseMiniAppTemplate.includes("setSubmitMessage"),

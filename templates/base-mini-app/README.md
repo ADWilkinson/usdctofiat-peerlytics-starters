@@ -86,6 +86,7 @@ Then test the real flow in a browser/client with Base Account:
 ## Resources
 
 - Base app docs: https://docs.base.org/apps/quickstart/build-app
+- Standard web app path: https://docs.base.org/apps/guides/migrate-to-standard-web-app
 - Base app rewards: https://docs.base.org/apps/growth/rewards
 - Builder Codes: https://docs.base.org/apps/builder-codes/app-developers
 - SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/

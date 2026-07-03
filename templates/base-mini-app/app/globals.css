@@ -37,8 +37,10 @@ button {
 }
 
 button:disabled {
-  cursor: wait;
-  opacity: 0.6;
+  background: #58745d;
+  color: rgba(7, 16, 12, 0.82);
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 a {

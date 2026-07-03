@@ -10,12 +10,16 @@ import {
 import { createWalletClient, custom, type WalletClient } from "viem";
 import { base } from "viem/chains";
 
-const INTEGRATOR_ID = "__INTEGRATOR_ID__";
-const REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const DEFAULT_INTEGRATOR_ID = "__INTEGRATOR_ID__";
+const DEFAULT_REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const INTEGRATOR_ID = process.env.NEXT_PUBLIC_INTEGRATOR_ID || DEFAULT_INTEGRATOR_ID;
+const REFERRAL_ID = process.env.NEXT_PUBLIC_REFERRAL_ID || DEFAULT_REFERRAL_ID;
+const APP_KICKER = process.env.NEXT_PUBLIC_APP_KICKER || "USDCtoFiat on Base";
 const APP_URL =
   typeof window === "undefined"
     ? "http://localhost:3000"
     : process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+const configuredReferralId = REFERRAL_ID === DEFAULT_REFERRAL_ID ? undefined : REFERRAL_ID;
 
 async function getBaseAccountSdk() {
   const { createBaseAccountSDK } = await import("@base-org/account");
@@ -72,7 +76,7 @@ export function MiniAppCashout() {
   const [amount, setAmount] = useState("50");
   const [identifier, setIdentifier] = useState("");
   const [routeId, setRouteId] = useState<(typeof routes)[number]["id"]>("venmo");
-  const [walletStatus, setWalletStatus] = useState("Ready");
+  const [walletStatus, setWalletStatus] = useState("Connect");
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -122,7 +126,7 @@ export function MiniAppCashout() {
         platform: selectedRoute.platform,
         identifier: identifier.trim(),
         integratorId: INTEGRATOR_ID,
-        referralId: REFERRAL_ID,
+        ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
       });
 
       setWalletStatus("Wallet ready");
@@ -139,7 +143,7 @@ export function MiniAppCashout() {
       <section className="panel stack">
         <div>
           <p className="muted fine" style={{ margin: 0 }}>
-            USDCtoFiat mini app starter
+            {APP_KICKER}
           </p>
           <h1 style={{ fontSize: "1.6rem", lineHeight: 1.1, margin: "6px 0 0" }}>
             Cash out Base USDC
@@ -147,14 +151,10 @@ export function MiniAppCashout() {
         </div>
 
         <p className="muted fine" style={{ margin: 0 }}>
-          Uses Base Account, creates a USDCtoFiat deposit on Base, and keeps attribution on every
-          deposit.
+          Pick a payment app, enter the handle where you want to be paid, and create a seller
+          deposit from your wallet.
         </p>
 
-        <div className="row fine">
-          <span className="muted">Integrator</span>
-          <code>{INTEGRATOR_ID}</code>
-        </div>
         <div className="row fine">
           <span className="muted">Wallet</span>
           <button type="button" onClick={connectWallet} style={{ padding: "0 12px" }}>

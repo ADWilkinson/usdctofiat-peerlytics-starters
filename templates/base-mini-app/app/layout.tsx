@@ -7,7 +7,7 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: "USDCtoFiat Base Mini App",
-  description: "Cash out Base USDC through USDCtoFiat.",
+  description: "Cash out Base USDC into payment-app money through USDCtoFiat.",
 };
 
 export default function RootLayout({

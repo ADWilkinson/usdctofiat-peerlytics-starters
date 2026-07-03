@@ -3,7 +3,7 @@ import { MiniAppCashout } from "./mini-app-cashout";
 
 export const metadata: Metadata = {
   title: "Cash out Base USDC",
-  description: "A compact USDCtoFiat mini app starter for Base.",
+  description: "Sell Base USDC into payment apps through USDCtoFiat.",
   openGraph: {
     title: "Cash out Base USDC",
     description: "Sell Base USDC into payment apps through USDCtoFiat.",

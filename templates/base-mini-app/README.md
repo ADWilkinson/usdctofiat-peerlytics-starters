@@ -28,6 +28,9 @@ placeholders, but the UI does not show those implementation labels to users.
 - Set `NEXT_PUBLIC_REFERRAL_ID` only when you have a real referral code for
   partner traffic. The starter omits `referralId` when the placeholder is still
   present.
+- Keep `NEXT_PUBLIC_BASE_BUILDER_CODE` set to the Builder Code issued by Base
+  Dashboard. The default `bc_srxybeyl` is the USDCtoFiat code for the reference
+  deployment.
 - Keep the UI tight. This template is meant to open from a Base app surface, so
   avoid landing-page sections, decorative cards, or extra explainers.
 - Do not add social-client manifests, frame SDKs, or client-specific discovery
@@ -58,6 +61,7 @@ NEXT_PUBLIC_APP_URL=https://your-mini-app.example
 NEXT_PUBLIC_APP_KICKER=USDCtoFiat on Base
 NEXT_PUBLIC_INTEGRATOR_ID=your-app
 NEXT_PUBLIC_REFERRAL_ID=your-real-referral-code
+NEXT_PUBLIC_BASE_BUILDER_CODE=bc_srxybeyl
 ```
 
 The public origin must serve:
@@ -80,7 +84,7 @@ Then test the real flow in a browser/client with Base Account:
 2. Create a small USDCtoFiat seller deposit.
 3. Record the `depositId`, transaction hash, route, and public origin.
 4. Register and verify the app on Base.dev.
-5. Add Builder Code attribution only after Base.dev issues the real code.
+5. Confirm `NEXT_PUBLIC_BASE_BUILDER_CODE` is the code issued by Base.dev.
 6. Verify attribution in Base.dev, a block explorer, or the Builder Code validation tool.
 
 ## Resources

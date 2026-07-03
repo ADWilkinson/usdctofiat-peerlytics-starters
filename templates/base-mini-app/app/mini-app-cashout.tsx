@@ -7,19 +7,24 @@ import {
   PLATFORMS,
   offramp,
 } from "@usdctofiat/offramp";
+import { Attribution } from "ox/erc8021";
 import { createWalletClient, custom, type WalletClient } from "viem";
 import { base } from "viem/chains";
 
 const DEFAULT_INTEGRATOR_ID = "__INTEGRATOR_ID__";
 const DEFAULT_REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const DEFAULT_BASE_BUILDER_CODE = "bc_srxybeyl";
 const INTEGRATOR_ID = process.env.NEXT_PUBLIC_INTEGRATOR_ID || DEFAULT_INTEGRATOR_ID;
 const REFERRAL_ID = process.env.NEXT_PUBLIC_REFERRAL_ID || DEFAULT_REFERRAL_ID;
+const BASE_BUILDER_CODE =
+  process.env.NEXT_PUBLIC_BASE_BUILDER_CODE || DEFAULT_BASE_BUILDER_CODE;
 const APP_KICKER = process.env.NEXT_PUBLIC_APP_KICKER || "USDCtoFiat on Base";
 const APP_URL =
   typeof window === "undefined"
     ? "http://localhost:3000"
     : process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
 const configuredReferralId = REFERRAL_ID === DEFAULT_REFERRAL_ID ? undefined : REFERRAL_ID;
+const dataSuffix = Attribution.toDataSuffix({ codes: [BASE_BUILDER_CODE] });
 
 async function getBaseAccountSdk() {
   const { createBaseAccountSDK } = await import("@base-org/account");
@@ -68,6 +73,7 @@ async function getMiniAppWalletClient(): Promise<WalletClient> {
   return createWalletClient({
     account,
     chain: base,
+    dataSuffix,
     transport: custom(provider as Parameters<typeof custom>[0]),
   });
 }

@@ -64,7 +64,7 @@ const packageChecks = [
   ],
   [
     "templates/base-mini-app/package.json",
-    ["@usdctofiat/offramp", "@base-org/account"],
+    ["@usdctofiat/offramp", "@base-org/account", "ox"],
   ],
   [
     "templates/vite/package.json",
@@ -91,7 +91,7 @@ for (const [pkgPath, names] of packageChecks) {
         ? rootPeerlyticsVersion
         : name === "@usdctofiat/offramp"
           ? rootOfframpVersion
-          : name === "@base-org/account"
+          : name === "@base-org/account" || name === "ox"
             ? baseMiniAppTemplateDeps[name]
           : privyTemplateDeps[name];
     assert(
@@ -109,7 +109,10 @@ for (const [pkgPath, names] of packageChecks) {
 const envFiles = {
   "demo/.env.example": ["PEERLYTICS_API_KEY"],
   "templates/next/.env.example": ["NEXT_PUBLIC_PRIVY_APP_ID"],
-  "templates/base-mini-app/.env.example": ["NEXT_PUBLIC_APP_URL"],
+  "templates/base-mini-app/.env.example": [
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_BASE_BUILDER_CODE",
+  ],
   "templates/vite/.env.example": ["VITE_PRIVY_APP_ID"],
   "templates/telegram-bot/.env.example": ["TELEGRAM_BOT_TOKEN", "MAKER_PRIVATE_KEY"],
 };
@@ -213,6 +216,15 @@ assert(
   baseMiniAppTemplate.includes("createBaseAccountSDK") &&
     baseMiniAppTemplate.includes("wallet_connect"),
   "templates/base-mini-app/app/mini-app-cashout.tsx must use Base Account instead of a generic wallet selector",
+);
+assert(
+  baseMiniAppTemplate.includes("Attribution.toDataSuffix") &&
+    baseMiniAppTemplate.includes("dataSuffix"),
+  "templates/base-mini-app/app/mini-app-cashout.tsx must attach the issued Base Builder Code through dataSuffix",
+);
+assert(
+  baseMiniAppTemplate.includes("bc_srxybeyl"),
+  "templates/base-mini-app/app/mini-app-cashout.tsx must default to the issued USDCtoFiat Base Builder Code",
 );
 assert(
   baseMiniAppTemplate.includes("/icon.png"),

@@ -1,9 +1,9 @@
 # Base Mini App Template
 
-Compact USDCtoFiat starter for Base distribution. It uses Base Account and
-creates a USDCtoFiat deposit on Base. Attribution is configured through
-`NEXT_PUBLIC_INTEGRATOR_ID`; optional referral attribution uses
-`NEXT_PUBLIC_REFERRAL_ID`.
+Compact USDCtoFiat starter for Base distribution. It is a standard Next.js app
+that uses Base Account and creates a USDCtoFiat deposit on Base. Attribution is
+configured through `NEXT_PUBLIC_INTEGRATOR_ID`; optional referral attribution
+uses `NEXT_PUBLIC_REFERRAL_ID`.
 
 ## Run
 
@@ -30,6 +30,9 @@ placeholders, but the UI does not show those implementation labels to users.
   present.
 - Keep the UI tight. This template is meant to open from a Base app surface, so
   avoid landing-page sections, decorative cards, or extra explainers.
+- Do not add social-client manifests, frame SDKs, or client-specific discovery
+  files. Base discovery should come from the public Next.js origin and Base.dev
+  app metadata.
 - Keep `OFFRAMP_DEVELOPER_RESOURCES` links visible for builders and agents.
 
 ## Base Hooks
@@ -43,7 +46,8 @@ placeholders, but the UI does not show those implementation labels to users.
 - `app/opengraph-image.tsx` serves the 3:2 Open Graph image for discovery.
 
 Before publishing, verify the public app with the current Base app builder,
-app verification, builder-code, and rewards flows.
+app verification, builder-code, and rewards flows. Register app metadata in
+Base.dev after the public origin is live.
 
 ## Deploy
 

@@ -2,11 +2,16 @@
   color-scheme: dark;
   font-family:
     ui-sans-serif,
-    system-ui,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  --bg: #0c1110;
+  --panel: #121917;
+  --border: rgba(237, 243, 239, 0.14);
+  --text-muted: #a9b7ad;
+  --accent: #86d783;
+  --danger: #ffb4a8;
 }
 
 * {
@@ -16,7 +21,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #101413;
+  background: var(--bg);
   color: #edf3ef;
 }
 
@@ -30,7 +35,7 @@ button {
   min-height: 42px;
   border: 0;
   border-radius: 8px;
-  background: #85d985;
+  background: var(--accent);
   color: #07100c;
   cursor: pointer;
   font-weight: 700;
@@ -44,7 +49,7 @@ button:disabled {
 }
 
 a {
-  color: #9ee7a3;
+  color: #a7ec9d;
 }
 
 .shell {
@@ -54,9 +59,9 @@ a {
 }
 
 .panel {
-  border: 1px solid rgba(237, 243, 239, 0.14);
-  border-radius: 10px;
-  background: #151b19;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
   padding: 16px;
 }
 
@@ -73,12 +78,29 @@ a {
 }
 
 .muted {
-  color: #9ca8a2;
+  color: var(--text-muted);
 }
 
 .fine {
+  margin: 0;
   font-size: 0.82rem;
   line-height: 1.55;
+}
+
+.hero h1 {
+  margin: 6px 0 0;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .field {
@@ -96,15 +118,31 @@ a {
 .field select {
   min-height: 42px;
   width: 100%;
-  border: 1px solid rgba(237, 243, 239, 0.16);
+  border: 1px solid var(--border);
   border-radius: 8px;
   background: #0e1211;
   color: #edf3ef;
   padding: 0 10px;
 }
 
+.field input:focus-visible,
+.field select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(134, 215, 131, 0.55);
+  outline-offset: 2px;
+}
+
 .links {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.compact-button {
+  padding: 0 12px;
+}
+
+.error {
+  color: var(--danger);
 }

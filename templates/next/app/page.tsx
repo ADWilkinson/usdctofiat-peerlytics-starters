@@ -11,8 +11,11 @@ import {
 import { createWalletClient, custom, type WalletClient } from "viem";
 import { base } from "viem/chains";
 
-const INTEGRATOR_ID = "__INTEGRATOR_ID__";
-const REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const DEFAULT_INTEGRATOR_ID = "__INTEGRATOR_ID__";
+const DEFAULT_REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const INTEGRATOR_ID = process.env.NEXT_PUBLIC_INTEGRATOR_ID || DEFAULT_INTEGRATOR_ID;
+const REFERRAL_ID = process.env.NEXT_PUBLIC_REFERRAL_ID || DEFAULT_REFERRAL_ID;
+const configuredReferralId = REFERRAL_ID === DEFAULT_REFERRAL_ID ? undefined : REFERRAL_ID;
 const resourceLinks = [
   ["SDK guide", OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide],
   ["App guide", OFFRAMP_DEVELOPER_RESOURCES.links.appGuide],
@@ -96,7 +99,7 @@ export default function HomePage() {
         platform: PLATFORMS.VENMO,
         identifier: identifier.trim(),
         integratorId: INTEGRATOR_ID,
-        referralId: REFERRAL_ID,
+        ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
       });
 
       setSubmitMessage(`Deposit #${result.depositId} created.`);
@@ -109,23 +112,32 @@ export default function HomePage() {
 
   return (
     <main>
-      <h1 style={{ fontSize: "2.35rem", marginBottom: "0.5rem" }}>Offramp Starter</h1>
-      <p style={{ marginTop: 0, opacity: 0.9 }}>Integrator: {INTEGRATOR_ID}</p>
-      <p style={{ marginTop: 0, maxWidth: 620, opacity: 0.84 }}>
+      <header className="hero">
+        <p className="eyebrow">Base USDC cash-out</p>
+        <h1>Offramp Starter</h1>
+        <p className="lede">
         Uses {OFFRAMP_DEVELOPER_RESOURCES.packageName} v
         {OFFRAMP_DEVELOPER_RESOURCES.sdkVersion} on Base. Deposits are created by
         the connected wallet and must delegate to the managed rate manager.
       </p>
+      </header>
 
-      <section>
-        <p style={{ marginTop: 0 }}>Status: {status}</p>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 14 }}>
+      <section className="panel">
+        <div className="panel-head">
+          <div>
+            <p className="eyebrow">Wallet</p>
+            <h2>Create a seller deposit</h2>
+          </div>
+          <span className="status-pill">{status}</span>
+        </div>
+
+        <div className="actions">
           {!authenticated ? (
-            <button onClick={() => login()} style={{ minHeight: 40 }}>
+            <button onClick={() => login()} className="button button-secondary">
               Connect wallet
             </button>
           ) : (
-            <button onClick={() => logout()} style={{ minHeight: 40 }}>
+            <button onClick={() => logout()} className="button button-secondary">
               Disconnect
             </button>
           )}
@@ -137,10 +149,10 @@ export default function HomePage() {
               event.preventDefault();
               void handleSubmit();
             }}
-            style={{ display: "grid", gap: 12, maxWidth: 360 }}
+            className="form-grid"
           >
-            <label style={{ display: "grid", gap: 6 }}>
-              USDC amount
+            <label className="field">
+              <span>USDC amount</span>
               <input
                 type="number"
                 min="1"
@@ -148,49 +160,39 @@ export default function HomePage() {
                 inputMode="decimal"
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
-                style={{ minHeight: 40 }}
               />
             </label>
-            <label style={{ display: "grid", gap: 6 }}>
-              Venmo username
+            <label className="field">
+              <span>Venmo username</span>
               <input
                 placeholder={PLATFORMS.VENMO.identifier.placeholder}
                 value={identifier}
                 onChange={(event) => setIdentifier(event.target.value)}
-                style={{ minHeight: 40 }}
               />
             </label>
             {validation && !validation.valid ? (
-              <p style={{ margin: 0, color: "#b42318" }}>{validation.error}</p>
+              <p className="error">{validation.error}</p>
             ) : null}
-            <button disabled={!canSubmit} type="submit" style={{ minHeight: 40 }}>
+            <button className="button button-primary" disabled={!canSubmit} type="submit">
               {isSubmitting ? "Creating..." : `Sell ${amount || "0"} USDC`}
             </button>
           </form>
         ) : (
-          <p style={{ marginBottom: 0, opacity: 0.8 }}>Connect a wallet to start an offramp.</p>
+          <p className="muted">Connect a wallet to start an offramp.</p>
         )}
-        {submitMessage ? <p style={{ marginBottom: 0 }}>{submitMessage}</p> : null}
+        {submitMessage ? <p className="notice">{submitMessage}</p> : null}
       </section>
 
-      <section style={{ marginTop: 16 }}>
-        <h2 style={{ marginTop: 0 }}>Ship from the canonical resources</h2>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+      <section className="panel resource-panel">
+        <div className="panel-head">
+          <div>
+            <p className="eyebrow">Reference</p>
+            <h2>Ship from canonical resources</h2>
+          </div>
+        </div>
+        <div className="resource-links">
           {resourceLinks.map(([label, href]) => (
-            <a
-              key={href}
-              href={href}
-              rel="noreferrer"
-              target="_blank"
-              style={{
-                border: "1px solid rgba(236, 243, 239, 0.16)",
-                borderRadius: 999,
-                color: "#9ddca9",
-                minHeight: 40,
-                padding: "9px 12px",
-                textDecoration: "none",
-              }}
-            >
+            <a key={href} href={href} rel="noreferrer" target="_blank">
               {label}
             </a>
           ))}

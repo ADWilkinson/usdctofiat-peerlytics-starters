@@ -130,7 +130,7 @@ export function MiniAppCashout() {
         amount,
         currency: selectedRoute.currency,
         platform: selectedRoute.platform,
-        identifier: identifier.trim(),
+        identifier: validation?.valid ? validation.normalized : identifier.trim(),
         integratorId: INTEGRATOR_ID,
         ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
       });
@@ -147,23 +147,19 @@ export function MiniAppCashout() {
   return (
     <main className="shell">
       <section className="panel stack">
-        <div>
-          <p className="muted fine" style={{ margin: 0 }}>
-            {APP_KICKER}
-          </p>
-          <h1 style={{ fontSize: "1.6rem", lineHeight: 1.1, margin: "6px 0 0" }}>
-            Cash out Base USDC
-          </h1>
+        <div className="hero">
+          <p className="eyebrow">{APP_KICKER}</p>
+          <h1>Cash out Base USDC</h1>
         </div>
 
-        <p className="muted fine" style={{ margin: 0 }}>
+        <p className="muted fine">
           Pick a payment app, enter the handle where you want to be paid, and create a seller
           deposit from your wallet.
         </p>
 
         <div className="row fine">
           <span className="muted">Wallet</span>
-          <button type="button" onClick={connectWallet} style={{ padding: "0 12px" }}>
+          <button type="button" onClick={connectWallet} className="compact-button">
             {walletStatus}
           </button>
         </div>
@@ -177,7 +173,10 @@ export function MiniAppCashout() {
         >
           <label className="field">
             <span>Route</span>
-            <select value={routeId} onChange={(event) => setRouteId(event.target.value as typeof routeId)}>
+            <select
+              value={routeId}
+              onChange={(event) => setRouteId(event.target.value as typeof routeId)}
+            >
               {routes.map((route) => (
                 <option key={route.id} value={route.id}>
                   {route.label}
@@ -208,9 +207,7 @@ export function MiniAppCashout() {
           </label>
 
           {validation && !validation.valid ? (
-            <p className="fine" style={{ color: "#ffb4a8", margin: 0 }}>
-              {validation.error}
-            </p>
+            <p className="error fine">{validation.error}</p>
           ) : null}
 
           <button type="submit" disabled={!canSubmit}>

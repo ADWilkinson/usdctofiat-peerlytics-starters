@@ -11,8 +11,11 @@ import { base } from "viem/chains";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
 const MAKER_PRIVATE_KEY = process.env.MAKER_PRIVATE_KEY as `0x${string}` | undefined;
-const INTEGRATOR_ID = "__INTEGRATOR_ID__";
-const REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const DEFAULT_INTEGRATOR_ID = "__INTEGRATOR_ID__";
+const DEFAULT_REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const INTEGRATOR_ID = process.env.INTEGRATOR_ID || DEFAULT_INTEGRATOR_ID;
+const REFERRAL_ID = process.env.REFERRAL_ID || DEFAULT_REFERRAL_ID;
+const configuredReferralId = REFERRAL_ID === DEFAULT_REFERRAL_ID ? undefined : REFERRAL_ID;
 
 if (!BOT_TOKEN) {
   throw new Error("Missing TELEGRAM_BOT_TOKEN");
@@ -83,7 +86,7 @@ bot.command("sell", async (ctx) => {
     const sdk = createOfframp({
       walletClient,
       integratorId: INTEGRATOR_ID,
-      referralId: REFERRAL_ID,
+      ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
     });
 
     const result = await sdk.createDeposit({
@@ -92,7 +95,7 @@ bot.command("sell", async (ctx) => {
       currency: CURRENCIES.USD,
       identifier,
       integratorId: INTEGRATOR_ID,
-      referralId: REFERRAL_ID,
+      ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
     });
 
     await ctx.reply(

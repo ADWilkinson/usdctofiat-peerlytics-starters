@@ -9,18 +9,18 @@
     "start": "next start -p 3000"
   },
   "dependencies": {
-    "@privy-io/react-auth": "^3.32.2",
+    "@privy-io/react-auth": "^3.33.1",
     "@solana-program/system": "^0.12.2",
     "@solana-program/token": "^0.14.0",
     "@solana/kit": "^6.10.0",
-    "@usdctofiat/offramp": "^4.4.2",
-    "next": "16.2.9",
+    "@usdctofiat/offramp": "^4.4.6",
+    "next": "16.2.10",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "viem": "^2.53.1"
+    "viem": "^2.54.2"
   },
   "devDependencies": {
-    "@types/node": "^26.0.1",
+    "@types/node": "^26.1.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3"

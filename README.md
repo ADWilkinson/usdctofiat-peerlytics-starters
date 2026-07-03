@@ -119,6 +119,21 @@ vercel --prod
 
 The orderbook API key stays server-side and is never exposed to the browser.
 
+## Start a real app
+
+Choose the smallest starter that matches where the cash-out flow will live:
+
+| Starter | Use it when | Required env |
+|---|---|---|
+| `next` | You want a production web app with Privy wallet auth | `NEXT_PUBLIC_PRIVY_APP_ID`, `NEXT_PUBLIC_INTEGRATOR_ID` |
+| `base-mini-app` | You are distributing a compact Base Account cash-out surface | `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_INTEGRATOR_ID`, `NEXT_PUBLIC_BASE_BUILDER_CODE` |
+| `vite` | You want a lean SPA without Next.js conventions | `VITE_PRIVY_APP_ID`, `VITE_INTEGRATOR_ID` |
+| `telegram-bot` | You are running a server-side maker bot with a managed wallet | `TELEGRAM_BOT_TOKEN`, `MAKER_PRIVATE_KEY`, `INTEGRATOR_ID` |
+
+`TODO_SET_REFERRAL_ID` is deliberately inert. The starters only pass
+`referralId` after you set a real referral value, so a generated app cannot
+accidentally attribute production deposits to the placeholder.
+
 ## SDKs at a glance
 
 ### @peerlytics/sdk

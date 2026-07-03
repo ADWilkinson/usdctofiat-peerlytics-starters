@@ -108,13 +108,26 @@ for (const [pkgPath, names] of packageChecks) {
 
 const envFiles = {
   "demo/.env.example": ["PEERLYTICS_API_KEY"],
-  "templates/next/.env.example": ["NEXT_PUBLIC_PRIVY_APP_ID"],
+  "templates/next/.env.example": [
+    "NEXT_PUBLIC_PRIVY_APP_ID",
+    "NEXT_PUBLIC_INTEGRATOR_ID",
+    "NEXT_PUBLIC_REFERRAL_ID",
+  ],
   "templates/base-mini-app/.env.example": [
     "NEXT_PUBLIC_APP_URL",
     "NEXT_PUBLIC_BASE_BUILDER_CODE",
   ],
-  "templates/vite/.env.example": ["VITE_PRIVY_APP_ID"],
-  "templates/telegram-bot/.env.example": ["TELEGRAM_BOT_TOKEN", "MAKER_PRIVATE_KEY"],
+  "templates/vite/.env.example": [
+    "VITE_PRIVY_APP_ID",
+    "VITE_INTEGRATOR_ID",
+    "VITE_REFERRAL_ID",
+  ],
+  "templates/telegram-bot/.env.example": [
+    "TELEGRAM_BOT_TOKEN",
+    "MAKER_PRIVATE_KEY",
+    "INTEGRATOR_ID",
+    "REFERRAL_ID",
+  ],
 };
 
 for (const [file, keys] of Object.entries(envFiles)) {
@@ -261,8 +274,26 @@ assert(
   "templates/next/app/page.tsx must not hardcode a payment identifier",
 );
 assert(
+  nextTemplate.includes("configuredReferralId") &&
+    !nextTemplate.includes("referralId: REFERRAL_ID"),
+  "templates/next/app/page.tsx must not send TODO_SET_REFERRAL_ID to the SDK",
+);
+assert(
+  !nextTemplate.includes("style={{"),
+  "templates/next/app/page.tsx must use reusable CSS classes instead of inline UI styling",
+);
+assert(
   !viteTemplate.includes('identifier: "alice"'),
   "templates/vite/src/App.tsx must not hardcode a payment identifier",
+);
+assert(
+  viteTemplate.includes("configuredReferralId") &&
+    !viteTemplate.includes("referralId: REFERRAL_ID"),
+  "templates/vite/src/App.tsx must not send TODO_SET_REFERRAL_ID to the SDK",
+);
+assert(
+  !viteTemplate.includes("style={{"),
+  "templates/vite/src/App.tsx must use reusable CSS classes instead of inline UI styling",
 );
 assert(
   telegramTemplate.includes("Usage: /sell <amount> <identifier>"),
@@ -271,6 +302,19 @@ assert(
 assert(
   !telegramTemplate.includes('identifierRaw || "alice"'),
   "templates/telegram-bot/src/index.ts must not silently default payment identifiers",
+);
+assert(
+  telegramTemplate.includes("configuredReferralId") &&
+    !telegramTemplate.includes("referralId: REFERRAL_ID"),
+  "templates/telegram-bot/src/index.ts must not send TODO_SET_REFERRAL_ID to the SDK",
+);
+assert(
+  baseMiniAppTemplate.includes("validation?.valid ? validation.normalized : identifier.trim()"),
+  "templates/base-mini-app/app/mini-app-cashout.tsx must submit normalized payment identifiers",
+);
+assert(
+  !baseMiniAppTemplate.includes("style={{"),
+  "templates/base-mini-app/app/mini-app-cashout.tsx must use reusable CSS classes instead of inline UI styling",
 );
 
 const demoServer = readText("demo/server/peerlytics.ts");

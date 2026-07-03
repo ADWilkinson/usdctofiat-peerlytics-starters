@@ -23,8 +23,8 @@ The CLI prompts for your `integratorId` and substitutes it into the template fil
 
 - `package.json` pinned to the latest `@usdctofiat/offramp` v4.x
 - A working `offramp()` call wired to `PLATFORMS.VENMO` / `CURRENCIES.USD` — edit to taste
-- Your `integratorId` baked in via the CLI prompt
-- A `TODO_SET_REFERRAL_ID` placeholder for partner attribution — replace before shipping
+- Your `integratorId` baked in via the CLI prompt or env
+- A `TODO_SET_REFERRAL_ID` placeholder for partner attribution — inert until replaced
 - Type-checked TypeScript
 - `OFFRAMP_DEVELOPER_RESOURCES` exposed in-app so generated projects keep canonical SDK, webhook, agent, and Peerlytics links
 - A README inside the template covering run, deploy, and customize
@@ -52,7 +52,9 @@ username, not email.
 
 ## Manual install (no CLI)
 
-Copy a template directory into your project, replace `__INTEGRATOR_ID__` with your integrator ID, and `npm install`.
+Copy a template directory into your project, replace `__INTEGRATOR_ID__` with
+your integrator ID, leave `TODO_SET_REFERRAL_ID` unset unless you have a real
+partner code, and `npm install`.
 
 ## See also
 

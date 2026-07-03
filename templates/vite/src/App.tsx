@@ -9,8 +9,11 @@ import {
 import { createWalletClient, custom, type WalletClient } from "viem";
 import { base } from "viem/chains";
 
-const INTEGRATOR_ID = "__INTEGRATOR_ID__";
-const REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const DEFAULT_INTEGRATOR_ID = "__INTEGRATOR_ID__";
+const DEFAULT_REFERRAL_ID = "TODO_SET_REFERRAL_ID";
+const INTEGRATOR_ID = import.meta.env.VITE_INTEGRATOR_ID || DEFAULT_INTEGRATOR_ID;
+const REFERRAL_ID = import.meta.env.VITE_REFERRAL_ID || DEFAULT_REFERRAL_ID;
+const configuredReferralId = REFERRAL_ID === DEFAULT_REFERRAL_ID ? undefined : REFERRAL_ID;
 const resourceLinks = [
   ["SDK guide", OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide],
   ["App guide", OFFRAMP_DEVELOPER_RESOURCES.links.appGuide],
@@ -94,7 +97,7 @@ export function App() {
         platform: PLATFORMS.VENMO,
         identifier: identifier.trim(),
         integratorId: INTEGRATOR_ID,
-        referralId: REFERRAL_ID,
+        ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
       });
 
       setSubmitMessage(`Deposit #${result.depositId} created.`);
@@ -107,27 +110,35 @@ export function App() {
 
   return (
     <main>
-      <h1>Offramp Vite Starter</h1>
-      <p className="muted">Integrator: {INTEGRATOR_ID}</p>
-      <p className="muted max-copy">
-        Uses {OFFRAMP_DEVELOPER_RESOURCES.packageName} v
-        {OFFRAMP_DEVELOPER_RESOURCES.sdkVersion} on Base. Deposits are wallet-signed
-        and must delegate to the managed rate manager.
-      </p>
+      <header className="hero">
+        <p className="eyebrow">Base USDC cash-out</p>
+        <h1>Offramp Vite Starter</h1>
+        <p className="lede">
+          Uses {OFFRAMP_DEVELOPER_RESOURCES.packageName} v
+          {OFFRAMP_DEVELOPER_RESOURCES.sdkVersion} on Base. Deposits are
+          wallet-signed and delegate to the managed rate manager.
+        </p>
+      </header>
 
-      <section>
-        <p>Status: {status}</p>
+      <section className="panel">
+        <div className="panel-head">
+          <div>
+            <p className="eyebrow">Wallet</p>
+            <h2>Create a seller deposit</h2>
+          </div>
+          <span className="status-pill">{status}</span>
+        </div>
         {!authenticated ? (
-          <button onClick={() => login()} className="btn-secondary">
+          <button onClick={() => login()} className="button button-secondary">
             Connect wallet
           </button>
         ) : (
-          <button onClick={() => logout()} className="btn-secondary">
+          <button onClick={() => logout()} className="button button-secondary">
             Disconnect
           </button>
         )}
 
-        <div style={{ marginTop: 14 }}>
+        <div className="flow-panel">
           {walletClient ? (
             <form
               onSubmit={(event) => {
@@ -162,16 +173,19 @@ export function App() {
               </button>
             </form>
           ) : (
-            <p className="muted" style={{ marginBottom: 0 }}>
-              Connect a wallet to start an offramp.
-            </p>
+            <p className="muted">Connect a wallet to start an offramp.</p>
           )}
           {submitMessage ? <p className="muted">{submitMessage}</p> : null}
         </div>
       </section>
 
-      <section className="resource-panel">
-        <h2>Canonical resources</h2>
+      <section className="panel resource-panel">
+        <div className="panel-head">
+          <div>
+            <p className="eyebrow">Reference</p>
+            <h2>Canonical resources</h2>
+          </div>
+        </div>
         <div className="resource-links">
           {resourceLinks.map(([label, href]) => (
             <a key={href} href={href} rel="noreferrer" target="_blank">

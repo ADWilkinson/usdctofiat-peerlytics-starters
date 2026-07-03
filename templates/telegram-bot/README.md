@@ -10,13 +10,17 @@ cp .env.example .env
 npm run dev
 ```
 
-Set `TELEGRAM_BOT_TOKEN` and `MAKER_PRIVATE_KEY` before starting the bot. `BASE_RPC_URL` is optional and falls back to the public Base RPC. The template keeps `__INTEGRATOR_ID__` and `TODO_SET_REFERRAL_ID` visible until the scaffold CLI replaces them or you set your production values.
+Set `TELEGRAM_BOT_TOKEN`, `MAKER_PRIVATE_KEY`, and `INTEGRATOR_ID` before
+starting the bot. `BASE_RPC_URL` is optional and falls back to the public Base
+RPC. `REFERRAL_ID` is optional; the starter omits `referralId` while it is still
+`TODO_SET_REFERRAL_ID`. If you are copying the template without the scaffold
+CLI, replace `__INTEGRATOR_ID__` yourself.
 
 ## Customize
 
 - Edit `src/index.ts` to change the platform, currency, and command vocabulary.
 - Keep `integratorId` on every deposit so activity is attributed.
-- Replace `TODO_SET_REFERRAL_ID` before shipping partner traffic.
+- Set a real `REFERRAL_ID` before shipping partner traffic.
 - Keep the `/resources` command or equivalent operator command so maintainers can retrieve canonical SDK, webhook, and Peerlytics links from `OFFRAMP_DEVELOPER_RESOURCES`.
 
 ## Deploy

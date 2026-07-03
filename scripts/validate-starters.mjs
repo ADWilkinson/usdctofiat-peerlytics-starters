@@ -111,6 +111,15 @@ const templateEntrypoints = [
   "templates/telegram-bot/src/index.ts",
 ];
 
+const baseMiniAppPublicRoutes = [
+  "templates/base-mini-app/app/icon.png/route.tsx",
+  "templates/base-mini-app/app/opengraph-image.tsx",
+];
+
+for (const file of baseMiniAppPublicRoutes) {
+  assert(exists(file), `templates/base-mini-app must provide ${file}`);
+}
+
 for (const file of templateEntrypoints) {
   const text = readText(file);
   assert(text.includes("__INTEGRATOR_ID__"), `${file} must keep the CLI integrator placeholder`);
@@ -154,6 +163,10 @@ assert(
   baseMiniAppTemplate.includes("createBaseAccountSDK") &&
     baseMiniAppTemplate.includes("wallet_connect"),
   "templates/base-mini-app/app/mini-app-cashout.tsx must use Base Account instead of a generic wallet selector",
+);
+assert(
+  baseMiniAppTemplate.includes("/icon.png"),
+  "templates/base-mini-app/app/mini-app-cashout.tsx must expose a public app icon to Base Account",
 );
 assert(
   !baseMiniAppTemplate.toLowerCase().includes("far" + "caster") &&

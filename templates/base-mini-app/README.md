@@ -32,6 +32,8 @@ or embeds. Local development can use `http://localhost:3000`.
 - The wallet client is built from the Base Account EIP-1193 provider and passed
   straight into `@usdctofiat/offramp`.
 - `app/page.tsx` keeps the Open Graph metadata for share/discovery surfaces.
+- `app/icon.png/route.tsx` serves the 200x200 PNG icon used by Base Account.
+- `app/opengraph-image.tsx` serves the 3:2 Open Graph image for discovery.
 
 Before publishing, verify the public app with the current Base app builder,
 app verification, builder-code, and rewards flows.
@@ -50,9 +52,28 @@ The public origin must serve:
 - a 3:2 Open Graph image at `/opengraph-image`
 - a 200x200 icon at `/icon.png`
 
+Verify the deployed origin before sharing it:
+
+```bash
+curl -I https://your-mini-app.example/
+curl -I https://your-mini-app.example/icon.png
+curl -I https://your-mini-app.example/opengraph-image
+```
+
+Then test the real flow in a browser/client with Base Account:
+
+1. Connect a wallet on Base.
+2. Create a small USDCtoFiat seller deposit.
+3. Record the `depositId`, transaction hash, route, and public origin.
+4. Register and verify the app on Base.dev.
+5. Add Builder Code attribution only after Base.dev issues the real code.
+6. Verify attribution in Base.dev, a block explorer, or the Builder Code validation tool.
+
 ## Resources
 
 - Base app docs: https://docs.base.org/apps/quickstart/build-app
+- Base app rewards: https://docs.base.org/apps/growth/rewards
+- Builder Codes: https://docs.base.org/apps/builder-codes/app-developers
 - SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
 - App guide: https://usdctofiat.xyz/developers/apps/
 - Webhooks: https://usdctofiat.xyz/developers/webhooks/

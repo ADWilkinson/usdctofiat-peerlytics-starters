@@ -258,6 +258,14 @@ assert(
   "templates/base-mini-app/app/layout.tsx must set metadataBase for public discovery images",
 );
 assert(
+  readText("templates/base-mini-app/app/layout.tsx").includes("export const viewport"),
+  "templates/base-mini-app/app/layout.tsx must set an explicit mobile viewport",
+);
+assert(
+  readText("templates/next/app/layout.tsx").includes("export const viewport"),
+  "templates/next/app/layout.tsx must set an explicit mobile viewport",
+);
+assert(
   readText("templates/base-mini-app/app/page.tsx").includes("openGraph"),
   "templates/base-mini-app/app/page.tsx must keep Open Graph metadata for Base.dev discovery",
 );

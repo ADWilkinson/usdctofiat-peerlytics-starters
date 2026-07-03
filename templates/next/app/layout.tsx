@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 // oxlint-disable-next-line import/no-unassigned-import -- Next.js requires global CSS side-effect imports in layout files.
 import "./globals.css";
 import { Providers } from "./providers";
@@ -6,6 +6,11 @@ import { Providers } from "./providers";
 export const metadata: Metadata = {
   title: "Offramp Starter",
   description: "Starter integration for @usdctofiat/offramp",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

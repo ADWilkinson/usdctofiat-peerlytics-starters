@@ -1123,8 +1123,10 @@ h3 {
   }
 
   .wallet-badge {
+    width: 100%;
     max-width: 100%;
     flex-wrap: wrap;
+    border-radius: 16px;
     justify-content: flex-start;
   }
 
@@ -1133,7 +1135,12 @@ h3 {
   }
 
   .topbar {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topbar-actions {
+    justify-content: flex-start;
   }
 
   .section-head {

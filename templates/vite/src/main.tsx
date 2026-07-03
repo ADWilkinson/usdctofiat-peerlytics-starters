@@ -19,9 +19,9 @@ const app = privyAppId ? (
       <p className="eyebrow">Setup required</p>
       <h1>Add your Privy app ID</h1>
       <p className="muted">
-        Set <code>VITE_PRIVY_APP_ID</code> in <code>.env.local</code> before
-        running the wallet flow. The template still builds without secrets, but
-        Privy cannot initialize until this value is real.
+        Add this key to <code>.env.local</code>:
+        <code className="code-line">VITE_PRIVY_APP_ID</code>
+        The template builds without secrets; Privy starts once the value is real.
       </p>
     </section>
   </main>

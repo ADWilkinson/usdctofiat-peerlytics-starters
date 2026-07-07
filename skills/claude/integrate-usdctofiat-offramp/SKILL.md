@@ -1,6 +1,6 @@
 ---
 name: integrate-usdctofiat-offramp
-description: Integrate the @usdctofiat/offramp SDK (v4.x) into a dApp to add USDC-to-fiat offramp functionality on Base. Use when asked to add an offramp, sell USDC for fiat, integrate USDCtoFiat, build a deposit flow, ship OTC private orders, or wire HMAC-signed deposit/otc lifecycle webhooks.
+description: Integrate the @usdctofiat/offramp SDK (v4.x) into a dApp to add USDC-to-fiat offramp functionality on Base. Use when asked to add an offramp, sell USDC for fiat, integrate USDCtoFiat, build a deposit flow, ship OTC private orders, or connect off-ramp activity to Peerlytics data.
 ---
 
 # Integrate USDCtoFiat Offramp (v4.x)
@@ -16,7 +16,6 @@ Companion docs:
 - App guide: https://usdctofiat.xyz/developers/apps/
 - Bot guide: https://usdctofiat.xyz/developers/bots/
 - Agent guide: https://usdctofiat.xyz/developers/agents/
-- Webhooks guide: https://usdctofiat.xyz/developers/webhooks/
 - llms-full.txt (canonical machine reference): https://usdctofiat.xyz/llms-full.txt
 - Skill: https://usdctofiat.xyz/skills/usdctofiat.md
 - Starters: https://github.com/ADWilkinson/usdctofiat-peerlytics-starters
@@ -228,7 +227,7 @@ just call `offramp()` again.
 ## Peer extension capture changes in v4
 
 If you drive the re-exported `peerExtensionSdk` directly, v4 follows
-`@zkp2p/sdk@0.5.8`. The upstream Peer extension removed the sidepanel onramp
+`@zkp2p/sdk@0.8.0`. The upstream Peer extension removed the sidepanel onramp
 contract entirely — `peerExtensionSdk.onramp()`, `getOnrampTransaction()`, and
 `openSidebar()` are gone, along with the `PeerExtensionOnrampParams` /
 `PeerOnrampPreparedTransaction*` types. Capture now goes through the headless
@@ -276,24 +275,6 @@ Error codes:
 - `USER_CANCELLED` — wallet popup rejected
 - `UNSUPPORTED` — unsupported chain / wallet capability
 
-## Webhooks
-
-Subscribe to `deposit.*` and `otc.*` events at https://usdctofiat.xyz/developers/webhooks/
-with your Peerlytics API key. Webhook registration is Pro-only; the same
-`paid-api-keys` Firestore collection serves both products.
-
-Events: `deposit.created`, `deposit.filled`, `deposit.partially_filled`,
-`deposit.closed`, `otc.taken` (live); `otc.enabled`, `otc.disabled` (reserved).
-
-Delivery headers:
-
-- `X-Usdctofiat-Signature: t=<unix>,v1=<hex>` — HMAC-SHA256 over `${t}.${rawBody}`
-- `X-Usdctofiat-Event: <event_name>`
-- `X-Usdctofiat-Delivery-Id: <uuid>` — dedupe key (single-attempt delivery)
-
-Reference verifier (Node, ~150 LOC, `node:crypto` only):
-[`usdctofiat/webhook-receiver.ts`](https://github.com/ADWilkinson/usdctofiat-peerlytics-starters/blob/main/usdctofiat/webhook-receiver.ts).
-
 ## Constraints
 
 - Base mainnet only (chain ID 8453)
@@ -308,7 +289,7 @@ Reference verifier (Node, ~150 LOC, `node:crypto` only):
 If you drive `peerExtensionSdk` directly, the `onramp()`,
 `getOnrampTransaction()`, and `openSidebar()` methods plus the
 `PeerExtensionOnrampParams` / `PeerOnrampPreparedTransaction*` types are removed.
-Migrate to the `@zkp2p/sdk@0.5.8` `authenticate()` + `onMetadataMessage()`
+Migrate to the `@zkp2p/sdk@0.8.0` `authenticate()` + `onMetadataMessage()`
 bridge. For seller registration use `captureMode: "sellerCredential"` via
 `getPeerExtensionRegistrationAuthParams` / `completePeerExtensionRegistration`
 (or the `usePeerExtensionRegistration` React hook). If you only use `offramp()`

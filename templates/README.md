@@ -26,7 +26,7 @@ The CLI prompts for your `integratorId` and substitutes it into the template fil
 - Your `integratorId` baked in via the CLI prompt or env
 - A `TODO_SET_REFERRAL_ID` placeholder for partner attribution — inert until replaced
 - Type-checked TypeScript
-- `OFFRAMP_DEVELOPER_RESOURCES` exposed in-app so generated projects keep canonical SDK, webhook, agent, and Peerlytics links
+- `OFFRAMP_DEVELOPER_RESOURCES` exposed in-app so generated projects keep canonical SDK, OTC, agent, and Peerlytics links
 - A README inside the template covering run, deploy, and customize
 
 ## What surface these templates use
@@ -42,7 +42,7 @@ need no template edits.
 The template-level `offramp()` / `createOfframp()` flow is unchanged on v4 — just
 raise the version. v4 only affects direct `peerExtensionSdk` drivers: the
 `onramp()`, `getOnrampTransaction()`, and `openSidebar()` methods were removed in
-favour of the `@zkp2p/sdk@0.6.2` `authenticate()` + `onMetadataMessage()` bridge.
+favour of the `@zkp2p/sdk@0.8.0` `authenticate()` + `onMetadataMessage()` bridge.
 See the [SDK CHANGELOG](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md).
 
 PayPal, Wise, Venmo, and Cash App makers may need to register their handle
@@ -61,5 +61,4 @@ partner code, and `npm install`.
 - SDK guide: [usdctofiat.xyz/developers/offramp-sdk](https://usdctofiat.xyz/developers/offramp-sdk/)
 - App guide: [usdctofiat.xyz/developers/apps](https://usdctofiat.xyz/developers/apps/)
 - Bot guide: [usdctofiat.xyz/developers/bots](https://usdctofiat.xyz/developers/bots/)
-- Webhook contract: [usdctofiat.xyz/developers/webhooks](https://usdctofiat.xyz/developers/webhooks/)
 - One-shot scripts that don't need scaffolding: [`/usdctofiat`](../usdctofiat) at the repo root

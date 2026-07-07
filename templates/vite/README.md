@@ -22,7 +22,7 @@ yourself.
 - Edit `src/App.tsx` to change the default platform/currency and input labels.
 - Keep `integratorId` on every `offramp()` call so deposits can be attributed.
 - Set a real `VITE_REFERRAL_ID` before shipping partner traffic.
-- Keep `OFFRAMP_DEVELOPER_RESOURCES` visible somewhere in your developer/admin surface so future maintainers and agents have canonical SDK, webhook, and Peerlytics links.
+- Keep `OFFRAMP_DEVELOPER_RESOURCES` visible somewhere in your developer/admin surface so future maintainers and agents have canonical SDK, OTC, and Peerlytics links.
 
 ## Deploy
 
@@ -32,4 +32,4 @@ Build with `npm run build`, then deploy the generated `dist/` folder to your sta
 
 - SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
 - App guide: https://usdctofiat.xyz/developers/apps/
-- Webhooks: https://usdctofiat.xyz/developers/webhooks/
+- Peerlytics developers: https://peerlytics.xyz/developers

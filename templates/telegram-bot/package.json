@@ -9,7 +9,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@usdctofiat/offramp": "^4.4.6",
+    "@usdctofiat/offramp": "^4.4.9",
     "grammy": "^1.44.0",
     "viem": "^2.54.2"
   },

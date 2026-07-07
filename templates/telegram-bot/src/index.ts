@@ -57,7 +57,7 @@ function parseSellCommand(text: string): { amount: string; identifier: string } 
 
 bot.command("start", (ctx) => {
   void ctx.reply(
-    "USDC offramp bot online. Use /sell <amount> <identifier>. Example: /sell 50 alice\n\nUse /resources for SDK docs, webhook docs, and the agent skill.",
+    "USDC offramp bot online. Use /sell <amount> <identifier>. Example: /sell 50 alice\n\nUse /resources for SDK docs, Peerlytics, and the agent skill.",
   );
 });
 
@@ -71,7 +71,6 @@ bot.command("resources", (ctx) => {
       "",
       `SDK guide: ${links.sdkGuide}`,
       `Bot guide: ${links.botGuide}`,
-      `Webhooks: ${links.webhooksGuide}`,
       `Agent skill: ${links.agentSkill}`,
       `Peerlytics: ${links.peerlyticsDevelopers}`,
     ].join("\n"),

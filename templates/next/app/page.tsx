@@ -19,7 +19,7 @@ const configuredReferralId = REFERRAL_ID === DEFAULT_REFERRAL_ID ? undefined : R
 const resourceLinks = [
   ["SDK guide", OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide],
   ["App guide", OFFRAMP_DEVELOPER_RESOURCES.links.appGuide],
-  ["Webhooks", OFFRAMP_DEVELOPER_RESOURCES.links.webhooksGuide],
+  ["Peerlytics", OFFRAMP_DEVELOPER_RESOURCES.links.peerlyticsDevelopers],
   ["Agent skill", OFFRAMP_DEVELOPER_RESOURCES.links.agentSkill],
 ] as const;
 

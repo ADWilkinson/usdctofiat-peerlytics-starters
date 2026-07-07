@@ -21,7 +21,7 @@ CLI, replace `__INTEGRATOR_ID__` yourself.
 - Edit `src/index.ts` to change the platform, currency, and command vocabulary.
 - Keep `integratorId` on every deposit so activity is attributed.
 - Set a real `REFERRAL_ID` before shipping partner traffic.
-- Keep the `/resources` command or equivalent operator command so maintainers can retrieve canonical SDK, webhook, and Peerlytics links from `OFFRAMP_DEVELOPER_RESOURCES`.
+- Keep the `/resources` command or equivalent operator command so maintainers can retrieve canonical SDK, agent, and Peerlytics links from `OFFRAMP_DEVELOPER_RESOURCES`.
 
 ## Deploy
 
@@ -31,4 +31,4 @@ Run it as a long-lived process on your server or container host. Keep `MAKER_PRI
 
 - Bot guide: https://usdctofiat.xyz/developers/bots/
 - SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
-- Webhooks: https://usdctofiat.xyz/developers/webhooks/
+- Peerlytics developers: https://peerlytics.xyz/developers

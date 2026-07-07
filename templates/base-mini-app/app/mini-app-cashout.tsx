@@ -59,7 +59,7 @@ const routes = [
 const resourceLinks = [
   ["SDK", OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide],
   ["Docs", OFFRAMP_DEVELOPER_RESOURCES.links.appGuide],
-  ["Webhooks", OFFRAMP_DEVELOPER_RESOURCES.links.webhooksGuide],
+  ["Peerlytics", OFFRAMP_DEVELOPER_RESOURCES.links.peerlyticsDevelopers],
 ] as const;
 
 async function getMiniAppWalletClient(): Promise<WalletClient> {

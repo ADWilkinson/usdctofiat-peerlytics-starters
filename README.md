@@ -1,6 +1,6 @@
 # Peerlytics & USDCtoFiat Starters
 
-Examples and a live demo for the two SDKs covering the ZKP2P protocol on Base: server-side analytics with **@peerlytics/sdk** and wallet-native USDC off-ramps with **@usdctofiat/offramp**.
+Examples and a live demo for the two SDKs covering ZKP2P on Base: server-side protocol data with **@peerlytics/sdk** and wallet-native USDC off-ramps with **@usdctofiat/offramp**.
 
 [![npm: @peerlytics/sdk](https://img.shields.io/npm/v/@peerlytics/sdk?label=%40peerlytics%2Fsdk&color=1b5e4e)](https://www.npmjs.com/package/@peerlytics/sdk)
 [![npm: @usdctofiat/offramp](https://img.shields.io/npm/v/@usdctofiat/offramp?label=%40usdctofiat%2Fofframp&color=6e4a0e)](https://www.npmjs.com/package/@usdctofiat/offramp)
@@ -48,7 +48,6 @@ peerlytics/                  @peerlytics/sdk examples (run standalone with tsx/b
   integrator-report.ts         ERC-8021 integrator stats (deposits, volume, top markets)
   timeseries-chart.ts          hourly/daily rollups in a terminal sparkbar chart
   live-activity.ts             real-time protocol event stream (SSE)
-  webhook-receiver.ts          HMAC-verified HTTPS receiver for outbound webhooks
   x402-agent.ts                x402 pay-per-request flow (no API key needed)
   llms.txt                     LLM-friendly SDK reference
 
@@ -62,7 +61,6 @@ usdctofiat/                  @usdctofiat/offramp examples
   paypal-deposit.ts            PayPal flow — paypal.me username + Peer extension fallback
   react-example.tsx            useOfframp hook usage in React (Revolut)
   paypal-react-example.tsx     useOfframp + usePeerExtensionRegistration handshake
-  webhook-receiver.ts          HMAC-verified HTTPS receiver for deposit/otc events
   developer-resources.ts       print SDK links, delegation config, and app/bot/agent playbooks
   llms.txt                     LLM-friendly SDK reference
 
@@ -96,7 +94,7 @@ npx tsx usdctofiat/platform-explorer.ts
 The deposit scripts default to the public Base RPC. Set `RPC_URL` to a private
 endpoint (Alchemy, QuickNode, etc.) to avoid rate limits on real deposit runs.
 
-Get a free API key at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) — same key authenticates the Peerlytics paid API _and_ outbound webhooks for both products.
+Get a free API key at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) for the Peerlytics paid API. Lifecycle state now lives in the explorer, activity stream, and deposit/intent reads.
 
 ## Run the demo locally
 
@@ -156,7 +154,6 @@ Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 reque
 - `getOrderbook({ taker })` includes private deposits whitelisted for that buyer wallet alongside public liquidity.
 - `DepositMarket.currency` / `deposit.currencies[].currency` are resolved ISO codes (e.g. `"GBP"`). `currencyCode` is the raw bytes32 hash — use `currency` for display.
 - Key management uses the opaque `id` from `listKeys()` (not the raw key): `deleteKey(id)`, `rotateKey(idOrKey)`, `createKey(label?)`.
-- Webhook event vocabulary aligned with `LiveEvent.type`: `intent.signaled`, `intent.fulfilled`, `deposit.rate_updated`. Legacy names (`intent.created`, `intent.filled`, `rate.updated`) are accepted on register but normalized server-side.
 - Some timestamp fields (`ApiKeyInfo.createdAt`, `lastUsedAt`, `freeCreditsResetAt`) are typed `number | string` — v2 emits Unix seconds (integer); convert with `Number(value) * 1000` to get a JS `Date`.
 
 [npm](https://www.npmjs.com/package/@peerlytics/sdk) · [Developer portal](https://peerlytics.xyz/developers) · [OpenAPI spec](https://peerlytics.xyz/api/openapi) · [llms.txt](https://peerlytics.xyz/llms.txt)
@@ -209,27 +206,12 @@ console.log(getOfframpDeveloperResources("bot"));
 
 Run `npx tsx usdctofiat/developer-resources.ts` or `npx tsx usdctofiat/developer-resources.ts agent` to print the full map.
 
-## Webhooks
-
-Both products deliver HMAC-SHA256 signed outbound webhooks. Register endpoints at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) (one key, both products). Store the secret returned on register — it is only shown once.
-
-```bash
-# USDCtoFiat: deposit + otc events
-WEBHOOK_SECRET=whsec_... npx tsx usdctofiat/webhook-receiver.ts
-
-# Peerlytics: deposit.created / intent.signaled / intent.fulfilled / deposit.rate_updated
-WEBHOOK_SECRET=whsec_... npx tsx peerlytics/webhook-receiver.ts
-```
-
-Verification is identical across both: `t=<unix>,v1=<hex>` header, HMAC-SHA256 over `${timestamp}.${rawBody}`, 5-minute replay window. Each receiver is ~150 LOC with no dependencies beyond `node:crypto` — copy it straight into your server.
-
 ## Links
 
 - [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) — self-serve developer hub
 - [usdctofiat.xyz/developers/offramp-sdk](https://usdctofiat.xyz/developers/offramp-sdk/) — SDK guide
-- [usdctofiat.xyz/developers/webhooks](https://usdctofiat.xyz/developers/webhooks/) — webhook contract
 - [peerlytics.xyz/developers](https://peerlytics.xyz/developers) — analytics SDK + API key dashboard
-- [Peerlytics Explorer](https://peerlytics.xyz/explorer) — protocol explorer and market intel
+- [Peerlytics Explorer](https://peerlytics.xyz/) — protocol explorer and market intel
 - [ZKP2P Protocol](https://zkp2p.xyz)
 - [@andrewwilkinson](https://x.com/andrewwilkinson)
 

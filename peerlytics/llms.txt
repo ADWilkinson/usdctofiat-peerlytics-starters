@@ -96,20 +96,6 @@ Account & keys (SDK ≥ 1.0 takes the opaque `id` from `listKeys()`, not the raw
 - client.getCredits() - credit balance, free-tier window, and purchase history
 - client.createCheckout(pkg) - purchase credits (starter/growth/scale)
 
-Webhooks (SDK ≥ 1.0):
-- client.listWebhooks() - list registered endpoints
-- client.createWebhook({ url, events, label? }) - register endpoint; returns the `secret` once
-- client.updateWebhook(id, { status }) - pause/resume an endpoint
-- client.deleteWebhook(id) - unregister
-
-Canonical webhook event names (aligned with `LiveEvent.type`):
-- deposit.created
-- intent.signaled
-- intent.fulfilled
-- deposit.rate_updated
-
-Legacy aliases (`intent.created`, `intent.filled`, `rate.updated`) are still accepted on register but normalized server-side. Type: `WebhookEventName`.
-
 ## Auth
 
 1. API key: set PEERLYTICS_API_KEY env var or pass { apiKey: "pk_live_..." }. Each key includes 1000 free requests/month. Generate via peerlytics.xyz/developers or programmatically with client.createKey().
@@ -121,7 +107,7 @@ Legacy aliases (`intent.created`, `intent.filled`, `rate.updated`) are still acc
 import { PeerlyticsError, RateLimitError, NotFoundError, ValidationError } from "@peerlytics/sdk";
 ```
 
-Types: ActivityStreamFilters, ActivityStreamEvent (for streamActivity), WebhookEventName, WebhookEndpoint (for webhook lifecycle), TimeseriesData, TimeseriesParams, TimeseriesBucket, TimeseriesSeries (for getTimeseries).
+Types: ActivityStreamFilters, ActivityStreamEvent (for streamActivity), TimeseriesData, TimeseriesParams, TimeseriesBucket, TimeseriesSeries (for getTimeseries).
 
 ## Examples in this repo
 
@@ -132,7 +118,6 @@ Types: ActivityStreamFilters, ActivityStreamEvent (for streamActivity), WebhookE
 - integrator-report.ts: ERC-8021 integrator stats (deposits, volume, top markets)
 - timeseries-chart.ts: hourly/daily rollups in a terminal sparkbar chart
 - live-activity.ts: real-time protocol event stream
-- webhook-receiver.ts: HMAC-verified HTTPS receiver for outbound webhooks
 - x402-agent.ts: x402 pay-per-request flow walkthrough
 
 ## Links

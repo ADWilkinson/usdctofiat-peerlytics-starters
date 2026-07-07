@@ -3,7 +3,7 @@
  *
  * Prints the canonical self-serve integration bundle exported by
  * @usdctofiat/offramp. Useful for coding agents, docs generators, and bots
- * that need the right SDK guide, agent skill, webhook guide, and Peerlytics
+ * that need the right SDK guide, agent skill, OTC guide, and Peerlytics
  * upgrade path without hardcoding URLs.
  *
  * Usage:

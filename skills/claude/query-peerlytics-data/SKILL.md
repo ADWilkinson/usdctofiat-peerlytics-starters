@@ -113,24 +113,6 @@ const vaults = await client.getVaultsOverview();
 // All vaults with AUM, fees, fill count, daily snapshots
 ```
 
-### Webhook subscriptions
-
-```typescript
-import type { WebhookEventName } from "@peerlytics/sdk";
-
-const events: WebhookEventName[] = [
-  "deposit.created",
-  "intent.signaled",
-  "intent.fulfilled",
-  "deposit.rate_updated",
-];
-const { secret } = await client.createWebhook({ url: "https://example.com/peerlytics", events });
-// Save `secret` once — it is never returned again. Verify deliveries with HMAC-SHA256
-// over `${timestamp}.${rawBody}` (see peerlytics/webhook-receiver.ts for the reference).
-```
-
-Canonical webhook event names (SDK ≥ 1.0): `deposit.created`, `intent.signaled`, `intent.fulfilled`, `deposit.rate_updated`. Legacy aliases (`intent.created`, `intent.filled`, `rate.updated`) are still accepted on registration but normalized server-side.
-
 ## Full method reference
 
 Analytics:
@@ -181,12 +163,6 @@ Account & keys (SDK ≥ 1.0 takes the opaque `id` from `listKeys()`, not the raw
 - `deleteKey(id)` — delete key by `id` from `listKeys()` (raw key is no longer accepted)
 - `getCredits()` — credit balance, free-tier window, and purchase history
 - `createCheckout(pkg)` — purchase credits (`"starter" | "growth" | "scale"`)
-
-Webhooks (SDK ≥ 1.0):
-- `listWebhooks()` — list registered endpoints
-- `createWebhook({ url, events, label? })` — register endpoint; returns the secret once
-- `updateWebhook(id, { status })` — pause/resume an endpoint
-- `deleteWebhook(id)` — unregister
 
 ## Error handling
 

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@base-org/account": "^2.5.7",
-    "@usdctofiat/offramp": "^4.4.9",
+    "@usdctofiat/offramp": "^4.4.11",
     "next": "16.2.10",
     "ox": "^0.14.30",
     "react": "^19.2.7",

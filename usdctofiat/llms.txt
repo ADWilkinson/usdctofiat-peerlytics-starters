@@ -302,7 +302,7 @@ if (venmoLimit?.isLocked) {
 ## Peer Extension v4 direct-driver changes
 
 If you use the re-exported `peerExtensionSdk` directly, v4 follows
-`@zkp2p/sdk@0.8.0`. The upstream sidepanel onramp contract was removed:
+`@zkp2p/sdk@0.8.1`. The upstream sidepanel onramp contract was removed:
 `peerExtensionSdk.onramp()`, `getOnrampTransaction()`, and `openSidebar()` are
 gone, along with the `PeerExtensionOnrampParams` /
 `PeerOnrampPreparedTransaction*` types. Capture now runs through the headless
@@ -345,7 +345,7 @@ v1.x is broken against the live curator — the old `POST /v1/makers/create` end
 The core `offramp()` / `useOfframp()` flow remains stable — just bump the
 version. Only direct `peerExtensionSdk` drivers are affected: `onramp()`,
 `getOnrampTransaction()`, and `openSidebar()` are removed. Migrate to the
-`@zkp2p/sdk@0.8.0` `authenticate()` + `onMetadataMessage()` bridge described
+`@zkp2p/sdk@0.8.1` `authenticate()` + `onMetadataMessage()` bridge described
 above. For seller registration use `getPeerExtensionRegistrationAuthParams` /
 `completePeerExtensionRegistration` (or the `usePeerExtensionRegistration` hook).
 

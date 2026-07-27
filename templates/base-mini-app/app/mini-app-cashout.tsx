@@ -65,7 +65,6 @@ const resourceLinks = [
 async function getMiniAppWalletClient(): Promise<WalletClient> {
   const baseAccountSdk = await getBaseAccountSdk();
   const provider = baseAccountSdk.getProvider();
-  await provider.request({ method: "wallet_connect" });
   const accounts = (await provider.request({ method: "eth_requestAccounts" })) as `0x${string}`[];
   const account = accounts[0];
   if (!account) throw new Error("No Base Account address returned.");

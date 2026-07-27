@@ -260,8 +260,9 @@ assert(
 );
 assert(
   baseMiniAppTemplate.includes("createBaseAccountSDK") &&
-    baseMiniAppTemplate.includes("wallet_connect"),
-  "templates/base-mini-app/app/mini-app-cashout.tsx must use Base Account instead of a generic wallet selector",
+    baseMiniAppTemplate.includes('method: "eth_requestAccounts"') &&
+    !baseMiniAppTemplate.includes('provider.request({ method: "wallet_connect" })'),
+  "templates/base-mini-app/app/mini-app-cashout.tsx must connect through Base Account's supported eth_requestAccounts path",
 );
 assert(
   baseMiniAppTemplate.includes("Attribution.toDataSuffix") &&

@@ -468,6 +468,7 @@ const demoApi = readText("demo/api/orderbook.ts");
 const demoViteConfig = readText("demo/vite.config.ts");
 const developerResources = readText("usdctofiat/developer-resources.ts");
 const platformExplorer = readText("usdctofiat/platform-explorer.ts");
+const rateMonitor = readText("peerlytics/rate-monitor.ts");
 
 assert(
   demoServer.includes("const supportedRoutes"),
@@ -500,6 +501,11 @@ assert(
   platformExplorer.includes('Key "${filterKey}" not found') &&
     platformExplorer.includes("process.exitCode = 1"),
   "usdctofiat/platform-explorer.ts must fail unknown platform lookups",
+);
+assert(
+  rateMonitor.includes("!Number.isFinite(POLL_SECONDS) || POLL_SECONDS < 1") &&
+    rateMonitor.includes("Set POLL_SECONDS to a finite number of at least 1 second"),
+  "peerlytics/rate-monitor.ts must reject polling intervals that can flood the API",
 );
 
 const installClaudeScript = readText("demo/scripts/install-claude.sh");

@@ -98,6 +98,10 @@ export async function switchToBaseNetwork(): Promise<void> {
           },
         ],
       });
+      await provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: BASE_CHAIN_ID_HEX }],
+      });
       return;
     }
 

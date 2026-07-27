@@ -504,6 +504,7 @@ assert(
 const demoServer = readText("demo/server/peerlytics.ts");
 const demoApi = readText("demo/api/orderbook.ts");
 const demoApp = readText("demo/src/App.tsx");
+const demoWallet = readText("demo/src/lib/wallet.ts");
 const demoViteConfig = readText("demo/vite.config.ts");
 const developerResources = readText("usdctofiat/developer-resources.ts");
 const integratorReport = readText("peerlytics/integrator-report.ts");
@@ -544,6 +545,12 @@ assert(
       "try {\n    window.sessionStorage.setItem(cacheKey, JSON.stringify(value))",
     ),
   "demo/src/App.tsx must treat unavailable session storage as an optional cache",
+);
+assert(
+  demoWallet.match(/method: "wallet_switchEthereumChain"/g)?.length === 2 &&
+    demoWallet.indexOf('method: "wallet_addEthereumChain"') <
+      demoWallet.lastIndexOf('method: "wallet_switchEthereumChain"'),
+  "demo/src/lib/wallet.ts must switch to Base after adding the missing chain",
 );
 assert(
   developerResources.includes("getOfframpDeveloperResources") &&

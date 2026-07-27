@@ -106,5 +106,8 @@ bot.command("sell", async (ctx) => {
   }
 });
 
-bot.start();
-console.log("Telegram offramp bot started");
+await bot.start({
+  onStart: (botInfo) => {
+    console.log(`Telegram offramp bot started as @${botInfo.username}`);
+  },
+});

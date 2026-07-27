@@ -348,6 +348,12 @@ assert(
   "templates/telegram-bot/src/index.ts must not send TODO_SET_REFERRAL_ID to the SDK",
 );
 assert(
+  telegramTemplate.includes("await bot.start({") &&
+    telegramTemplate.includes("onStart: (botInfo)") &&
+    !telegramTemplate.includes('console.log("Telegram offramp bot started")'),
+  "templates/telegram-bot/src/index.ts must only report readiness after Telegram authentication",
+);
+assert(
   baseMiniAppTemplate.includes("validation?.valid ? validation.normalized : identifier.trim()"),
   "templates/base-mini-app/app/mini-app-cashout.tsx must submit normalized payment identifiers",
 );

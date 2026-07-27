@@ -230,12 +230,10 @@ export default function App() {
     const cacheKey = getOrderbookCacheKey(selectedMarket.platform.id, currency.code);
     const cachedState = readOrderbookCache(cacheKey);
 
-    if (cachedState) {
-      setOrderbookState({
-        orderbook: cachedState.orderbook,
-        updatedAt: cachedState.updatedAt,
-      });
-    }
+    setOrderbookState({
+      orderbook: cachedState?.orderbook ?? null,
+      updatedAt: cachedState?.updatedAt ?? null,
+    });
 
     setIsOrderbookLoading(!cachedState);
     setOrderbookError(null);

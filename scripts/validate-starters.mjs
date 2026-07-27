@@ -503,6 +503,7 @@ assert(
 
 const demoServer = readText("demo/server/peerlytics.ts");
 const demoApi = readText("demo/api/orderbook.ts");
+const demoApp = readText("demo/src/App.tsx");
 const demoViteConfig = readText("demo/vite.config.ts");
 const developerResources = readText("usdctofiat/developer-resources.ts");
 const integratorReport = readText("peerlytics/integrator-report.ts");
@@ -529,6 +530,11 @@ assert(
 assert(
   demoViteConfig.includes('req.method !== "GET"'),
   "demo/vite.config.ts must match the production orderbook API method contract",
+);
+assert(
+  demoApp.includes("orderbook: cachedState?.orderbook ?? null") &&
+    demoApp.includes("updatedAt: cachedState?.updatedAt ?? null"),
+  "demo/src/App.tsx must clear stale orderbook data when a selected route has no cache",
 );
 assert(
   developerResources.includes("getOfframpDeveloperResources") &&

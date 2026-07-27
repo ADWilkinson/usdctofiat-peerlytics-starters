@@ -77,7 +77,7 @@ export function App() {
 
   const amountValue = Number(amount);
   const validation = identifier.trim()
-    ? PLATFORMS.VENMO.validate(identifier.trim())
+    ? PLATFORMS.REVOLUT.validate(identifier.trim())
     : null;
   const canSubmit =
     Boolean(walletClient) &&
@@ -97,7 +97,7 @@ export function App() {
       const result = await offramp(walletClient, {
         amount,
         currency: CURRENCIES.USD,
-        platform: PLATFORMS.VENMO,
+        platform: PLATFORMS.REVOLUT,
         identifier: identifier.trim(),
         integratorId: INTEGRATOR_ID,
         ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
@@ -161,9 +161,9 @@ export function App() {
                 />
               </label>
               <label>
-                Venmo username
+                Revolut Revtag
                 <input
-                  placeholder={PLATFORMS.VENMO.identifier.placeholder}
+                  placeholder={PLATFORMS.REVOLUT.identifier.placeholder}
                   value={identifier}
                   onChange={(event) => setIdentifier(event.target.value)}
                 />

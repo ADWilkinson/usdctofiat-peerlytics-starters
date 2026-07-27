@@ -5,7 +5,10 @@ import path from "node:path";
 const root = process.cwd();
 const failures = [];
 const require = createRequire(import.meta.url);
-const { PLATFORMS: offrampPlatforms } = require("@usdctofiat/offramp");
+const {
+  getPeerExtensionRegistrationInfo,
+  PLATFORMS: offrampPlatforms,
+} = require("@usdctofiat/offramp");
 
 function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.join(root, relativePath), "utf8"));
@@ -53,6 +56,7 @@ const offrampPlatformKeys = Object.keys(offrampPlatforms).join(", ");
 const offrampPlatformNames = Object.values(offrampPlatforms)
   .map((platform) => platform.name)
   .join(", ");
+const defaultWebPlatform = offrampPlatforms.REVOLUT;
 
 assert(
   rootReadme.includes(`Supported platforms: ${offrampPlatformNames}.`),
@@ -61,6 +65,12 @@ assert(
 assert(
   offrampLlms.includes(`Keys: ${offrampPlatformKeys}`),
   "usdctofiat/llms.txt must list the platform keys exposed by the locked offramp SDK",
+);
+assert(
+  Boolean(defaultWebPlatform) &&
+    defaultWebPlatform.currencies.includes("USD") &&
+    getPeerExtensionRegistrationInfo(defaultWebPlatform.id) === null,
+  "the locked offramp SDK must support the default web starter route without Peer extension registration",
 );
 
 // The @solana-program/* and @solana/kit pins are intentional, not dead weight:
@@ -318,6 +328,11 @@ for (const [file, text] of [
   assert(
     text.includes("await wallet.switchChain(base.id)"),
     `${file} must switch the connected Privy wallet to Base before creating its wallet client`,
+  );
+  assert(
+    text.includes("PLATFORMS.REVOLUT.validate") &&
+      text.includes("platform: PLATFORMS.REVOLUT"),
+    `${file} must default to a USD route that does not require Peer extension registration`,
   );
 }
 for (const [file, text] of [

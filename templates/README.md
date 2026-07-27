@@ -22,7 +22,7 @@ The CLI prompts for your `integratorId` and substitutes it into the template fil
 ## What ships in each template
 
 - `package.json` pinned to the latest `@usdctofiat/offramp` v4.x
-- A working `offramp()` call wired to `PLATFORMS.VENMO` / `CURRENCIES.USD` — edit to taste
+- A working `offramp()` path wired to `PLATFORMS.REVOLUT` / `CURRENCIES.USD` — edit to taste
 - Your `integratorId` baked in via the CLI prompt or env
 - A `TODO_SET_REFERRAL_ID` placeholder for partner attribution — inert until replaced
 - Type-checked TypeScript

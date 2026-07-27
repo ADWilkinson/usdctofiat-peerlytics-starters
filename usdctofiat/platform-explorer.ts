@@ -25,7 +25,7 @@ const fmt = {
 
 function main() {
   const all = Object.entries(PLATFORMS);
-  const filterKey = process.argv[2]?.toUpperCase();
+  const filterKey = process.argv[2]?.trim().toUpperCase();
 
   console.log();
   console.log(fmt.bold("  Supported Platforms"));

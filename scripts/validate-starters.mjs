@@ -519,6 +519,10 @@ assert(
   "usdctofiat/platform-explorer.ts must fail unknown platform lookups",
 );
 assert(
+  platformExplorer.includes("process.argv[2]?.trim().toUpperCase()"),
+  "usdctofiat/platform-explorer.ts must normalize padded platform keys",
+);
+assert(
   rateMonitor.includes("!Number.isFinite(POLL_SECONDS) || POLL_SECONDS < 1") &&
     rateMonitor.includes("Set POLL_SECONDS to a finite number of at least 1 second"),
   "peerlytics/rate-monitor.ts must reject polling intervals that can flood the API",

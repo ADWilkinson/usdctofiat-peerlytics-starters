@@ -148,6 +148,7 @@ const baseMiniAppAuthoredFiles = listFiles(
   "templates/base-mini-app",
   new Set([".next", ".vercel", "node_modules"]),
 );
+const telegramBotPackage = readJson("templates/telegram-bot/package.json");
 const forbiddenBaseMiniAppTerms = [
   "@far" + "caster/",
   ".well-known/far" + "caster",
@@ -202,6 +203,11 @@ for (const file of templateEntrypoints) {
     `${file} must expose OFFRAMP_DEVELOPER_RESOURCES so generated apps keep canonical docs and agent links`,
   );
 }
+
+assert(
+  telegramBotPackage.scripts?.dev === "tsx --env-file=.env src/index.ts",
+  "templates/telegram-bot must load the documented .env file in local development",
+);
 
 const templateReadmes = [
   ["templates/next/README.md", "NEXT_PUBLIC_PRIVY_APP_ID"],

@@ -34,8 +34,22 @@ if (!apiKey) {
 type Entity = "deposits" | "intents" | "volume";
 type Granularity = "hour" | "day";
 
-const entity = (process.env.ENTITY ?? "volume") as Entity;
-const granularity = (process.env.GRANULARITY ?? "day") as Granularity;
+const validEntities: Entity[] = ["deposits", "intents", "volume"];
+const validGranularities: Granularity[] = ["hour", "day"];
+const entityInput = process.env.ENTITY ?? "volume";
+const granularityInput = process.env.GRANULARITY ?? "day";
+
+if (!validEntities.includes(entityInput as Entity)) {
+  console.error(`Set ENTITY to one of: ${validEntities.join(", ")}`);
+  process.exit(1);
+}
+if (!validGranularities.includes(granularityInput as Granularity)) {
+  console.error(`Set GRANULARITY to one of: ${validGranularities.join(", ")}`);
+  process.exit(1);
+}
+
+const entity = entityInput as Entity;
+const granularity = granularityInput as Granularity;
 const fromRaw = process.env.FROM;
 const toRaw = process.env.TO;
 const baseUrl = process.env.PEERLYTICS_BASE_URL ?? "https://peerlytics.xyz";

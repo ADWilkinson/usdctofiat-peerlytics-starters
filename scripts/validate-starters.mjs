@@ -383,6 +383,11 @@ assert(
     developerResources.includes("OFFRAMP_DEVELOPER_RESOURCES"),
   "usdctofiat/developer-resources.ts must demonstrate the SDK resource bundle",
 );
+assert(
+  developerResources.includes("validProfiles.includes(profile)") &&
+    developerResources.includes("process.exitCode = 1"),
+  "usdctofiat/developer-resources.ts must reject unknown integration profiles",
+);
 
 const installClaudeScript = readText("demo/scripts/install-claude.sh");
 assert(

@@ -20,6 +20,9 @@ import {
 
 const profile = process.argv[2] as OfframpIntegratorProfile | undefined;
 const resource = getOfframpDeveloperResources(profile);
+const validProfiles = OFFRAMP_DEVELOPER_RESOURCES.playbooks.map(
+  (playbook) => playbook.profile,
+);
 
 function isPlaybook(value: typeof resource): value is OfframpIntegrationPlaybook {
   return "profile" in value;
@@ -65,4 +68,11 @@ function main() {
   console.log();
 }
 
-main();
+if (profile && !validProfiles.includes(profile)) {
+  console.error(
+    `Unknown profile "${profile}". Available: ${validProfiles.join(", ")}`,
+  );
+  process.exitCode = 1;
+} else {
+  main();
+}

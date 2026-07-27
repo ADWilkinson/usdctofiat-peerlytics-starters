@@ -580,6 +580,15 @@ assert(
   "peerlytics/rate-monitor.ts must reject polling intervals that can flood the API",
 );
 assert(
+  rateMonitor.includes("async function monitorRates(): Promise<void>") &&
+    rateMonitor.includes(
+      "await new Promise<void>((resolve) => setTimeout(resolve, POLL_SECONDS * 1000))",
+    ) &&
+    rateMonitor.includes("await monitorRates()") &&
+    !rateMonitor.includes("setInterval(async () =>"),
+  "peerlytics/rate-monitor.ts must wait for each rate check before scheduling the next",
+);
+assert(
   rateMonitor.includes("!Number.isFinite(THRESHOLD) || THRESHOLD <= 0") &&
     rateMonitor.includes("Set THRESHOLD to a finite positive rate"),
   "peerlytics/rate-monitor.ts must reject thresholds that silently disable alerts",

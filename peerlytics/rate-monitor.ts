@@ -88,6 +88,22 @@ async function checkRates(): Promise<void> {
   );
 }
 
+async function monitorRates(): Promise<void> {
+  while (true) {
+    await new Promise<void>((resolve) => setTimeout(resolve, POLL_SECONDS * 1000));
+
+    try {
+      await checkRates();
+    } catch (err) {
+      if (err instanceof PeerlyticsError) {
+        console.error(`${fmt.dim(fmt.time())}  ${fmt.red("ERR")}  ${err.message}`);
+      } else {
+        console.error(`${fmt.dim(fmt.time())}  ${fmt.red("ERR")}  ${err instanceof Error ? err.message : err}`);
+      }
+    }
+  }
+}
+
 async function main(): Promise<void> {
   console.log();
   console.log(`  ┌─────────────────────────────────────────┐`);
@@ -101,18 +117,7 @@ async function main(): Promise<void> {
   console.log();
 
   await checkRates();
-
-  setInterval(async () => {
-    try {
-      await checkRates();
-    } catch (err) {
-      if (err instanceof PeerlyticsError) {
-        console.error(`${fmt.dim(fmt.time())}  ${fmt.red("ERR")}  ${err.message}`);
-      } else {
-        console.error(`${fmt.dim(fmt.time())}  ${fmt.red("ERR")}  ${err instanceof Error ? err.message : err}`);
-      }
-    }
-  }, POLL_SECONDS * 1000);
+  await monitorRates();
 }
 
 main().catch((err) => {

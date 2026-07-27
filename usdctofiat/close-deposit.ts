@@ -17,11 +17,16 @@ import { privateKeyToAccount } from "viem/accounts";
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const depositId = process.argv[2];
+const MAX_UINT256 = (1n << 256n) - 1n;
 
 if (!PRIVATE_KEY) { console.error("Set PRIVATE_KEY env var"); process.exit(1); }
 if (!depositId) { console.error("Usage: npx tsx usdctofiat/close-deposit.ts <deposit-id>"); process.exit(1); }
 if (!/^\d+$/.test(depositId)) {
   console.error("Set <deposit-id> to a non-negative decimal integer");
+  process.exit(1);
+}
+if (BigInt(depositId) > MAX_UINT256) {
+  console.error("Set <deposit-id> within the uint256 range");
   process.exit(1);
 }
 

@@ -439,6 +439,11 @@ assert(
   "usdctofiat/close-deposit.ts must reject deposit IDs that cannot be encoded as uints",
 );
 assert(
+  closeDepositExample.includes("const MAX_UINT256 = (1n << 256n) - 1n") &&
+    closeDepositExample.includes("BigInt(depositId) > MAX_UINT256"),
+  "usdctofiat/close-deposit.ts must reject deposit IDs above the uint256 range",
+);
+assert(
   manageDepositsExample.includes('import { isAddress } from "viem"') &&
     manageDepositsExample.includes("!isAddress(address)"),
   "usdctofiat/manage-deposits.ts must reject invalid addresses before querying the indexer",

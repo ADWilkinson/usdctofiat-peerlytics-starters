@@ -35,8 +35,12 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const OTC_TAKER = process.env.OTC_TAKER;
 const REVOLUT_REV_TAG = process.env.REVOLUT_REV_TAG?.trim();
 const amount = process.env.AMOUNT ?? "1";
-const mode = (process.env.MODE ?? "one-call") as "one-call" | "retrofit";
+const mode = process.env.MODE ?? "one-call";
 
+if (mode !== "one-call" && mode !== "retrofit") {
+  console.error('Set MODE env var to either "one-call" or "retrofit"');
+  process.exit(1);
+}
 if (!PRIVATE_KEY) {
   console.error("Set PRIVATE_KEY env var (hex, 0x-prefixed)");
   process.exit(1);

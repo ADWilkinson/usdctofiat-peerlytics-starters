@@ -268,6 +268,7 @@ const executableRevolutExamples = [
   "usdctofiat/resume-deposit.ts",
   "usdctofiat/otc-deposit.ts",
 ];
+const otcDepositExample = readText("usdctofiat/otc-deposit.ts");
 
 assert(
   nextTemplate.includes("setSubmitMessage"),
@@ -425,6 +426,11 @@ for (const file of executableRevolutExamples) {
     `${file} must require and validate the operator's payout Revtag`,
   );
 }
+assert(
+  otcDepositExample.includes('mode !== "one-call" && mode !== "retrofit"') &&
+    !otcDepositExample.includes('as "one-call" | "retrofit"'),
+  "usdctofiat/otc-deposit.ts must reject invalid MODE values instead of silently using retrofit",
+);
 assert(
   telegramTemplate.includes("configuredReferralId") &&
     !telegramTemplate.includes("referralId: REFERRAL_ID"),

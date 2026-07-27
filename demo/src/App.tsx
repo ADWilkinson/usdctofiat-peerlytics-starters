@@ -1013,8 +1013,12 @@ function getErrorMessage(error: unknown): string {
 
 async function copyText(value: string): Promise<void> {
   if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(value);
-    return;
+    try {
+      await navigator.clipboard.writeText(value);
+      return;
+    } catch {
+      // Some browsers expose the API but reject it; try the legacy fallback below.
+    }
   }
 
   const textarea = document.createElement("textarea");

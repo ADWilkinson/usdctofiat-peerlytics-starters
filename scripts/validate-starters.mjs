@@ -547,6 +547,14 @@ assert(
   "demo/src/App.tsx must treat unavailable session storage as an optional cache",
 );
 assert(
+  demoApp.includes(
+    "try {\n      await navigator.clipboard.writeText(value);\n      return;\n    } catch {",
+  ) &&
+    demoApp.indexOf('document.createElement("textarea")') >
+      demoApp.indexOf("await navigator.clipboard.writeText(value)"),
+  "demo/src/App.tsx must fall back when the modern clipboard API rejects",
+);
+assert(
   demoWallet.match(/method: "wallet_switchEthereumChain"/g)?.length === 2 &&
     demoWallet.indexOf('method: "wallet_addEthereumChain"') <
       demoWallet.lastIndexOf('method: "wallet_switchEthereumChain"'),

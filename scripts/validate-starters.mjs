@@ -467,6 +467,7 @@ const demoServer = readText("demo/server/peerlytics.ts");
 const demoApi = readText("demo/api/orderbook.ts");
 const demoViteConfig = readText("demo/vite.config.ts");
 const developerResources = readText("usdctofiat/developer-resources.ts");
+const liveActivity = readText("peerlytics/live-activity.ts");
 const platformExplorer = readText("usdctofiat/platform-explorer.ts");
 const rateMonitor = readText("peerlytics/rate-monitor.ts");
 const timeseriesChart = readText("peerlytics/timeseries-chart.ts");
@@ -507,6 +508,11 @@ assert(
   rateMonitor.includes("!Number.isFinite(POLL_SECONDS) || POLL_SECONDS < 1") &&
     rateMonitor.includes("Set POLL_SECONDS to a finite number of at least 1 second"),
   "peerlytics/rate-monitor.ts must reject polling intervals that can flood the API",
+);
+assert(
+  liveActivity.includes("!Number.isFinite(POLL_SECONDS) || POLL_SECONDS < 1") &&
+    liveActivity.includes("Set POLL_SECONDS to a finite number of at least 1 second"),
+  "peerlytics/live-activity.ts must reject polling intervals that can flood the API",
 );
 assert(
   timeseriesChart.includes("!validEntities.includes(entityInput as Entity)") &&

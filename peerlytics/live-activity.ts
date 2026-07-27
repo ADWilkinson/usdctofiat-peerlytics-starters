@@ -22,6 +22,11 @@ import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
 const POLL_SECONDS = Number(process.env.POLL_SECONDS ?? "10");
 const EVENT_TYPE = process.env.EVENT_TYPE as EventType | undefined;
 
+if (!Number.isFinite(POLL_SECONDS) || POLL_SECONDS < 1) {
+  console.error("Set POLL_SECONDS to a finite number of at least 1 second");
+  process.exit(1);
+}
+
 // ── Formatting ──────────────────────────────────────────────────
 
 const fmt = {

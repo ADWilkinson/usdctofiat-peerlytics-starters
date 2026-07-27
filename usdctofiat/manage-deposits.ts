@@ -10,7 +10,7 @@
 import { deposits } from "@usdctofiat/offramp";
 import { isAddress } from "viem";
 
-const address = process.argv[2] ?? process.env.WALLET_ADDRESS;
+const address = (process.argv[2] ?? process.env.WALLET_ADDRESS)?.trim();
 if (!address) {
   console.error("Usage: npx tsx usdctofiat/manage-deposits.ts <wallet-address>");
   process.exit(1);

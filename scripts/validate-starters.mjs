@@ -444,6 +444,12 @@ assert(
   "usdctofiat/manage-deposits.ts must reject invalid addresses before querying the indexer",
 );
 assert(
+  manageDepositsExample.includes(
+    "(process.argv[2] ?? process.env.WALLET_ADDRESS)?.trim()",
+  ),
+  "usdctofiat/manage-deposits.ts must normalize pasted wallet addresses",
+);
+assert(
   telegramTemplate.includes("configuredReferralId") &&
     !telegramTemplate.includes("referralId: REFERRAL_ID"),
   "templates/telegram-bot/src/index.ts must not send TODO_SET_REFERRAL_ID to the SDK",

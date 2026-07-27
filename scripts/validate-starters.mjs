@@ -537,6 +537,15 @@ assert(
   "demo/src/App.tsx must clear stale orderbook data when a selected route has no cache",
 );
 assert(
+  demoApp.includes(
+    "try {\n    const rawValue = window.sessionStorage.getItem(cacheKey)",
+  ) &&
+    demoApp.includes(
+      "try {\n    window.sessionStorage.setItem(cacheKey, JSON.stringify(value))",
+    ),
+  "demo/src/App.tsx must treat unavailable session storage as an optional cache",
+);
+assert(
   developerResources.includes("getOfframpDeveloperResources") &&
     developerResources.includes("OFFRAMP_DEVELOPER_RESOURCES"),
   "usdctofiat/developer-resources.ts must demonstrate the SDK resource bundle",

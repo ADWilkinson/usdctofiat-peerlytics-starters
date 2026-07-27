@@ -1042,12 +1042,11 @@ function getOrderbookCacheKey(
 
 function readOrderbookCache(cacheKey: string): CachedOrderbookState | null {
   if (typeof window === "undefined") return null;
-  const rawValue = window.sessionStorage.getItem(cacheKey);
-  if (!rawValue) return null;
   try {
+    const rawValue = window.sessionStorage.getItem(cacheKey);
+    if (!rawValue) return null;
     return JSON.parse(rawValue) as CachedOrderbookState;
   } catch {
-    window.sessionStorage.removeItem(cacheKey);
     return null;
   }
 }
@@ -1057,5 +1056,9 @@ function writeOrderbookCache(
   value: CachedOrderbookState,
 ): void {
   if (typeof window === "undefined") return;
-  window.sessionStorage.setItem(cacheKey, JSON.stringify(value));
+  try {
+    window.sessionStorage.setItem(cacheKey, JSON.stringify(value));
+  } catch {
+    // Session storage is an optional cache; the fetched orderbook is already in state.
+  }
 }

@@ -435,6 +435,11 @@ assert(
   "usdctofiat/create-deposit.ts must validate USDC amounts before wallet activity",
 );
 assert(
+  otcDepositExample.includes("parseUnits(amount, 6) < 1_000_000n") &&
+    otcDepositExample.includes("at most 6 decimal places"),
+  "usdctofiat/otc-deposit.ts must validate USDC amounts before wallet activity",
+);
+assert(
   otcDepositExample.includes('mode !== "one-call" && mode !== "retrofit"') &&
     !otcDepositExample.includes('as "one-call" | "retrofit"'),
   "usdctofiat/otc-deposit.ts must reject invalid MODE values instead of silently using retrofit",

@@ -27,14 +27,14 @@ import {
   CURRENCIES,
   type OfframpError,
 } from "@usdctofiat/offramp";
-import { createWalletClient, http, isAddress } from "viem";
+import { createWalletClient, http, isAddress, parseUnits } from "viem";
 import { base } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const OTC_TAKER = process.env.OTC_TAKER;
 const REVOLUT_REV_TAG = process.env.REVOLUT_REV_TAG?.trim();
-const amount = process.env.AMOUNT ?? "1";
+const amount = (process.env.AMOUNT ?? "1").trim();
 const mode = process.env.MODE ?? "one-call";
 
 if (mode !== "one-call" && mode !== "retrofit") {
@@ -61,6 +61,11 @@ if (!revtagValidation.valid) {
 }
 const revolutRevTag = revtagValidation.normalized;
 const taker: string = OTC_TAKER;
+
+if (!/^\d+(?:\.\d{0,6})?$/.test(amount) || parseUnits(amount, 6) < 1_000_000n) {
+  console.error("Set AMOUNT to at least 1 USDC with at most 6 decimal places");
+  process.exit(1);
+}
 
 const fmt = {
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,

@@ -191,7 +191,7 @@ if (paypalLimit?.isLocked) {
 }
 ```
 
-Supported platforms: Revolut, Venmo, Cash App, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
+Supported platforms: Venmo, Cash App, Chime, Revolut, Wise, Mercado Pago, Zelle, PayPal, Monzo.
 
 [npm](https://www.npmjs.com/package/@usdctofiat/offramp) · [Developer portal](https://usdctofiat.xyz/developers) · [SDK guide](https://usdctofiat.xyz/developers/offramp-sdk/)
 

@@ -103,7 +103,7 @@ PLATFORMS.CASHAPP.extensionRegistration
 // { providerId: "cashapp", requiredPrompt: "This Cash App cashtag is not registered yet...", ctaLabel: "Register Cash App Cashtag" }
 ```
 
-Keys: VENMO, CASHAPP, CHIME, REVOLUT, WISE, MERCADO_PAGO, ZELLE, PAYPAL, MONZO, N26
+Keys: VENMO, CASHAPP, CHIME, REVOLUT, WISE, MERCADO_PAGO, ZELLE, PAYPAL, MONZO
 
 ## CURRENCIES constant
 

@@ -1,8 +1,11 @@
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 
 const root = process.cwd();
 const failures = [];
+const require = createRequire(import.meta.url);
+const { PLATFORMS: offrampPlatforms } = require("@usdctofiat/offramp");
 
 function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.join(root, relativePath), "utf8"));
@@ -41,9 +44,24 @@ function dependencyVersion(pkg, name) {
 }
 
 const rootPkg = readJson("package.json");
+const rootReadme = readText("README.md");
+const offrampLlms = readText("usdctofiat/llms.txt");
 const rootOfframpVersion = dependencyVersion(rootPkg, "@usdctofiat/offramp");
 const rootPeerlyticsVersion = dependencyVersion(rootPkg, "@peerlytics/sdk");
 const rootZkp2pSdkOverride = rootPkg.overrides?.["@zkp2p/sdk"];
+const offrampPlatformKeys = Object.keys(offrampPlatforms).join(", ");
+const offrampPlatformNames = Object.values(offrampPlatforms)
+  .map((platform) => platform.name)
+  .join(", ");
+
+assert(
+  rootReadme.includes(`Supported platforms: ${offrampPlatformNames}.`),
+  "README.md must list the platforms exposed by the locked offramp SDK",
+);
+assert(
+  offrampLlms.includes(`Keys: ${offrampPlatformKeys}`),
+  "usdctofiat/llms.txt must list the platform keys exposed by the locked offramp SDK",
+);
 
 // The @solana-program/* and @solana/kit pins are intentional, not dead weight:
 // @privy-io/react-auth statically imports them in its ESM bundle (e.g.

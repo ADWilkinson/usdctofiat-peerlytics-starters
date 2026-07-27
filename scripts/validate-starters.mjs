@@ -467,6 +467,7 @@ const demoServer = readText("demo/server/peerlytics.ts");
 const demoApi = readText("demo/api/orderbook.ts");
 const demoViteConfig = readText("demo/vite.config.ts");
 const developerResources = readText("usdctofiat/developer-resources.ts");
+const integratorReport = readText("peerlytics/integrator-report.ts");
 const liveActivity = readText("peerlytics/live-activity.ts");
 const platformExplorer = readText("usdctofiat/platform-explorer.ts");
 const rateMonitor = readText("peerlytics/rate-monitor.ts");
@@ -498,6 +499,11 @@ assert(
   developerResources.includes("validProfiles.includes(profile)") &&
     developerResources.includes("process.exitCode = 1"),
   "usdctofiat/developer-resources.ts must reject unknown integration profiles",
+);
+assert(
+  integratorReport.includes("if (windowDays !== 90)") &&
+    integratorReport.includes("the only currently materialized window"),
+  "peerlytics/integrator-report.ts must reject unsupported report windows locally",
 );
 assert(
   platformExplorer.includes('Key "${filterKey}" not found') &&

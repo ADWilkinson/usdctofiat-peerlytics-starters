@@ -27,6 +27,11 @@ if (!code) {
 }
 
 const windowDays = Number(process.env.WINDOW_DAYS ?? 90);
+if (windowDays !== 90) {
+  console.error("Set WINDOW_DAYS to 90 (the only currently materialized window)");
+  process.exit(1);
+}
+
 const apiKey = process.env.PEERLYTICS_API_KEY;
 const baseUrl = process.env.PEERLYTICS_BASE_URL ?? "https://peerlytics.xyz";
 

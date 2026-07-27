@@ -357,6 +357,10 @@ assert(
   "demo/vite.config.ts must load the server-only Peerlytics key from Vite env files",
 );
 assert(
+  demoViteConfig.includes('req.method !== "GET"'),
+  "demo/vite.config.ts must match the production orderbook API method contract",
+);
+assert(
   developerResources.includes("getOfframpDeveloperResources") &&
     developerResources.includes("OFFRAMP_DEVELOPER_RESOURCES"),
   "usdctofiat/developer-resources.ts must demonstrate the SDK resource bundle",

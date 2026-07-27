@@ -46,6 +46,11 @@ function peerlyticsOrderbookProxy(): Plugin {
           return;
         }
 
+        if (req.method !== "GET") {
+          sendJson(res, 405, { error: "Method not allowed." });
+          return;
+        }
+
         if (!getPeerlyticsApiKey()) {
           sendJson(res, 500, { error: "Missing PEERLYTICS_API_KEY." });
           return;

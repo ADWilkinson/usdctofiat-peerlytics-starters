@@ -28,7 +28,7 @@ import {
   OfframpError,
   getPeerExtensionRegistrationInfo,
 } from "@usdctofiat/offramp";
-import { createWalletClient, http } from "viem";
+import { createWalletClient, http, parseUnits } from "viem";
 import { base } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 
@@ -44,7 +44,11 @@ if (!PAYPAL_USERNAME) {
   process.exit(1);
 }
 
-const amount = process.env.AMOUNT ?? "1";
+const amount = (process.env.AMOUNT ?? "1").trim();
+if (!/^\d+(?:\.\d{0,6})?$/.test(amount) || parseUnits(amount, 6) < 1_000_000n) {
+  console.error("Set AMOUNT to at least 1 USDC with at most 6 decimal places");
+  process.exit(1);
+}
 
 const fmt = {
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,

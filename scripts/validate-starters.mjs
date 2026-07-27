@@ -270,6 +270,7 @@ const executableRevolutExamples = [
 ];
 const otcDepositExample = readText("usdctofiat/otc-deposit.ts");
 const createDepositExample = readText("usdctofiat/create-deposit.ts");
+const paypalDepositExample = readText("usdctofiat/paypal-deposit.ts");
 const closeDepositExample = readText("usdctofiat/close-deposit.ts");
 const manageDepositsExample = readText("usdctofiat/manage-deposits.ts");
 
@@ -438,6 +439,11 @@ assert(
   otcDepositExample.includes("parseUnits(amount, 6) < 1_000_000n") &&
     otcDepositExample.includes("at most 6 decimal places"),
   "usdctofiat/otc-deposit.ts must validate USDC amounts before wallet activity",
+);
+assert(
+  paypalDepositExample.includes("parseUnits(amount, 6) < 1_000_000n") &&
+    paypalDepositExample.includes("at most 6 decimal places"),
+  "usdctofiat/paypal-deposit.ts must validate USDC amounts before wallet activity",
 );
 assert(
   otcDepositExample.includes('mode !== "one-call" && mode !== "retrofit"') &&

@@ -11,6 +11,7 @@ import { base } from "viem/chains";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
 const MAKER_PRIVATE_KEY = process.env.MAKER_PRIVATE_KEY as `0x${string}` | undefined;
+const AUTHORIZED_TELEGRAM_USER_ID = process.env.AUTHORIZED_TELEGRAM_USER_ID?.trim() || "";
 const DEFAULT_INTEGRATOR_ID = "__INTEGRATOR_ID__";
 const DEFAULT_REFERRAL_ID = "TODO_SET_REFERRAL_ID";
 const INTEGRATOR_ID = process.env.INTEGRATOR_ID || DEFAULT_INTEGRATOR_ID;
@@ -22,6 +23,9 @@ if (!BOT_TOKEN) {
 }
 if (!MAKER_PRIVATE_KEY) {
   throw new Error("Missing MAKER_PRIVATE_KEY");
+}
+if (!/^\d+$/.test(AUTHORIZED_TELEGRAM_USER_ID)) {
+  throw new Error("Missing or invalid AUTHORIZED_TELEGRAM_USER_ID");
 }
 
 const account = privateKeyToAccount(MAKER_PRIVATE_KEY);
@@ -78,6 +82,11 @@ bot.command("resources", (ctx) => {
 });
 
 bot.command("sell", async (ctx) => {
+  if (String(ctx.from?.id) !== AUTHORIZED_TELEGRAM_USER_ID) {
+    await ctx.reply("You are not authorized to create deposits.");
+    return;
+  }
+
   try {
     const text = ctx.message?.text || "";
     const { amount, identifier } = parseSellCommand(text);

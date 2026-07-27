@@ -150,6 +150,7 @@ const envFiles = {
   "templates/telegram-bot/.env.example": [
     "TELEGRAM_BOT_TOKEN",
     "MAKER_PRIVATE_KEY",
+    "AUTHORIZED_TELEGRAM_USER_ID",
     "INTEGRATOR_ID",
     "REFERRAL_ID",
   ],
@@ -251,6 +252,7 @@ const nextTemplate = readText("templates/next/app/page.tsx");
 const baseMiniAppTemplate = readText("templates/base-mini-app/app/mini-app-cashout.tsx");
 const viteTemplate = readText("templates/vite/src/App.tsx");
 const telegramTemplate = readText("templates/telegram-bot/src/index.ts");
+const telegramSellHandler = telegramTemplate.slice(telegramTemplate.indexOf('bot.command("sell"'));
 
 assert(
   nextTemplate.includes("setSubmitMessage"),
@@ -360,6 +362,13 @@ assert(
 assert(
   telegramTemplate.includes("Usage: /sell <amount> <identifier>"),
   "templates/telegram-bot/src/index.ts must reject incomplete /sell commands",
+);
+assert(
+  telegramTemplate.includes("Missing or invalid AUTHORIZED_TELEGRAM_USER_ID") &&
+    telegramSellHandler.indexOf("String(ctx.from?.id) !== AUTHORIZED_TELEGRAM_USER_ID") >= 0 &&
+    telegramSellHandler.indexOf("String(ctx.from?.id) !== AUTHORIZED_TELEGRAM_USER_ID") <
+      telegramSellHandler.indexOf("parseSellCommand(text)"),
+  "templates/telegram-bot/src/index.ts must authorize /sell callers before parsing or wallet activity",
 );
 assert(
   !telegramTemplate.includes('identifierRaw || "alice"'),

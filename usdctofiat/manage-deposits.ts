@@ -8,10 +8,15 @@
  */
 
 import { deposits } from "@usdctofiat/offramp";
+import { isAddress } from "viem";
 
 const address = process.argv[2] ?? process.env.WALLET_ADDRESS;
 if (!address) {
   console.error("Usage: npx tsx usdctofiat/manage-deposits.ts <wallet-address>");
+  process.exit(1);
+}
+if (!isAddress(address)) {
+  console.error("Set <wallet-address> to a valid Ethereum address");
   process.exit(1);
 }
 

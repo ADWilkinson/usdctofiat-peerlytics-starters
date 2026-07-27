@@ -270,6 +270,7 @@ const executableRevolutExamples = [
 ];
 const otcDepositExample = readText("usdctofiat/otc-deposit.ts");
 const closeDepositExample = readText("usdctofiat/close-deposit.ts");
+const manageDepositsExample = readText("usdctofiat/manage-deposits.ts");
 
 assert(
   nextTemplate.includes("setSubmitMessage"),
@@ -436,6 +437,11 @@ assert(
   closeDepositExample.includes("!/^\\d+$/.test(depositId)") &&
     closeDepositExample.includes("non-negative decimal integer"),
   "usdctofiat/close-deposit.ts must reject deposit IDs that cannot be encoded as uints",
+);
+assert(
+  manageDepositsExample.includes('import { isAddress } from "viem"') &&
+    manageDepositsExample.includes("!isAddress(address)"),
+  "usdctofiat/manage-deposits.ts must reject invalid addresses before querying the indexer",
 );
 assert(
   telegramTemplate.includes("configuredReferralId") &&

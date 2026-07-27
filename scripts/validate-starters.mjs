@@ -269,6 +269,7 @@ const executableRevolutExamples = [
   "usdctofiat/otc-deposit.ts",
 ];
 const otcDepositExample = readText("usdctofiat/otc-deposit.ts");
+const createDepositExample = readText("usdctofiat/create-deposit.ts");
 const closeDepositExample = readText("usdctofiat/close-deposit.ts");
 const manageDepositsExample = readText("usdctofiat/manage-deposits.ts");
 
@@ -428,6 +429,11 @@ for (const file of executableRevolutExamples) {
     `${file} must require and validate the operator's payout Revtag`,
   );
 }
+assert(
+  createDepositExample.includes("parseUnits(amount, 6) < 1_000_000n") &&
+    createDepositExample.includes("at most 6 decimal places"),
+  "usdctofiat/create-deposit.ts must validate USDC amounts before wallet activity",
+);
 assert(
   otcDepositExample.includes('mode !== "one-call" && mode !== "retrofit"') &&
     !otcDepositExample.includes('as "one-call" | "retrofit"'),

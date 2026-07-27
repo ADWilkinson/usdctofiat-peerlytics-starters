@@ -515,6 +515,13 @@ assert(
   "peerlytics/live-activity.ts must reject polling intervals that can flood the API",
 );
 assert(
+  liveActivity.includes("Record<EventType") &&
+    liveActivity.includes("!Object.hasOwn(EVENT_STYLES, EVENT_TYPE_INPUT)") &&
+    liveActivity.indexOf("!Object.hasOwn(EVENT_STYLES, EVENT_TYPE_INPUT)") <
+      liveActivity.indexOf("const client = new Peerlytics"),
+  "peerlytics/live-activity.ts must reject invalid event types before polling",
+);
+assert(
   timeseriesChart.includes("!validEntities.includes(entityInput as Entity)") &&
     timeseriesChart.includes(
       "!validGranularities.includes(granularityInput as Granularity)",

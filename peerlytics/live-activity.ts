@@ -20,7 +20,7 @@ import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
 // ── Config ──────────────────────────────────────────────────────
 
 const POLL_SECONDS = Number(process.env.POLL_SECONDS ?? "10");
-const EVENT_TYPE = process.env.EVENT_TYPE as EventType | undefined;
+const EVENT_TYPE_INPUT = process.env.EVENT_TYPE;
 
 if (!Number.isFinite(POLL_SECONDS) || POLL_SECONDS < 1) {
   console.error("Set POLL_SECONDS to a finite number of at least 1 second");
@@ -50,7 +50,7 @@ const fmt = {
 };
 
 // Event type colors and labels
-const EVENT_STYLES: Record<string, { color: (s: string) => string; icon: string }> = {
+const EVENT_STYLES: Record<EventType, { color: (s: string) => string; icon: string }> = {
   intent_signaled: { color: fmt.cyan, icon: "◈" },
   intent_fulfilled: { color: fmt.green, icon: "●" },
   intent_pruned: { color: fmt.red, icon: "✕" },
@@ -61,7 +61,13 @@ const EVENT_STYLES: Record<string, { color: (s: string) => string; icon: string 
   deposit_rate_updated: { color: fmt.yellow, icon: "↕" },
 };
 
-function getStyle(type: string): { color: (s: string) => string; icon: string } {
+if (EVENT_TYPE_INPUT && !Object.hasOwn(EVENT_STYLES, EVENT_TYPE_INPUT)) {
+  console.error(`Set EVENT_TYPE to one of: ${Object.keys(EVENT_STYLES).join(", ")}`);
+  process.exit(1);
+}
+const EVENT_TYPE = EVENT_TYPE_INPUT as EventType | undefined;
+
+function getStyle(type: EventType): { color: (s: string) => string; icon: string } {
   return EVENT_STYLES[type] ?? { color: fmt.dim, icon: "·" };
 }
 

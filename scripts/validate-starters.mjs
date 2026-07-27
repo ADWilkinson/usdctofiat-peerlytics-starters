@@ -360,6 +360,7 @@ const demoServer = readText("demo/server/peerlytics.ts");
 const demoApi = readText("demo/api/orderbook.ts");
 const demoViteConfig = readText("demo/vite.config.ts");
 const developerResources = readText("usdctofiat/developer-resources.ts");
+const platformExplorer = readText("usdctofiat/platform-explorer.ts");
 
 assert(
   demoServer.includes("const supportedRoutes"),
@@ -387,6 +388,11 @@ assert(
   developerResources.includes("validProfiles.includes(profile)") &&
     developerResources.includes("process.exitCode = 1"),
   "usdctofiat/developer-resources.ts must reject unknown integration profiles",
+);
+assert(
+  platformExplorer.includes('Key "${filterKey}" not found') &&
+    platformExplorer.includes("process.exitCode = 1"),
+  "usdctofiat/platform-explorer.ts must fail unknown platform lookups",
 );
 
 const installClaudeScript = readText("demo/scripts/install-claude.sh");

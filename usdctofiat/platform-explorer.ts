@@ -37,6 +37,7 @@ function main() {
     if (!entry) {
       console.log(fmt.dim(`  Key "${filterKey}" not found. Available: ${all.map(([k]) => k).join(", ")}`));
       console.log();
+      process.exitCode = 1;
       return;
     }
     printDetail(filterKey, entry);

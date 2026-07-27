@@ -595,6 +595,13 @@ assert(
   "peerlytics/live-activity.ts must reject polling intervals that can flood the API",
 );
 assert(
+  liveActivity.includes("const MAX_SEEN_EVENTS = 1_000") &&
+    liveActivity.includes("if (seen.size > MAX_SEEN_EVENTS)") &&
+    liveActivity.includes("seen.delete(oldestKey)") &&
+    liveActivity.includes("if (rememberEvent(key))"),
+  "peerlytics/live-activity.ts must bound its in-memory event deduplication history",
+);
+assert(
   liveActivity.includes("Record<EventType") &&
     liveActivity.includes("!Object.hasOwn(EVENT_STYLES, EVENT_TYPE_INPUT)") &&
     liveActivity.indexOf("!Object.hasOwn(EVENT_STYLES, EVENT_TYPE_INPUT)") <

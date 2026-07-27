@@ -79,11 +79,24 @@ const client = new Peerlytics({
 
 // ── Activity Feed ───────────────────────────────────────────────
 
+const MAX_SEEN_EVENTS = 1_000;
 const seen = new Set<string>();
 
 function eventKey(event: LiveEvent): string {
   const hash = event.intentHash ?? event.id ?? "";
   return `${event.type}-${hash}-${event.timestamp}`;
+}
+
+function rememberEvent(key: string): boolean {
+  if (seen.has(key)) return false;
+
+  seen.add(key);
+  if (seen.size > MAX_SEEN_EVENTS) {
+    const oldestKey = seen.values().next().value;
+    if (oldestKey !== undefined) seen.delete(oldestKey);
+  }
+
+  return true;
 }
 
 function renderEvent(event: LiveEvent): void {
@@ -114,8 +127,7 @@ async function poll(): Promise<void> {
 
   for (const event of activity.events) {
     const key = eventKey(event);
-    if (!seen.has(key)) {
-      seen.add(key);
+    if (rememberEvent(key)) {
       newEvents.push(event);
     }
   }

@@ -555,6 +555,10 @@ assert(
   "demo/src/App.tsx must fall back when the modern clipboard API rejects",
 );
 assert(
+  demoApp.includes('role={tone === "error" ? "alert" : "status"}'),
+  "demo/src/App.tsx must announce asynchronous feedback to assistive technology",
+);
+assert(
   demoWallet.match(/method: "wallet_switchEthereumChain"/g)?.length === 2 &&
     demoWallet.indexOf('method: "wallet_addEthereumChain"') <
       demoWallet.lastIndexOf('method: "wallet_switchEthereumChain"'),

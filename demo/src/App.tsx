@@ -984,7 +984,11 @@ function InlineMessage({
   children: React.ReactNode;
   tone: "error" | "success";
 }) {
-  return <div className={`inline-message ${tone}`}>{children}</div>;
+  return (
+    <div className={`inline-message ${tone}`} role={tone === "error" ? "alert" : "status"}>
+      {children}
+    </div>
+  );
 }
 
 function ValueTile({

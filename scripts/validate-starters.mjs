@@ -401,6 +401,16 @@ assert(
   "templates/telegram-bot/src/index.ts must enforce the SDK's 1 USDC minimum",
 );
 assert(
+  telegramTemplate.includes("const USDC_DECIMALS = 6;") &&
+    telegramTemplate.includes("fractionalDigits > USDC_DECIMALS") &&
+    telegramTemplate.includes("Amount supports at most ${USDC_DECIMALS} decimal places."),
+  "templates/telegram-bot/src/index.ts must reject amounts that exceed USDC precision",
+);
+assert(
+  readText("templates/telegram-bot/README.md").includes("at most six decimal places"),
+  "templates/telegram-bot/README.md must document the USDC amount precision limit",
+);
+assert(
   telegramTemplate.includes("configuredReferralId") &&
     !telegramTemplate.includes("referralId: REFERRAL_ID"),
   "templates/telegram-bot/src/index.ts must not send TODO_SET_REFERRAL_ID to the SDK",

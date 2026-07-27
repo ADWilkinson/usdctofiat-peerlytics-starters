@@ -17,6 +17,7 @@ const DEFAULT_REFERRAL_ID = "TODO_SET_REFERRAL_ID";
 const INTEGRATOR_ID = process.env.INTEGRATOR_ID || DEFAULT_INTEGRATOR_ID;
 const REFERRAL_ID = process.env.REFERRAL_ID || DEFAULT_REFERRAL_ID;
 const configuredReferralId = REFERRAL_ID === DEFAULT_REFERRAL_ID ? undefined : REFERRAL_ID;
+const USDC_DECIMALS = 6;
 
 if (!BOT_TOKEN) {
   throw new Error("Missing TELEGRAM_BOT_TOKEN");
@@ -48,6 +49,11 @@ function parseSellCommand(text: string): { amount: string; identifier: string } 
 
   if (!/^\d+(\.\d+)?$/.test(amount)) {
     throw new Error("Amount must be a positive USDC number.");
+  }
+
+  const fractionalDigits = amount.split(".")[1]?.length ?? 0;
+  if (fractionalDigits > USDC_DECIMALS) {
+    throw new Error(`Amount supports at most ${USDC_DECIMALS} decimal places.`);
   }
 
   const parsedAmount = Number.parseFloat(amount);

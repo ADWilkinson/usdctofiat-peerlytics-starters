@@ -13,10 +13,11 @@ npm run dev
 Set `TELEGRAM_BOT_TOKEN`, `MAKER_PRIVATE_KEY`, `AUTHORIZED_TELEGRAM_USER_ID`,
 and `INTEGRATOR_ID` before starting the bot. The authorized user ID must be your
 numeric Telegram user ID; `/sell` requests from every other account are rejected
-before the managed wallet is used. `BASE_RPC_URL` is optional and falls back to
-the public Base RPC. `REFERRAL_ID` is optional; the starter omits `referralId`
-while it is still `TODO_SET_REFERRAL_ID`. If you are copying the template
-without the scaffold CLI, replace `__INTEGRATOR_ID__` yourself.
+before the managed wallet is used. Amounts may have at most six decimal places,
+matching USDC precision. `BASE_RPC_URL` is optional and falls back to the public
+Base RPC. `REFERRAL_ID` is optional; the starter omits `referralId` while it is
+still `TODO_SET_REFERRAL_ID`. If you are copying the template without the
+scaffold CLI, replace `__INTEGRATOR_ID__` yourself.
 
 ## Customize
 

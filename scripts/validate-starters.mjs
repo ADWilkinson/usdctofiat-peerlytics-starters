@@ -519,6 +519,11 @@ assert(
   "peerlytics/orderbook-snapshot.ts must reject empty currency queries",
 );
 assert(
+  orderbookSnapshot.indexOf("process.exitCode = 1") >
+    orderbookSnapshot.indexOf("} catch (err)"),
+  "peerlytics/orderbook-snapshot.ts must exit nonzero after request failures",
+);
+assert(
   platformExplorer.includes('Key "${filterKey}" not found') &&
     platformExplorer.includes("process.exitCode = 1"),
   "usdctofiat/platform-explorer.ts must fail unknown platform lookups",

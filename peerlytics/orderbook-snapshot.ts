@@ -138,6 +138,7 @@ async function main(): Promise<void> {
       renderMarket(currency, levels, currencyBook.totalLiquidityUsd);
       console.log();
     } catch (err) {
+      process.exitCode = 1;
       if (err instanceof PeerlyticsError) {
         console.log(`  ${fmt.dim(currency)}: ${err.message}`);
       } else {

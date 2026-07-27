@@ -53,6 +53,7 @@ const granularity = granularityInput as Granularity;
 const fromRaw = process.env.FROM;
 const toRaw = process.env.TO;
 const baseUrl = process.env.PEERLYTICS_BASE_URL ?? "https://peerlytics.xyz";
+const MAX_WINDOW_MILLIS = 400 * 24 * 60 * 60 * 1000;
 
 const fmt = {
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
@@ -109,6 +110,13 @@ async function main(): Promise<void> {
     boundaryMillis(from) >= boundaryMillis(to)
   ) {
     throw new Error("Set FROM to a time before TO");
+  }
+  if (
+    from !== undefined &&
+    to !== undefined &&
+    boundaryMillis(to) - boundaryMillis(from) > MAX_WINDOW_MILLIS
+  ) {
+    throw new Error("Set FROM and TO to a window of at most 400 days");
   }
 
   const client = new Peerlytics({ apiKey, baseUrl });

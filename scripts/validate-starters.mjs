@@ -571,6 +571,13 @@ assert(
     timeseriesChart.includes("Set FROM to a time before TO"),
   "peerlytics/timeseries-chart.ts must reject reversed or empty time windows",
 );
+assert(
+  timeseriesChart.includes(
+    "boundaryMillis(to) - boundaryMillis(from) > MAX_WINDOW_MILLIS",
+  ) &&
+    timeseriesChart.includes("window of at most 400 days"),
+  "peerlytics/timeseries-chart.ts must enforce the SDK's 400-day window cap",
+);
 
 const installClaudeScript = readText("demo/scripts/install-claude.sh");
 assert(

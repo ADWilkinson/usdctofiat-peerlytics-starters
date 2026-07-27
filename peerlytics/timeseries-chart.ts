@@ -77,10 +77,23 @@ function sparkbar(value: number, max: number, width = 36): string {
 }
 
 /** Accept either ISO-8601 or unix seconds; leave undefined to let the API default. */
-function parseBoundary(value: string | undefined): string | number | undefined {
+function parseBoundary(
+  value: string | undefined,
+  envKey: "FROM" | "TO",
+): string | number | undefined {
   if (!value) return undefined;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : value;
+  const normalized = value.trim();
+  if (!normalized) {
+    throw new Error(`Set ${envKey} to ISO-8601 or finite unix seconds`);
+  }
+  const unixSeconds = Number(normalized);
+  if (Number.isFinite(unixSeconds)) return unixSeconds;
+
+  const looksIso8601 = /^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(normalized);
+  if (!looksIso8601 || Number.isNaN(Date.parse(normalized))) {
+    throw new Error(`Set ${envKey} to ISO-8601 or finite unix seconds`);
+  }
+  return normalized;
 }
 
 async function main(): Promise<void> {
@@ -89,8 +102,8 @@ async function main(): Promise<void> {
   const data = await client.getTimeseries({
     entity,
     granularity,
-    from: parseBoundary(fromRaw),
-    to: parseBoundary(toRaw),
+    from: parseBoundary(fromRaw, "FROM"),
+    to: parseBoundary(toRaw, "TO"),
   });
 
   // `buckets` is the global single-series payload (null when groupBy is set).

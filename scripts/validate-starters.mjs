@@ -560,6 +560,12 @@ assert(
     ),
   "peerlytics/timeseries-chart.ts must reject invalid enums before calling the paid endpoint",
 );
+assert(
+  timeseriesChart.includes('parseBoundary(fromRaw, "FROM")') &&
+    timeseriesChart.includes('parseBoundary(toRaw, "TO")') &&
+    timeseriesChart.includes("Number.isNaN(Date.parse(normalized))"),
+  "peerlytics/timeseries-chart.ts must validate time boundaries before calling the paid endpoint",
+);
 
 const installClaudeScript = readText("demo/scripts/install-claude.sh");
 assert(

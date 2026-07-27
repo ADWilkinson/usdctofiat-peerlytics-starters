@@ -16,7 +16,7 @@ import { base } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const depositId = process.argv[2];
+const depositId = process.argv[2]?.trim();
 const MAX_UINT256 = (1n << 256n) - 1n;
 
 if (!PRIVATE_KEY) { console.error("Set PRIVATE_KEY env var"); process.exit(1); }

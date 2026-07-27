@@ -444,6 +444,10 @@ assert(
   "usdctofiat/close-deposit.ts must reject deposit IDs above the uint256 range",
 );
 assert(
+  closeDepositExample.includes("process.argv[2]?.trim()"),
+  "usdctofiat/close-deposit.ts must normalize pasted deposit IDs",
+);
+assert(
   manageDepositsExample.includes('import { isAddress } from "viem"') &&
     manageDepositsExample.includes("!isAddress(address)"),
   "usdctofiat/manage-deposits.ts must reject invalid addresses before querying the indexer",

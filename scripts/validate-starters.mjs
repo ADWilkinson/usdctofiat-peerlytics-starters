@@ -56,7 +56,7 @@ const offrampPlatformKeys = Object.keys(offrampPlatforms).join(", ");
 const offrampPlatformNames = Object.values(offrampPlatforms)
   .map((platform) => platform.name)
   .join(", ");
-const defaultWebPlatform = offrampPlatforms.REVOLUT;
+const defaultStarterPlatform = offrampPlatforms.REVOLUT;
 
 assert(
   rootReadme.includes(`Supported platforms: ${offrampPlatformNames}.`),
@@ -67,10 +67,10 @@ assert(
   "usdctofiat/llms.txt must list the platform keys exposed by the locked offramp SDK",
 );
 assert(
-  Boolean(defaultWebPlatform) &&
-    defaultWebPlatform.currencies.includes("USD") &&
-    getPeerExtensionRegistrationInfo(defaultWebPlatform.id) === null,
-  "the locked offramp SDK must support the default web starter route without Peer extension registration",
+  Boolean(defaultStarterPlatform) &&
+    defaultStarterPlatform.currencies.includes("USD") &&
+    getPeerExtensionRegistrationInfo(defaultStarterPlatform.id) === null,
+  "the locked offramp SDK must support the default starter route without Peer extension registration",
 );
 
 // The @solana-program/* and @solana/kit pins are intentional, not dead weight:
@@ -316,6 +316,11 @@ assert(
 assert(
   baseMiniAppTemplate.includes("setSubmitMessage"),
   "templates/base-mini-app/app/mini-app-cashout.tsx must surface submit success/failure to users",
+);
+assert(
+  baseMiniAppTemplate.includes('id: "revolut-usd"') &&
+    baseMiniAppTemplate.includes('["id"]>("revolut-usd")'),
+  "templates/base-mini-app/app/mini-app-cashout.tsx must default to the extension-free Revolut USD route",
 );
 assert(
   viteTemplate.includes("setSubmitMessage"),

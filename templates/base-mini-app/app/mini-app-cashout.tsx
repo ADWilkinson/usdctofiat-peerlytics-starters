@@ -37,6 +37,12 @@ async function getBaseAccountSdk() {
 
 const routes = [
   {
+    id: "revolut-usd",
+    label: "Revolut USD",
+    currency: CURRENCIES.USD,
+    platform: PLATFORMS.REVOLUT,
+  },
+  {
     id: "venmo",
     label: "Venmo",
     currency: CURRENCIES.USD,
@@ -47,12 +53,6 @@ const routes = [
     label: "Wise USD",
     currency: CURRENCIES.USD,
     platform: PLATFORMS.WISE,
-  },
-  {
-    id: "revolut-eur",
-    label: "Revolut EUR",
-    currency: CURRENCIES.EUR,
-    platform: PLATFORMS.REVOLUT,
   },
 ] as const;
 
@@ -80,7 +80,7 @@ async function getMiniAppWalletClient(): Promise<WalletClient> {
 export function MiniAppCashout() {
   const [amount, setAmount] = useState("50");
   const [identifier, setIdentifier] = useState("");
-  const [routeId, setRouteId] = useState<(typeof routes)[number]["id"]>("venmo");
+  const [routeId, setRouteId] = useState<(typeof routes)[number]["id"]>("revolut-usd");
   const [walletStatus, setWalletStatus] = useState("Connect");
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

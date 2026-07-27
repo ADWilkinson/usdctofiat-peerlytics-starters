@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import {
   fetchOrderbookSnapshot,
@@ -6,27 +6,34 @@ import {
   isSupportedRoute,
 } from "./server/peerlytics";
 
-export default defineConfig({
-  plugins: [react(), peerlyticsOrderbookProxy()],
-  build: {
-    chunkSizeWarningLimit: 1300,
-    rolldownOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
-            return "react";
+export default defineConfig(({ mode }) => {
+  const fileEnv = loadEnv(mode, process.cwd(), "");
+  if (!process.env.PEERLYTICS_API_KEY && fileEnv.PEERLYTICS_API_KEY) {
+    process.env.PEERLYTICS_API_KEY = fileEnv.PEERLYTICS_API_KEY;
+  }
+
+  return {
+    plugins: [react(), peerlyticsOrderbookProxy()],
+    build: {
+      chunkSizeWarningLimit: 1300,
+      rolldownOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
+              return "react";
+            }
+            if (
+              id.includes("node_modules/@usdctofiat/offramp") ||
+              id.includes("node_modules/viem")
+            ) {
+              return "wallet";
+            }
+            return undefined;
           }
-          if (
-            id.includes("node_modules/@usdctofiat/offramp") ||
-            id.includes("node_modules/viem")
-          ) {
-            return "wallet";
-          }
-          return undefined;
         },
       },
     },
-  },
+  };
 });
 
 function peerlyticsOrderbookProxy(): Plugin {

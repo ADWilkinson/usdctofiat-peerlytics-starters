@@ -334,6 +334,7 @@ assert(
 
 const demoServer = readText("demo/server/peerlytics.ts");
 const demoApi = readText("demo/api/orderbook.ts");
+const demoViteConfig = readText("demo/vite.config.ts");
 const developerResources = readText("usdctofiat/developer-resources.ts");
 
 assert(
@@ -343,6 +344,11 @@ assert(
 assert(
   !demoApi.includes("const supportedRoutes"),
   "demo/api/orderbook.ts must use the shared route registry instead of duplicating it",
+);
+assert(
+  demoViteConfig.includes("loadEnv") &&
+    demoViteConfig.includes("fileEnv.PEERLYTICS_API_KEY"),
+  "demo/vite.config.ts must load the server-only Peerlytics key from Vite env files",
 );
 assert(
   developerResources.includes("getOfframpDeveloperResources") &&

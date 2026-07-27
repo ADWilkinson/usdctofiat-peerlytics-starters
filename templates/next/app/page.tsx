@@ -77,7 +77,9 @@ export default function HomePage() {
   }, [authenticated, ready]);
 
   const amountValue = Number(amount);
-  const validation = identifier ? PLATFORMS.VENMO.validate(identifier) : null;
+  const validation = identifier.trim()
+    ? PLATFORMS.VENMO.validate(identifier.trim())
+    : null;
   const canSubmit =
     Boolean(walletClient) &&
     !isSubmitting &&

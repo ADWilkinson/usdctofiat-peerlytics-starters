@@ -91,7 +91,9 @@ export function MiniAppCashout() {
     [routeId],
   );
   const amountValue = Number(amount);
-  const validation = identifier ? selectedRoute.platform.validate(identifier) : null;
+  const validation = identifier.trim()
+    ? selectedRoute.platform.validate(identifier.trim())
+    : null;
   const canSubmit =
     !isSubmitting &&
     Number.isFinite(amountValue) &&

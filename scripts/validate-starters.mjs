@@ -308,6 +308,16 @@ assert(
   viteTemplate.includes("setSubmitMessage"),
   "templates/vite/src/App.tsx must surface submit success/failure to users",
 );
+for (const [file, text] of [
+  ["templates/next/app/page.tsx", nextTemplate],
+  ["templates/base-mini-app/app/mini-app-cashout.tsx", baseMiniAppTemplate],
+  ["templates/vite/src/App.tsx", viteTemplate],
+]) {
+  assert(
+    text.includes("validate(identifier.trim())"),
+    `${file} must validate the trimmed payment identifier it submits`,
+  );
+}
 assert(
   !nextTemplate.includes('identifier: "alice"'),
   "templates/next/app/page.tsx must not hardcode a payment identifier",

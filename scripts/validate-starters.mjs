@@ -469,6 +469,7 @@ const demoViteConfig = readText("demo/vite.config.ts");
 const developerResources = readText("usdctofiat/developer-resources.ts");
 const integratorReport = readText("peerlytics/integrator-report.ts");
 const liveActivity = readText("peerlytics/live-activity.ts");
+const orderbookSnapshot = readText("peerlytics/orderbook-snapshot.ts");
 const platformExplorer = readText("usdctofiat/platform-explorer.ts");
 const rateMonitor = readText("peerlytics/rate-monitor.ts");
 const timeseriesChart = readText("peerlytics/timeseries-chart.ts");
@@ -504,6 +505,13 @@ assert(
   integratorReport.includes("if (windowDays !== 90)") &&
     integratorReport.includes("the only currently materialized window"),
   "peerlytics/integrator-report.ts must reject unsupported report windows locally",
+);
+assert(
+  orderbookSnapshot.includes(
+    "CURRENCIES.some((currency) => currency.length === 0)",
+  ) &&
+    orderbookSnapshot.includes("comma-separated list without empty entries"),
+  "peerlytics/orderbook-snapshot.ts must reject empty currency queries",
 );
 assert(
   platformExplorer.includes('Key "${filterKey}" not found') &&

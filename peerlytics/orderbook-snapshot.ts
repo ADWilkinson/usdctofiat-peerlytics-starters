@@ -16,7 +16,14 @@ import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
 
 // ── Config ──────────────────────────────────────────────────────
 
-const CURRENCIES = (process.env.CURRENCIES ?? "GBP,EUR,BRL,TRY,NGN").split(",").map((c) => c.trim());
+const CURRENCIES = (process.env.CURRENCIES ?? "GBP,EUR,BRL,TRY,NGN")
+  .split(",")
+  .map((currency) => currency.trim());
+
+if (CURRENCIES.some((currency) => currency.length === 0)) {
+  console.error("Set CURRENCIES to a comma-separated list without empty entries");
+  process.exit(1);
+}
 
 // ── Formatting ──────────────────────────────────────────────────
 

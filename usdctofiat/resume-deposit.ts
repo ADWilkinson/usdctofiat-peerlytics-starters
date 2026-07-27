@@ -9,7 +9,8 @@
  *   npx tsx usdctofiat/resume-deposit.ts
  *
  * Required:
- *   PRIVATE_KEY    Hex private key (0x...) with USDC balance on Base
+ *   PRIVATE_KEY      Hex private key (0x...) with USDC balance on Base
+ *   REVOLUT_REV_TAG  Revolut Revtag used if a new deposit must be created
  *
  * How it works:
  *   1. First run: creates a new deposit and delegates it
@@ -23,10 +24,22 @@ import { base } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const REVOLUT_REV_TAG = process.env.REVOLUT_REV_TAG?.trim();
 if (!PRIVATE_KEY) {
   console.error("Set PRIVATE_KEY env var (hex, 0x-prefixed)");
   process.exit(1);
 }
+if (!REVOLUT_REV_TAG) {
+  console.error("Set REVOLUT_REV_TAG env var to the payout recipient's Revtag");
+  process.exit(1);
+}
+
+const revtagValidation = PLATFORMS.REVOLUT.validate(REVOLUT_REV_TAG);
+if (!revtagValidation.valid) {
+  console.error(`Invalid REVOLUT_REV_TAG: ${revtagValidation.error}`);
+  process.exit(1);
+}
+const revolutRevTag = revtagValidation.normalized;
 
 const fmt = {
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
@@ -66,7 +79,7 @@ async function main() {
       amount: "1",
       platform: PLATFORMS.REVOLUT,
       currency: CURRENCIES.USD,
-      identifier: "demo",
+      identifier: revolutRevTag,
     }, (progress) => {
       const icons: Record<string, string> = {
         resuming: fmt.cyan("↻"),

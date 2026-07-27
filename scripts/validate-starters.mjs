@@ -263,6 +263,11 @@ const baseMiniAppTemplate = readText("templates/base-mini-app/app/mini-app-casho
 const viteTemplate = readText("templates/vite/src/App.tsx");
 const telegramTemplate = readText("templates/telegram-bot/src/index.ts");
 const telegramSellHandler = telegramTemplate.slice(telegramTemplate.indexOf('bot.command("sell"'));
+const executableRevolutExamples = [
+  "usdctofiat/create-deposit.ts",
+  "usdctofiat/resume-deposit.ts",
+  "usdctofiat/otc-deposit.ts",
+];
 
 assert(
   nextTemplate.includes("setSubmitMessage"),
@@ -410,6 +415,16 @@ assert(
   readText("templates/telegram-bot/README.md").includes("at most six decimal places"),
   "templates/telegram-bot/README.md must document the USDC amount precision limit",
 );
+for (const file of executableRevolutExamples) {
+  const text = readText(file);
+  assert(
+    text.includes("process.env.REVOLUT_REV_TAG") &&
+      text.includes("PLATFORMS.REVOLUT.validate(REVOLUT_REV_TAG)") &&
+      text.includes("identifier: revolutRevTag") &&
+      !text.includes('identifier: "demo"'),
+    `${file} must require and validate the operator's payout Revtag`,
+  );
+}
 assert(
   telegramTemplate.includes("configuredReferralId") &&
     !telegramTemplate.includes("referralId: REFERRAL_ID"),

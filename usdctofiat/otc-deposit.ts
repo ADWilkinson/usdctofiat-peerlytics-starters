@@ -9,8 +9,9 @@
  *   npx tsx usdctofiat/otc-deposit.ts
  *
  * Required:
- *   PRIVATE_KEY    Hex private key (0x...) with USDC balance on Base
- *   OTC_TAKER      Taker wallet address (0x...) allowed to fill the deposit
+ *   PRIVATE_KEY      Hex private key (0x...) with USDC balance on Base
+ *   OTC_TAKER        Taker wallet address (0x...) allowed to fill the deposit
+ *   REVOLUT_REV_TAG  Revolut Revtag that should receive the fiat payout
  *
  * Optional:
  *   AMOUNT         USDC amount (default: 1)
@@ -32,6 +33,7 @@ import { privateKeyToAccount } from "viem/accounts";
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const OTC_TAKER = process.env.OTC_TAKER;
+const REVOLUT_REV_TAG = process.env.REVOLUT_REV_TAG?.trim();
 const amount = process.env.AMOUNT ?? "1";
 const mode = (process.env.MODE ?? "one-call") as "one-call" | "retrofit";
 
@@ -43,6 +45,17 @@ if (!OTC_TAKER || !isAddress(OTC_TAKER)) {
   console.error("Set OTC_TAKER env var to the taker's Ethereum address");
   process.exit(1);
 }
+if (!REVOLUT_REV_TAG) {
+  console.error("Set REVOLUT_REV_TAG env var to the payout recipient's Revtag");
+  process.exit(1);
+}
+
+const revtagValidation = PLATFORMS.REVOLUT.validate(REVOLUT_REV_TAG);
+if (!revtagValidation.valid) {
+  console.error(`Invalid REVOLUT_REV_TAG: ${revtagValidation.error}`);
+  process.exit(1);
+}
+const revolutRevTag = revtagValidation.normalized;
 const taker: string = OTC_TAKER;
 
 const fmt = {
@@ -81,6 +94,7 @@ async function main() {
   console.log(`  Amount:     ${fmt.cyan(amount + " USDC")}`);
   console.log(`  Platform:   ${PLATFORMS.REVOLUT.name}`);
   console.log(`  Currency:   ${CURRENCIES.USD.code} (${CURRENCIES.USD.symbol})`);
+  console.log(`  Recipient:  @${revolutRevTag}`);
   console.log(`  Mode:       ${fmt.cyan(mode)}`);
   console.log();
 
@@ -94,7 +108,7 @@ async function main() {
           amount,
           platform: PLATFORMS.REVOLUT,
           currency: CURRENCIES.USD,
-          identifier: "demo",
+          identifier: revolutRevTag,
           otcTaker: taker,
         },
         (progress) => {
@@ -124,7 +138,7 @@ async function main() {
         amount,
         platform: PLATFORMS.REVOLUT,
         currency: CURRENCIES.USD,
-        identifier: "demo",
+        identifier: revolutRevTag,
       },
       (progress) => {
         const label = STEP_LABELS[progress.step] ?? progress.step;

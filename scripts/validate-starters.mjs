@@ -529,6 +529,11 @@ assert(
   "peerlytics/rate-monitor.ts must reject thresholds that silently disable alerts",
 );
 assert(
+  rateMonitor.includes('(process.env.CURRENCY ?? "GBP").trim()') &&
+    rateMonitor.includes("Set CURRENCY to a non-empty fiat currency code"),
+  "peerlytics/rate-monitor.ts must reject blank currency filters",
+);
+assert(
   liveActivity.includes("!Number.isFinite(POLL_SECONDS) || POLL_SECONDS < 1") &&
     liveActivity.includes("Set POLL_SECONDS to a finite number of at least 1 second"),
   "peerlytics/live-activity.ts must reject polling intervals that can flood the API",

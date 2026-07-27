@@ -22,6 +22,10 @@ const CURRENCY = process.env.CURRENCY ?? "GBP";
 const THRESHOLD = Number(process.env.THRESHOLD ?? "1.02");
 const POLL_SECONDS = Number(process.env.POLL_SECONDS ?? "60");
 
+if (!Number.isFinite(THRESHOLD) || THRESHOLD <= 0) {
+  console.error("Set THRESHOLD to a finite positive rate");
+  process.exit(1);
+}
 if (!Number.isFinite(POLL_SECONDS) || POLL_SECONDS < 1) {
   console.error("Set POLL_SECONDS to a finite number of at least 1 second");
   process.exit(1);

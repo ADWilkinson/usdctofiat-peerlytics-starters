@@ -516,6 +516,11 @@ assert(
   "peerlytics/rate-monitor.ts must reject polling intervals that can flood the API",
 );
 assert(
+  rateMonitor.includes("!Number.isFinite(THRESHOLD) || THRESHOLD <= 0") &&
+    rateMonitor.includes("Set THRESHOLD to a finite positive rate"),
+  "peerlytics/rate-monitor.ts must reject thresholds that silently disable alerts",
+);
+assert(
   liveActivity.includes("!Number.isFinite(POLL_SECONDS) || POLL_SECONDS < 1") &&
     liveActivity.includes("Set POLL_SECONDS to a finite number of at least 1 second"),
   "peerlytics/live-activity.ts must reject polling intervals that can flood the API",

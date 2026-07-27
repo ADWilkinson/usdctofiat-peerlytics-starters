@@ -96,14 +96,28 @@ function parseBoundary(
   return normalized;
 }
 
+function boundaryMillis(boundary: string | number): number {
+  return typeof boundary === "number" ? boundary * 1000 : Date.parse(boundary);
+}
+
 async function main(): Promise<void> {
+  const from = parseBoundary(fromRaw, "FROM");
+  const to = parseBoundary(toRaw, "TO");
+  if (
+    from !== undefined &&
+    to !== undefined &&
+    boundaryMillis(from) >= boundaryMillis(to)
+  ) {
+    throw new Error("Set FROM to a time before TO");
+  }
+
   const client = new Peerlytics({ apiKey, baseUrl });
 
   const data = await client.getTimeseries({
     entity,
     granularity,
-    from: parseBoundary(fromRaw, "FROM"),
-    to: parseBoundary(toRaw, "TO"),
+    from,
+    to,
   });
 
   // `buckets` is the global single-series payload (null when groupBy is set).

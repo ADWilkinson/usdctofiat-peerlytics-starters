@@ -566,6 +566,11 @@ assert(
     timeseriesChart.includes("Number.isNaN(Date.parse(normalized))"),
   "peerlytics/timeseries-chart.ts must validate time boundaries before calling the paid endpoint",
 );
+assert(
+  timeseriesChart.includes("boundaryMillis(from) >= boundaryMillis(to)") &&
+    timeseriesChart.includes("Set FROM to a time before TO"),
+  "peerlytics/timeseries-chart.ts must reject reversed or empty time windows",
+);
 
 const installClaudeScript = readText("demo/scripts/install-claude.sh");
 assert(

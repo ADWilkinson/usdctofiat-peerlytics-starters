@@ -310,6 +310,15 @@ assert(
 );
 for (const [file, text] of [
   ["templates/next/app/page.tsx", nextTemplate],
+  ["templates/vite/src/App.tsx", viteTemplate],
+]) {
+  assert(
+    text.includes("await wallet.switchChain(base.id)"),
+    `${file} must switch the connected Privy wallet to Base before creating its wallet client`,
+  );
+}
+for (const [file, text] of [
+  ["templates/next/app/page.tsx", nextTemplate],
   ["templates/base-mini-app/app/mini-app-cashout.tsx", baseMiniAppTemplate],
   ["templates/vite/src/App.tsx", viteTemplate],
 ]) {

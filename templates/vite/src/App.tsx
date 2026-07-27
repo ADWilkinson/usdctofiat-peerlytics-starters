@@ -39,6 +39,7 @@ function useWalletClient(): WalletClient | null {
 
     void (async () => {
       try {
+        await wallet.switchChain(base.id);
         const provider = await wallet.getEthereumProvider();
         if (cancelled || !provider) return;
         setWalletClient(

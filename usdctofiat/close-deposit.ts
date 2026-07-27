@@ -20,6 +20,10 @@ const depositId = process.argv[2];
 
 if (!PRIVATE_KEY) { console.error("Set PRIVATE_KEY env var"); process.exit(1); }
 if (!depositId) { console.error("Usage: npx tsx usdctofiat/close-deposit.ts <deposit-id>"); process.exit(1); }
+if (!/^\d+$/.test(depositId)) {
+  console.error("Set <deposit-id> to a non-negative decimal integer");
+  process.exit(1);
+}
 
 const fmt = {
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,

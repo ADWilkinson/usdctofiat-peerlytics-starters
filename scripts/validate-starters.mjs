@@ -269,6 +269,7 @@ const executableRevolutExamples = [
   "usdctofiat/otc-deposit.ts",
 ];
 const otcDepositExample = readText("usdctofiat/otc-deposit.ts");
+const closeDepositExample = readText("usdctofiat/close-deposit.ts");
 
 assert(
   nextTemplate.includes("setSubmitMessage"),
@@ -430,6 +431,11 @@ assert(
   otcDepositExample.includes('mode !== "one-call" && mode !== "retrofit"') &&
     !otcDepositExample.includes('as "one-call" | "retrofit"'),
   "usdctofiat/otc-deposit.ts must reject invalid MODE values instead of silently using retrofit",
+);
+assert(
+  closeDepositExample.includes("!/^\\d+$/.test(depositId)") &&
+    closeDepositExample.includes("non-negative decimal integer"),
+  "usdctofiat/close-deposit.ts must reject deposit IDs that cannot be encoded as uints",
 );
 assert(
   telegramTemplate.includes("configuredReferralId") &&

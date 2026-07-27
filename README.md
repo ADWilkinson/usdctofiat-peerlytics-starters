@@ -47,7 +47,7 @@ peerlytics/                  @peerlytics/sdk examples (run standalone with tsx/b
   maker-report.ts              portfolio report for a maker address
   integrator-report.ts         ERC-8021 integrator stats (deposits, volume, top markets)
   timeseries-chart.ts          hourly/daily rollups in a terminal sparkbar chart
-  live-activity.ts             real-time protocol event stream (SSE)
+  live-activity.ts             near-real-time protocol activity polling feed
   x402-agent.ts                x402 pay-per-request flow (no API key needed)
   llms.txt                     LLM-friendly SDK reference
 

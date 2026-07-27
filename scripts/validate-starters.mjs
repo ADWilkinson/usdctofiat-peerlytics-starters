@@ -63,6 +63,12 @@ assert(
   "README.md must list the platforms exposed by the locked offramp SDK",
 );
 assert(
+  rootReadme.includes(
+    "live-activity.ts             near-real-time protocol activity polling feed",
+  ) && !rootReadme.includes("live-activity.ts             real-time protocol event stream (SSE)"),
+  "README.md must describe live-activity.ts as polling rather than SSE",
+);
+assert(
   offrampLlms.includes(`Keys: ${offrampPlatformKeys}`),
   "usdctofiat/llms.txt must list the platform keys exposed by the locked offramp SDK",
 );

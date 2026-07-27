@@ -11,6 +11,9 @@
   "dependencies": {
     "@base-org/account": "^2.5.7",
     "@usdctofiat/offramp": "^4.4.11",
+    "@x402/core": "^2.19.0",
+    "@x402/evm": "^2.19.0",
+    "@x402/svm": "^2.19.0",
     "next": "16.2.10",
     "ox": "^0.14.30",
     "react": "^19.2.7",

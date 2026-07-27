@@ -64,7 +64,14 @@ const packageChecks = [
   ],
   [
     "templates/base-mini-app/package.json",
-    ["@usdctofiat/offramp", "@base-org/account", "ox"],
+    [
+      "@usdctofiat/offramp",
+      "@base-org/account",
+      "@x402/core",
+      "@x402/evm",
+      "@x402/svm",
+      "ox",
+    ],
   ],
   [
     "templates/vite/package.json",
@@ -91,7 +98,7 @@ for (const [pkgPath, names] of packageChecks) {
         ? rootPeerlyticsVersion
         : name === "@usdctofiat/offramp"
           ? rootOfframpVersion
-          : name === "@base-org/account" || name === "ox"
+          : Object.hasOwn(baseMiniAppTemplateDeps, name)
             ? baseMiniAppTemplateDeps[name]
           : privyTemplateDeps[name];
     assert(

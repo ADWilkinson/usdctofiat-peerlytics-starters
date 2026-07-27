@@ -317,6 +317,10 @@ for (const [file, text] of [
     text.includes("validate(identifier.trim())"),
     `${file} must validate the trimmed payment identifier it submits`,
   );
+  assert(
+    text.includes("amountValue >= 1"),
+    `${file} must enforce the SDK's 1 USDC minimum before submission`,
+  );
 }
 assert(
   !nextTemplate.includes('identifier: "alice"'),
@@ -351,6 +355,11 @@ assert(
 assert(
   !telegramTemplate.includes('identifierRaw || "alice"'),
   "templates/telegram-bot/src/index.ts must not silently default payment identifiers",
+);
+assert(
+  telegramTemplate.includes("parsedAmount < 1") &&
+    telegramTemplate.includes("Amount must be at least 1 USDC."),
+  "templates/telegram-bot/src/index.ts must enforce the SDK's 1 USDC minimum",
 );
 assert(
   telegramTemplate.includes("configuredReferralId") &&

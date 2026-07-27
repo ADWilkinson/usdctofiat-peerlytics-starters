@@ -48,8 +48,8 @@ function parseSellCommand(text: string): { amount: string; identifier: string } 
 
   const parsedAmount = Number.parseFloat(amount);
 
-  if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
-    throw new Error("Amount must be a positive USDC number.");
+  if (!Number.isFinite(parsedAmount) || parsedAmount < 1) {
+    throw new Error("Amount must be at least 1 USDC.");
   }
 
   return { amount, identifier };

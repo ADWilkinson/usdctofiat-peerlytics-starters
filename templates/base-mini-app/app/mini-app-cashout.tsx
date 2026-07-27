@@ -97,7 +97,7 @@ export function MiniAppCashout() {
   const canSubmit =
     !isSubmitting &&
     Number.isFinite(amountValue) &&
-    amountValue > 0 &&
+    amountValue >= 1 &&
     Boolean(identifier.trim()) &&
     (!validation || validation.valid);
 

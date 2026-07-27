@@ -559,6 +559,10 @@ assert(
   "demo/src/App.tsx must announce asynchronous feedback to assistive technology",
 );
 assert(
+  fs.readFileSync("demo/api/orderbook.ts", "utf8").includes('from "../server/peerlytics.js"'),
+  "demo/api/orderbook.ts must use an ESM-resolvable local import in Vercel functions",
+);
+assert(
   demoWallet.match(/method: "wallet_switchEthereumChain"/g)?.length === 2 &&
     demoWallet.indexOf('method: "wallet_addEthereumChain"') <
       demoWallet.lastIndexOf('method: "wallet_switchEthereumChain"'),

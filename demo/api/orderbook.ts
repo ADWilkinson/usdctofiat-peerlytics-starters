@@ -2,7 +2,7 @@ import {
   fetchOrderbookSnapshot,
   getPeerlyticsApiKey,
   isSupportedRoute,
-} from "../server/peerlytics";
+} from "../server/peerlytics.js";
 
 type VercelRequest = {
   method?: string;

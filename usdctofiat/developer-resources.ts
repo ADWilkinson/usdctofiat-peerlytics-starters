@@ -18,7 +18,9 @@ import {
   type OfframpIntegrationPlaybook,
 } from "@usdctofiat/offramp";
 
-const profile = process.argv[2] as OfframpIntegratorProfile | undefined;
+const profile = process.argv[2]?.trim().toLowerCase() as
+  | OfframpIntegratorProfile
+  | undefined;
 const resource = getOfframpDeveloperResources(profile);
 const validProfiles = OFFRAMP_DEVELOPER_RESOURCES.playbooks.map(
   (playbook) => playbook.profile,

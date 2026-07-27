@@ -502,6 +502,10 @@ assert(
   "usdctofiat/developer-resources.ts must reject unknown integration profiles",
 );
 assert(
+  developerResources.includes("process.argv[2]?.trim().toLowerCase()"),
+  "usdctofiat/developer-resources.ts must normalize human-entered profiles",
+);
+assert(
   integratorReport.includes("if (windowDays !== 90)") &&
     integratorReport.includes("the only currently materialized window"),
   "peerlytics/integrator-report.ts must reject unsupported report windows locally",

@@ -469,6 +469,7 @@ const demoViteConfig = readText("demo/vite.config.ts");
 const developerResources = readText("usdctofiat/developer-resources.ts");
 const integratorReport = readText("peerlytics/integrator-report.ts");
 const liveActivity = readText("peerlytics/live-activity.ts");
+const makerReport = readText("peerlytics/maker-report.ts");
 const orderbookSnapshot = readText("peerlytics/orderbook-snapshot.ts");
 const platformExplorer = readText("usdctofiat/platform-explorer.ts");
 const rateMonitor = readText("peerlytics/rate-monitor.ts");
@@ -552,6 +553,13 @@ assert(
     liveActivity.indexOf("!Object.hasOwn(EVENT_STYLES, EVENT_TYPE_INPUT)") <
       liveActivity.indexOf("const client = new Peerlytics"),
   "peerlytics/live-activity.ts must reject invalid event types before polling",
+);
+assert(
+  makerReport.includes('import { isAddress } from "viem"') &&
+    makerReport.includes("!isAddress(address)") &&
+    makerReport.indexOf("!isAddress(address)") <
+      makerReport.indexOf("client.getMaker(address)"),
+  "peerlytics/maker-report.ts must reject invalid addresses before API requests",
 );
 assert(
   timeseriesChart.includes("!validEntities.includes(entityInput as Entity)") &&

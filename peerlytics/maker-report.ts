@@ -12,6 +12,7 @@
  */
 
 import { Peerlytics, PeerlyticsError, NotFoundError } from "@peerlytics/sdk";
+import { isAddress } from "viem";
 
 // ── Formatting ──────────────────────────────────────────────────
 
@@ -61,11 +62,15 @@ const client = new Peerlytics({
 // ── Report ──────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  const address = process.argv[2];
+  const address = process.argv[2]?.trim();
 
   if (!address) {
     console.error("Usage: npx tsx peerlytics/maker-report.ts <address>");
     console.error("  e.g. npx tsx peerlytics/maker-report.ts 0xC141Cbe4f4a9CAbc3cc78159a9268a4e008922CD");
+    process.exit(1);
+  }
+  if (!isAddress(address)) {
+    console.error("Set <address> to a valid Ethereum address");
     process.exit(1);
   }
 

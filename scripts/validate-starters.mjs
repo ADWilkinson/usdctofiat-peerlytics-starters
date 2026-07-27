@@ -518,6 +518,10 @@ assert(
   "peerlytics/integrator-report.ts must reject unsupported report windows locally",
 );
 assert(
+  integratorReport.includes("process.env.CODE?.trim()"),
+  "peerlytics/integrator-report.ts must normalize copied integrator slugs",
+);
+assert(
   orderbookSnapshot.includes(
     "CURRENCIES.some((currency) => currency.length === 0)",
   ) &&

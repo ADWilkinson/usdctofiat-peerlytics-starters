@@ -20,7 +20,7 @@
 
 import { Peerlytics, NotFoundError, PeerlyticsError } from "@peerlytics/sdk";
 
-const code = process.env.CODE;
+const code = process.env.CODE?.trim();
 if (!code) {
   console.error("Set CODE (integrator slug, e.g. usdctofiat, peer-extension, pns-pay)");
   process.exit(1);

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@base-org/account": "^2.5.7",
-    "@usdctofiat/offramp": "^4.4.11",
+    "@usdctofiat/offramp": "^5.0.1",
     "@x402/core": "^2.19.0",
     "@x402/evm": "^2.19.0",
     "@x402/svm": "^2.19.0",

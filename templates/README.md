@@ -21,7 +21,7 @@ The CLI prompts for your `integratorId` and substitutes it into the template fil
 
 ## What ships in each template
 
-- `package.json` pinned to the latest `@usdctofiat/offramp` v4.x
+- `package.json` pinned to the latest `@usdctofiat/offramp` v5.x
 - A working `offramp()` path wired to `PLATFORMS.REVOLUT` / `CURRENCIES.USD` — edit to taste
 - Your `integratorId` baked in via the CLI prompt or env
 - A `TODO_SET_REFERRAL_ID` placeholder for partner attribution — inert until replaced
@@ -37,13 +37,12 @@ for a server-managed maker wallet. None of them touch the React hooks or the
 low-level `peerExtensionSdk` — so SDK upgrades that only change those surfaces
 need no template edits.
 
-## Upgrading to v4.x
+## Upgrading to v5.x
 
-The template-level `offramp()` / `createOfframp()` flow is unchanged on v4 — just
-raise the version. v4 only affects direct `peerExtensionSdk` drivers: the
-`onramp()`, `getOnrampTransaction()`, and `openSidebar()` methods were removed in
-favour of the `@zkp2p/sdk@0.8.1` `authenticate()` + `onMetadataMessage()` bridge.
-See the [SDK CHANGELOG](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md).
+The template-level `offramp()` / `createOfframp()` flow is unchanged on v5.
+The retired taker-tier helpers are gone: the maker-focused SDK creates and
+manages deposits, while the production Curator quote and orderbook flows own
+taker eligibility. See the [SDK CHANGELOG](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md).
 
 PayPal, Wise, Venmo, and Cash App makers may need to register their handle
 through the PeerAuth browser extension before the first deposit; in React that

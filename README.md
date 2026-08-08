@@ -179,18 +179,6 @@ Pass `otcTaker` to restrict a deposit to one wallet, or use `enableOtc` / `disab
 
 **PayPal, Wise, Venmo, and Cash App** makers may need to register their handle in the PeerAuth browser extension before the first deposit. The SDK throws `EXTENSION_REGISTRATION_REQUIRED` and ships `usePeerExtensionRegistration(platform)` to drive the install / connect / verify flow. See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts` for the PayPal-shaped recovery pattern. PayPal uses the `paypal.me` **username**, not the account email.
 
-Take-side UIs should ask Curator for live platform caps and locks before presenting a fill amount. `@usdctofiat/offramp@4.4` exports `getTakerTier`, `findTakerPlatformLimit`, and `resolveTakerPlatformLimit` for the `/v2/taker/tier` surface:
-
-```ts
-import { findTakerPlatformLimit, getTakerTier } from "@usdctofiat/offramp";
-
-const tier = await getTakerTier({ owner: takerAddress });
-const paypalLimit = findTakerPlatformLimit(tier, { platform: "paypal" });
-if (paypalLimit?.isLocked) {
-  console.log(`PayPal unlocks at ${paypalLimit.minTierRequired} tier`);
-}
-```
-
 Supported platforms: Venmo, Cash App, Chime, Revolut, Wise, Mercado Pago, Zelle, PayPal, Monzo.
 
 [npm](https://www.npmjs.com/package/@usdctofiat/offramp) · [Developer portal](https://usdctofiat.xyz/developers) · [SDK guide](https://usdctofiat.xyz/developers/offramp-sdk/)

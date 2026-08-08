@@ -1,4 +1,4 @@
-# @usdctofiat/offramp v4
+# @usdctofiat/offramp v5
 
 USDC-to-fiat offramp SDK for Base. Deposits are wallet-native, delegated to the managed rate manager, and observable through Peerlytics explorer/data surfaces.
 
@@ -16,9 +16,6 @@ import {
   enableOtc,
   disableOtc,
   getOtcLink,
-  getTakerTier,
-  findTakerPlatformLimit,
-  resolveTakerPlatformLimit,
   OFFRAMP_DEVELOPER_RESOURCES,
   OFFRAMP_RESOURCE_LINKS,
   OFFRAMP_INTEGRATION_PLAYBOOKS,
@@ -65,16 +62,12 @@ console.log(OFFRAMP_RESOURCE_LINKS.agentSkill);
 console.log(OFFRAMP_INTEGRATION_PLAYBOOKS.map((entry) => entry.profile));
 console.log(getOfframpDeveloperResources("agent"));
 
-// Live Curator taker tier/cap surface for take-side UIs
-const tier = await getTakerTier({ owner: "0xTakerAddress" });
-const paypalLimit = findTakerPlatformLimit(tier, { platform: "paypal" });
-const resolved = resolveTakerPlatformLimit(tier, { platform: "paypal" });
 ```
 
 ## Resource bundle
 
 `OFFRAMP_DEVELOPER_RESOURCES` includes:
-- packageName, sdkVersion, Base chain metadata, referrer
+- packageName, sdkVersion, Base chain metadata, ERC-8021 attribution codes
 - mandatory delegation config (`rateManagerId`, registry address, manager fee bps, escrow)
 - links: developerPortal, sdkGuide, appGuide, botGuide, agentGuide, privateOtcGuide, peerlyticsGuide, agentSkill, llms references, starters, Peerlytics, npm
 - playbooks for `app`, `bot`, `agent`, `private-otc`, and `peerlytics`
@@ -240,7 +233,7 @@ const state = await peerExtensionSdk.getState();
 if (state === "needs_install") peerExtensionSdk.openInstallPage();
 else if (state === "needs_connection") await peerExtensionSdk.requestConnection();
 else {
-  // Headless metadata capture (v4 — the sidepanel openSidebar() flow is gone):
+  // Headless metadata capture:
   const params = getPeerExtensionRegistrationAuthParams("paypal");
   const unsubscribe = peerExtensionSdk.onMetadataMessage(async (message) => {
     if (message.platform !== params.platform) return;
@@ -280,39 +273,12 @@ CTA. PayPal, Wise, Venmo, and Cash App currently ship that metadata.
 
 See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`.
 
-## Dynamic taker tiers
+## Peer Extension direct driver
 
-Curator computes taker caps, cooldowns, and platform locks dynamically. Use
-`getTakerTier()` plus `findTakerPlatformLimit()` when a take-side UI needs the
-current buyer limit for a wallet:
-
-```ts
-import { findTakerPlatformLimit, getTakerTier } from "@usdctofiat/offramp";
-
-const tier = await getTakerTier({ owner: takerAddress });
-const venmoLimit = findTakerPlatformLimit(tier, { platform: "venmo" });
-
-if (venmoLimit?.isLocked) {
-  console.log(`Unlocks at ${venmoLimit.minTierRequired} tier`);
-} else {
-  console.log(venmoLimit?.effectiveCapDisplay);
-}
-```
-
-## Peer Extension v4 direct-driver changes
-
-If you use the re-exported `peerExtensionSdk` directly, v4 follows
-`@zkp2p/sdk@0.8.1`. The upstream sidepanel onramp contract was removed:
-`peerExtensionSdk.onramp()`, `getOnrampTransaction()`, and `openSidebar()` are
-gone, along with the `PeerExtensionOnrampParams` /
-`PeerOnrampPreparedTransaction*` types. Capture now runs through the headless
-metadata bridge — register `onMetadataMessage(callback)`, then call
-`authenticate({ actionType, captureMode, platform, providerConfig })`. Build the
-buyer-TEE proof from the captured message, prepare fulfill calldata via
-`fulfillIntent.prepare`, and broadcast it yourself. There is no pull-recovery
-path — re-run `authenticate` for the active intent if a callback is missed.
-`PeerSarCredentialBundle` is now an alias of `@zkp2p/sdk`'s
-`SellerCredentialBundle`.
+If you use the re-exported `peerExtensionSdk` directly, capture runs through
+the headless metadata bridge: register `onMetadataMessage(callback)`, then call
+`authenticate({ actionType, captureMode, platform, providerConfig })`. Re-run
+`authenticate` if the active capture callback is missed.
 
 ## How It Works
 
@@ -331,23 +297,6 @@ All deposits are delegated, market-tracking, auto-closing, on Base (8453).
 ## OTC private orders
 
 Pass `otcTaker` to `offramp()` to whitelist a single taker wallet at creation time, or use `enableOtc` / `disableOtc` to toggle restriction on an existing deposit. Hand the returned `otcLink` (or `getOtcLink(depositId)`) to the taker — it deep-links into usdctofiat.xyz to the restricted deposit.
-
-## v2 migration
-
-v1.x is broken against the live curator — the old `POST /v1/makers/create` endpoint and legacy payload blobs (`paypalEmail`, `venmoUsername`, `wisetag`, …) are no longer accepted. If you were on v1, upgrade and:
-
-1. Re-prompt PayPal users for their paypal.me USERNAME (not email).
-2. Handle `OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED` on PayPal, Wise, Venmo, and Cash App — walk the user through `usePeerExtensionRegistration(...)` and retry.
-3. If you hand-rolled `POST /v1/makers/create`, switch to `POST /v2/makers/create` with `{ processorName, offchainId, telegramUsername? }`.
-
-## v4 migration
-
-The core `offramp()` / `useOfframp()` flow remains stable — just bump the
-version. Only direct `peerExtensionSdk` drivers are affected: `onramp()`,
-`getOnrampTransaction()`, and `openSidebar()` are removed. Migrate to the
-`@zkp2p/sdk@0.8.1` `authenticate()` + `onMetadataMessage()` bridge described
-above. For seller registration use `getPeerExtensionRegistrationAuthParams` /
-`completePeerExtensionRegistration` (or the `usePeerExtensionRegistration` hook).
 
 ## Links
 

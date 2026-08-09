@@ -7,6 +7,7 @@ Examples and a live demo for the two SDKs covering ZKP2P on Base: server-side pr
 
 **Live demo:** [offramp-sdk.vercel.app](https://offramp-sdk.vercel.app)
 **Developer portals:** [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) · [peerlytics.xyz/developers](https://peerlytics.xyz/developers)
+**Workshop:** [by Galleon](https://galleonlabs.io/fleet/starter-kits)
 
 ## 60-second deposit
 

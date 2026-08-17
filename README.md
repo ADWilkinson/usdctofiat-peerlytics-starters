@@ -199,6 +199,8 @@ Run `npx tsx usdctofiat/developer-resources.ts` or `npx tsx usdctofiat/developer
 
 - [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) — self-serve developer hub
 - [usdctofiat.xyz/developers/offramp-sdk](https://usdctofiat.xyz/developers/offramp-sdk/) — SDK guide
+- [How USDC to fiat works](https://usdctofiat.xyz/usdc-to-fiat/) — what your users get: methods, currencies, fees
+- [Base USDC](https://usdctofiat.xyz/learn/base-usdc/) — the exact token the off-ramp sells (native, not USDbC)
 - [peerlytics.xyz/developers](https://peerlytics.xyz/developers) — analytics SDK + API key dashboard
 - [Peerlytics Explorer](https://peerlytics.xyz/) — protocol explorer and market intel
 - [ZKP2P Protocol](https://zkp2p.xyz)

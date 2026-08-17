@@ -967,6 +967,10 @@ export default function App() {
             <a href="https://x.com/andrewwilkinson" target="_blank" rel="noreferrer">
               @andrewwilkinson
             </a>
+            . Your users' side of the trade:{" "}
+            <a href="https://usdctofiat.xyz/usdc-to-fiat/" target="_blank" rel="noreferrer">
+              how USDC to fiat works
+            </a>
             .
           </p>
         </footer>

@@ -1,6 +1,6 @@
 # Templates
 
-Scaffolds for `@usdctofiat/offramp`. Each template is a working app with the wallet flow wired and a real `offramp()` call in place — drop in your `integratorId` and run.
+Scaffolds for `@usdctofiat/offramp`. Each template is a working app with the wallet flow wired and an explicit `cashout({ mode })` call in place.
 
 ## Use the CLI
 
@@ -8,7 +8,7 @@ Scaffolds for `@usdctofiat/offramp`. Each template is a working app with the wal
 npx create-offramp-app@latest my-offramp --template=next
 ```
 
-The CLI prompts for your `integratorId` and substitutes it into the template files. Templates: `next`, `base-mini-app`, `vite`, `telegram-bot`. Default is `next`.
+Templates: `next`, `base-mini-app`, `vite`, `telegram-bot`. Default is `next`.
 
 ## Templates
 
@@ -21,28 +21,27 @@ The CLI prompts for your `integratorId` and substitutes it into the template fil
 
 ## What ships in each template
 
-- `package.json` pinned to the latest `@usdctofiat/offramp` v5.x
-- A working `offramp()` path wired to `PLATFORMS.REVOLUT` / `CURRENCIES.USD` — edit to taste
-- Your `integratorId` baked in via the CLI prompt or env
-- A `TODO_SET_REFERRAL_ID` placeholder for partner attribution — inert until replaced
+- `package.json` pinned to `@usdctofiat/offramp` v8.x
+- A working `cashout({ mode: "best" })` path wired to Revolut / USD — edit to taste
+- Fixed USDCtoFiat attribution applied by the v8 SDK
 - Type-checked TypeScript
 - `OFFRAMP_DEVELOPER_RESOURCES` exposed in-app so generated projects keep canonical SDK, OTC, agent, and Peerlytics links
 - A README inside the template covering run, deploy, and customize
 
 ## What surface these templates use
 
-The `next` and `vite` templates call the standalone `offramp(walletClient, params)`
-function; `telegram-bot` uses `createOfframp({ walletClient }).createDeposit(params)`
-for a server-managed maker wallet. None of them touch the React hooks or the
-low-level `peerExtensionSdk` — so SDK upgrades that only change those surfaces
-need no template edits.
+All four templates call the standalone `cashout({ mode, signer, amount,
+currency, platform, payee })` helper. They default to `best` mode to preserve
+Delegate-managed pricing while using the v8 production API. None of them touch
+the React hooks or low-level extension client.
 
-## Upgrading to v5.x
+## Upgrading from v5
 
-The template-level `offramp()` / `createOfframp()` flow is unchanged on v5.
-The retired taker-tier helpers are gone: the maker-focused SDK creates and
-manages deposits, while the production Curator quote and orderbook flows own
-taker eligibility. See the [SDK CHANGELOG](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md).
+Replace the managed `offramp(walletClient, { identifier })` path with
+`cashout({ mode, signer: walletClient, payee })`. Choose `fast` for the direct
+Peer Cash route or `best` for Delegate-managed pricing. The old managed API is
+still available as an explicit compatibility surface under
+`@usdctofiat/offramp/managed`. See the [SDK CHANGELOG](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md).
 
 PayPal, Wise, Venmo, and Cash App makers may need to register their handle
 through the PeerAuth browser extension before the first deposit; in React that
@@ -51,9 +50,7 @@ username, not email.
 
 ## Manual install (no CLI)
 
-Copy a template directory into your project, replace `__INTEGRATOR_ID__` with
-your integrator ID, leave `TODO_SET_REFERRAL_ID` unset unless you have a real
-partner code, and `npm install`.
+Copy a template directory into your project and run `npm install`.
 
 ## See also
 

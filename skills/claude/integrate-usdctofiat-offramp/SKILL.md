@@ -1,274 +1,189 @@
 ---
 name: integrate-usdctofiat-offramp
-description: Integrate the @usdctofiat/offramp SDK (v5.x) into a dApp to add USDC-to-fiat offramp functionality on Base. Use when asked to add an offramp, sell USDC for fiat, integrate USDCtoFiat, build a deposit flow, ship OTC private orders, or connect off-ramp activity to Peerlytics data.
+description: Integrate @usdctofiat/offramp v8 into an app, bot, or agent for Base USDC cash-out. Use when adding an offramp, selling USDC for fiat, choosing fast or best routing, building private OTC orders, onboarding verified payees, or connecting cash-out activity to Peerlytics.
 ---
 
-# Integrate USDCtoFiat Offramp (v5.x)
+# Integrate USDCtoFiat Offramp v8
 
-## Overview
-
-Guide the user to integrate `@usdctofiat/offramp` v5.x. Surface area: 1 primary function (`offramp()`), deposit/OTC helpers (`deposits`, `close`, `enableOtc`, `disableOtc`, `getOtcLink`), Peer extension helpers (`getPeerExtensionRegistrationAuthParams`, `completePeerExtensionRegistration`), platform constants (`PLATFORMS`, `CURRENCIES`), developer resource exports (`OFFRAMP_DEVELOPER_RESOURCES`, `OFFRAMP_RESOURCE_LINKS`, `OFFRAMP_INTEGRATION_PLAYBOOKS`, `getOfframpDeveloperResources`), and 2 React hooks (`useOfframp`, `usePeerExtensionRegistration`).
-
-Companion docs:
-
-- Developer portal: https://usdctofiat.xyz/developers
-- SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
-- App guide: https://usdctofiat.xyz/developers/apps/
-- Bot guide: https://usdctofiat.xyz/developers/bots/
-- Agent guide: https://usdctofiat.xyz/developers/agents/
-- llms-full.txt (canonical machine reference): https://usdctofiat.xyz/llms-full.txt
-- Skill: https://usdctofiat.xyz/skills/usdctofiat.md
-- Starters: https://github.com/ADWilkinson/usdctofiat-peerlytics-starters
-- Companion analytics SDK: `@peerlytics/sdk` (one Peerlytics API key authenticates both products)
+Use `cashout()` as the default integration path. Require callers to choose
+`mode: "fast"` or `mode: "best"`; never silently choose a mode for them.
 
 ## Install
 
 ```bash
-bun add @usdctofiat/offramp
-# or scaffold a working app:
-npx create-offramp-app@latest my-offramp --template=next|vite|telegram-bot
+npm install @usdctofiat/offramp viem
 ```
 
-React hooks live at the `/react` subpath: `import { useOfframp } from "@usdctofiat/offramp/react"`.
+Require Node 22+, viem 2.x, and a connected viem `WalletClient` on Base.
 
-## Resource bundle
+## Ship the first cash-out
 
 ```typescript
-import { OFFRAMP_DEVELOPER_RESOURCES, getOfframpDeveloperResources } from "@usdctofiat/offramp";
+import { cashout } from "@usdctofiat/offramp";
+import type { WalletClient } from "viem";
 
-const allResources = OFFRAMP_DEVELOPER_RESOURCES;
-const botPlaybook = getOfframpDeveloperResources("bot");
-console.log(allResources.links.agentSkill, botPlaybook);
-```
+export async function sellUsdc(signer: WalletClient) {
+  const order = await cashout({
+    mode: "fast",
+    signer,
+    amount: "100",
+    currency: "EUR",
+    platform: "revolut",
+    payee: "alice",
+  });
 
-Use this export when generating docs, scaffolding apps, or giving coding agents
-canonical links. It includes Base chain metadata, mandatory delegation config,
-developer pages, the agent skill, `llms.txt`, starter repo, and Peerlytics
-upgrade links.
-
-## Core pattern (server / Node / bot)
-
-```typescript
-import { offramp, PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
-
-const result = await offramp(walletClient, {
-  amount: "100", // USDC, decimal string, min 1
-  platform: PLATFORMS.REVOLUT,
-  currency: CURRENCIES.EUR,
-  identifier: "alice", // platform-specific (Revtag / @username / paypal.me USERNAME / etc.)
-  integratorId: "your-app", // ERC-8021 attribution
-  referralId: "partner-123", // optional partner code
-  idempotencyKey: `order-${orderId}`, // 10-min replay-protected
-});
-// { depositId: "362", txHash: "0x...", resumed: false, otcLink?: "..." }
-```
-
-## React pattern
-
-```tsx
-import { PLATFORMS, CURRENCIES, OFFRAMP_ERROR_CODES } from "@usdctofiat/offramp";
-import { useOfframp } from "@usdctofiat/offramp/react";
-
-function SellButton({ walletClient }) {
-  const { offramp, step, isLoading, lastError } = useOfframp({ integratorId: "your-app" });
-
-  if (lastError?.code === OFFRAMP_ERROR_CODES.USER_CANCELLED) {
-    // No-op, user backed out.
-  }
-
-  return (
-    <button
-      disabled={isLoading}
-      onClick={() =>
-        offramp(walletClient, {
-          amount: "100",
-          platform: PLATFORMS.REVOLUT,
-          currency: CURRENCIES.EUR,
-          identifier: "alice",
-        })
-      }
-    >
-      {isLoading ? (step ?? "Working...") : "Sell 100 USDC"}
-    </button>
-  );
+  // Persist this immediately; it is the cross-device/process resume key.
+  console.log(order.depositId);
+  return order;
 }
 ```
 
-## OTC private orders
-
-Pass `otcTaker` to lock a deposit to a single buyer wallet in one call:
+Treat strings and numbers as human USDC amounts. Treat a `bigint` as exact
+six-decimal base units. Validate free-form handles before submitting:
 
 ```typescript
-const { depositId, otcLink } = await offramp(walletClient, {
+import { PLATFORMS } from "@usdctofiat/offramp";
+
+const validation = PLATFORMS.REVOLUT.validate(input);
+if (!validation.valid) throw new Error(validation.error);
+const payee = validation.normalized;
+```
+
+## Choose the mode explicitly
+
+- Use `fast` for the direct Peer Cash route at the live oracle rate with 0 bps
+  spread. Its composite `depositId` works with `createOfframp().order()`,
+  `.watch()`, and `.withdraw()`.
+- Use `best` for Delegate-managed pricing. It returns a numeric EscrowV2
+  `depositId` that works with `deposits()` and `close()`, and has a 10 bps fill
+  fee.
+
+Never infer that `best` is always cheaper or that `fast` always settles first;
+the names identify routing policies, not a guaranteed outcome.
+
+## Follow and recover a fast order
+
+```typescript
+import { createOfframp } from "@usdctofiat/offramp";
+
+const cash = createOfframp();
+
+for await (const order of cash.watch(depositId)) {
+  console.log(order.state, order.explain());
+  if (!order.isInFlight) break;
+}
+```
+
+Use the advanced client for estimates, multiple payout routes, order history,
+Relay source routing, withdrawals, top-ups, and unsigned transaction
+preparation. Keep the client stable across React renders. React hooks live at
+`@usdctofiat/offramp/react`: `useEstimate`, `useCashout`, `useOrder`, and
+`useOrders`.
+
+## Create a private OTC cash-out
+
+```typescript
+const order = await cashout({
+  mode: "fast",
+  signer,
   amount: "250",
-  platform: PLATFORMS.REVOLUT,
-  currency: CURRENCIES.EUR,
-  identifier: "alice",
+  currency: "EUR",
+  platform: "revolut",
+  payee: "alice",
   otcTaker: "0xBuyerWallet",
 });
-// otcLink: share with the approved buyer
+
+console.log(order.usdctofiat.otcLink);
 ```
 
-Retrofit OTC onto an existing public deposit:
+For `best` results, read `order.otcLink`. If restriction fails after cash-out
+creation, preserve the returned `depositId` and `txHash`; do not create a
+second order. Recover the existing deposit with `enableOtc()`.
+
+## Handle errors
 
 ```typescript
-import { enableOtc, disableOtc, getOtcLink } from "@usdctofiat/offramp";
-
-await enableOtc(walletClient, "362", "0xBuyerWallet");
-await disableOtc(walletClient, "362"); // back to public orderbook
-const link = getOtcLink("362"); // no tx, just the share URL
-```
-
-Buyer rejection happens at the `WhitelistPreIntentHook` contract before payment starts — non-approved wallets cannot signal intent.
-
-## PeerAuth seller registration
-
-PayPal, Wise, Venmo, and Cash App makers may need to register their handle
-inside the PeerAuth browser extension before the first deposit. The SDK throws
-`OfframpError` with code `EXTENSION_REGISTRATION_REQUIRED` when curator rejects
-a maker for this reason. Drive recovery with the React hook:
-
-```tsx
-import { PLATFORMS, OFFRAMP_ERROR_CODES } from "@usdctofiat/offramp";
-import { useOfframp, usePeerExtensionRegistration } from "@usdctofiat/offramp/react";
-
-function PayPalSellButton({ walletClient }) {
-  const { offramp, lastError } = useOfframp();
-  const peer = usePeerExtensionRegistration(PLATFORMS.PAYPAL);
-  const needsExt = lastError?.code === OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED;
-
-  return (
-    <>
-      <button
-        onClick={() =>
-          offramp(walletClient, {
-            amount: "100",
-            platform: PLATFORMS.PAYPAL,
-            currency: CURRENCIES.USD,
-            identifier: "alicepay", // PayPal.me USERNAME, NOT email
-          })
-        }
-      >
-        Sell USDC
-      </button>
-
-      {needsExt && (
-        <div>
-          <p>{peer.info?.requiredPrompt}</p>
-          {peer.phase === "needs_install" && (
-            <button onClick={peer.installExtension}>Install Peer Extension</button>
-          )}
-          {peer.phase === "needs_connection" && (
-            <button onClick={peer.connectExtension} disabled={peer.busy}>
-              Connect Peer Extension
-            </button>
-          )}
-          {peer.phase === "ready" && (
-            <button onClick={peer.startRegistrationCapture} disabled={peer.busy}>
-              {peer.info?.ctaLabel ?? "Register with Peer"}
-            </button>
-          )}
-          {peer.capturedMetadata?.sarCredentialCapture?.credentialBundle && !peer.error && (
-            <button onClick={() => peer.completeRegistration(walletClient, depositParams)}>
-              Continue registration
-            </button>
-          )}
-        </div>
-      )}
-    </>
-  );
-}
-```
-
-`startRegistrationCapture()` launches the headless Peer metadata capture; once
-`capturedMetadata.sarCredentialCapture.credentialBundle` is present, call
-`completeRegistration(walletClient, depositParams)` (it uploads the seller
-credential and retries the deposit in one shot). Or just call `offramp()` again
-with the same identifier after the handshake completes.
-
-## Deposit management
-
-```typescript
-import { deposits, close } from "@usdctofiat/offramp";
-
-const list = await deposits("0xYourAddress");
-// [{ depositId, status, remainingUsdc, paymentMethods, currencies, delegated, ... }]
-
-await close(walletClient, "362"); // withdraw remaining USDC and close
-```
-
-## Resumable flow
-
-`offramp()` is idempotent. Before creating a new deposit it checks for an
-existing undelegated deposit on the wallet and resumes from delegation if
-found. Handles browser crashes, failed delegation, and retries automatically —
-just call `offramp()` again.
-
-## Peer extension capture changes in v4
-
-If you drive the re-exported `peerExtensionSdk` directly, v4 follows
-`@zkp2p/sdk@0.8.1`. The upstream Peer extension removed the sidepanel onramp
-contract entirely — `peerExtensionSdk.onramp()`, `getOnrampTransaction()`, and
-`openSidebar()` are gone, along with the `PeerExtensionOnrampParams` /
-`PeerOnrampPreparedTransaction*` types. Capture now goes through the headless
-metadata bridge: register an `onMetadataMessage(callback)` listener, then call
-`authenticate({ actionType: "transfer_<platform>", captureMode, platform, providerConfig })`.
-Build the buyer-TEE proof from the captured message, prepare fulfill calldata
-via `fulfillIntent.prepare`, and broadcast it with your wallet client. There is
-no pull-recovery path — re-run `authenticate` for the active intent if a
-callback is missed. `PeerSarCredentialBundle` is now an alias of `@zkp2p/sdk`'s
-`SellerCredentialBundle`. Most integrators never touch this surface: the
-`offramp()` function and the React hooks handle the whole flow.
-
-## Error handling
-
-```typescript
-import { OfframpError, OFFRAMP_ERROR_CODES } from "@usdctofiat/offramp";
+import { CashError, OfframpError, cashout } from "@usdctofiat/offramp";
 
 try {
-  await offramp(walletClient, params);
-} catch (err) {
-  if (err instanceof OfframpError) {
-    switch (err.code) {
-      case OFFRAMP_ERROR_CODES.USER_CANCELLED:
-        return;
-      case OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED:
-        // Walk the user through usePeerExtensionRegistration() then retry.
-        return;
-      default:
-        // Generic recovery: call offramp() again — undelegated deposits resume.
-        console.error(err.code, err.step, err.txHash, err.depositId, err.message);
-    }
+  await cashout(input);
+} catch (error) {
+  if (error instanceof CashError) {
+    console.error(error.code, error.retryable, error.remediation);
+  } else if (error instanceof OfframpError) {
+    console.error(error.code, error.depositId, error.txHash);
   }
+  throw error;
 }
 ```
 
-Error codes:
+Present the typed remediation to the user, preserve any order identifiers on
+the error, and retry only when the error marks the operation retryable.
 
-- `VALIDATION` — invalid parameter shape or unsupported platform/currency pair
-- `APPROVAL_FAILED` — USDC allowance transaction failed
-- `REGISTRATION_FAILED` — `POST /v2/makers/create` rejected (non-extension reason)
-- `EXTENSION_REGISTRATION_REQUIRED` — seller needs the PeerAuth registration handshake
-- `DEPOSIT_FAILED` — escrow `createDeposit` transaction failed
-- `CONFIRMATION_FAILED` — could not parse the deposit ID from receipt logs
-- `DELEGATION_FAILED` — delegation transaction failed
-- `USER_CANCELLED` — wallet popup rejected
-- `UNSUPPORTED` — unsupported chain / wallet capability
+## Onboard verified payees
 
-## Constraints
+Use `createOfframp().registerPayee()` for extension-verified handles, then
+reuse the returned handle in `cashout()`. Consult the current verified-payees
+guide before implementing PayPal, Wise, Venmo, or Cash App onboarding; their
+extension requirements can change independently of an app's UI.
 
-- Base mainnet only (chain ID 8453)
-- Minimum deposit: 1 USDC
-- Requires a viem `WalletClient` with an account
-- All deposits delegate to the Delegate vault (mandatory — pricing is managed)
-- Rate mode is `track_market` (vault oracle handles quoting)
-- Attribution: SDK v5.0.1+ attaches the `galleonlabs` ERC-8021 builder code and
-  Curator's `peer-ref-TOFIAT` integration-referral marker. `integratorId` and
-  `referralId` are telemetry dimensions, not on-chain fee configuration.
+## Keep managed v5 flows explicit
 
-## Links
+Use the compatibility API only when automatic Delegate-vault management or a
+legacy EscrowV2 lifecycle is specifically required:
 
-- npm: https://www.npmjs.com/package/@usdctofiat/offramp
-- Starters: https://github.com/ADWilkinson/usdctofiat-peerlytics-starters
-- App: https://usdctofiat.xyz
+```typescript
+import {
+  CURRENCIES,
+  PLATFORMS,
+  createManagedOfframp,
+} from "@usdctofiat/offramp/managed";
+
+const managed = createManagedOfframp({ walletClient });
+await managed.createDeposit({
+  amount: "100",
+  currency: CURRENCIES.EUR,
+  platform: PLATFORMS.REVOLUT,
+  identifier: "alice",
+});
+```
+
+Do not present the compatibility `offramp()` helper, `useOfframp()` hook, or
+`createManagedOfframp()` factory as the v8 golden path.
+
+## Preserve attribution and resources
+
+The v8 distribution automatically applies `peer-ref-TOFIAT` and
+`galleonlabs`. Do not pass the removed v5 `integratorId` or `referralId` fields
+to the flat `cashout()` input. Advanced clients may append an analytics code
+with `createOfframp({ referrer: "my-wallet" })`; they cannot replace the fixed
+financial referral.
+
+Use the package resource exports instead of hardcoding integration links:
+
+```typescript
+import {
+  OFFRAMP_DEVELOPER_RESOURCES,
+  getOfframpDeveloperResources,
+} from "@usdctofiat/offramp";
+
+console.log(OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide);
+console.log(getOfframpDeveloperResources("bot"));
+```
+
+## Verify
+
+- Confirm the signer is on Base mainnet (chain ID 8453).
+- Validate the amount and payout handle before wallet activity.
+- Persist `depositId` immediately after success.
+- Exercise the selected mode with a small real order before release.
+- Use Peerlytics or the explorer to confirm the resulting order/deposit.
+
+## References
+
 - Developer portal: https://usdctofiat.xyz/developers
+- SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
+- Canonical machine reference: https://usdctofiat.xyz/llms-full.txt
+- Canonical skill: https://usdctofiat.xyz/skills/usdctofiat.md
+- Starters: https://github.com/ADWilkinson/usdctofiat-peerlytics-starters
+- Peerlytics: https://peerlytics.xyz/developers

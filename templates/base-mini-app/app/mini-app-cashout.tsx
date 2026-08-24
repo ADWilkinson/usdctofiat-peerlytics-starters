@@ -1,21 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  CURRENCIES,
-  OFFRAMP_DEVELOPER_RESOURCES,
-  PLATFORMS,
-  offramp,
-} from "@usdctofiat/offramp";
+import { OFFRAMP_DEVELOPER_RESOURCES, PLATFORMS, cashout } from "@usdctofiat/offramp";
 import { Attribution } from "ox/erc8021";
 import { createWalletClient, custom, type WalletClient } from "viem";
 import { base } from "viem/chains";
 
-const DEFAULT_INTEGRATOR_ID = "__INTEGRATOR_ID__";
-const DEFAULT_REFERRAL_ID = "TODO_SET_REFERRAL_ID";
 const DEFAULT_BASE_BUILDER_CODE = "bc_srxybeyl";
-const INTEGRATOR_ID = process.env.NEXT_PUBLIC_INTEGRATOR_ID || DEFAULT_INTEGRATOR_ID;
-const REFERRAL_ID = process.env.NEXT_PUBLIC_REFERRAL_ID || DEFAULT_REFERRAL_ID;
 const BASE_BUILDER_CODE =
   process.env.NEXT_PUBLIC_BASE_BUILDER_CODE || DEFAULT_BASE_BUILDER_CODE;
 const APP_KICKER = process.env.NEXT_PUBLIC_APP_KICKER || "USDCtoFiat on Base";
@@ -23,7 +14,6 @@ const APP_URL =
   typeof window === "undefined"
     ? "http://localhost:3000"
     : process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-const configuredReferralId = REFERRAL_ID === DEFAULT_REFERRAL_ID ? undefined : REFERRAL_ID;
 const dataSuffix = Attribution.toDataSuffix({ codes: [BASE_BUILDER_CODE] });
 
 async function getBaseAccountSdk() {
@@ -39,19 +29,19 @@ const routes = [
   {
     id: "revolut-usd",
     label: "Revolut USD",
-    currency: CURRENCIES.USD,
+    currency: "USD",
     platform: PLATFORMS.REVOLUT,
   },
   {
     id: "venmo",
     label: "Venmo",
-    currency: CURRENCIES.USD,
+    currency: "USD",
     platform: PLATFORMS.VENMO,
   },
   {
     id: "wise-usd",
     label: "Wise USD",
-    currency: CURRENCIES.USD,
+    currency: "USD",
     platform: PLATFORMS.WISE,
   },
 ] as const;
@@ -127,13 +117,13 @@ export function MiniAppCashout() {
 
     try {
       const walletClient = await getMiniAppWalletClient();
-      const result = await offramp(walletClient, {
+      const result = await cashout({
+        mode: "best",
+        signer: walletClient,
         amount,
         currency: selectedRoute.currency,
-        platform: selectedRoute.platform,
-        identifier: validation?.valid ? validation.normalized : identifier.trim(),
-        integratorId: INTEGRATOR_ID,
-        ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
+        platform: selectedRoute.platform.id,
+        payee: validation?.valid ? validation.normalized : identifier.trim(),
       });
 
       setWalletStatus("Wallet ready");

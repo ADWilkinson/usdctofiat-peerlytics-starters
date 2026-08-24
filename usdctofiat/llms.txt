@@ -1,6 +1,6 @@
-# @usdctofiat/offramp v5
+# @usdctofiat/offramp v8
 
-USDC-to-fiat offramp SDK for Base. Deposits are wallet-native, delegated to the managed rate manager, and observable through Peerlytics explorer/data surfaces.
+USDC-to-fiat cash-out SDK for Base. `cashout()` is the golden path and requires an explicit `fast` or `best` mode. Cash-outs are observable through Peerlytics explorer/data surfaces.
 
 ## Install
 
@@ -10,38 +10,66 @@ bun add @usdctofiat/offramp
 
 ```ts
 import {
-  offramp,
-  deposits,
-  close,
-  enableOtc,
-  disableOtc,
-  getOtcLink,
+  cashout,
   OFFRAMP_DEVELOPER_RESOURCES,
   OFFRAMP_RESOURCE_LINKS,
   OFFRAMP_INTEGRATION_PLAYBOOKS,
   getOfframpDeveloperResources,
-  PLATFORMS,
-  CURRENCIES,
 } from "@usdctofiat/offramp";
 
-// Create deposit + delegate (resumable)
-const result = await offramp(walletClient, {
+// Direct Peer Cash route at the live oracle rate (0 bps spread)
+const result = await cashout({
+  mode: "fast",
+  signer: walletClient,
   amount: "100",
-  platform: PLATFORMS.REVOLUT,
-  currency: CURRENCIES.EUR,
-  identifier: "alice",
+  platform: "revolut",
+  currency: "EUR",
+  payee: "alice",
 });
-// { depositId: "362", txHash: "0x...", resumed: false }
+// Persist result.depositId immediately; it is the cross-process resume key.
 
-// One-call OTC: create a deposit only one taker wallet can fill
-const otc = await offramp(walletClient, {
+// Delegate-managed pricing (10 bps fill fee)
+const best = await cashout({
+  mode: "best",
+  signer: walletClient,
   amount: "100",
-  platform: PLATFORMS.REVOLUT,
-  currency: CURRENCIES.EUR,
-  identifier: "alice",
+  platform: "revolut",
+  currency: "EUR",
+  payee: "alice",
+});
+
+// One-call OTC: restrict the confirmed cash-out to one taker wallet
+const otc = await cashout({
+  mode: "fast",
+  signer: walletClient,
+  amount: "100",
+  platform: "revolut",
+  currency: "EUR",
+  payee: "alice",
   otcTaker: "0xTakerAddress",
 });
-// { depositId, txHash, resumed, otcLink }
+
+// Canonical resources for apps, bots, agents, OTC, and Peerlytics
+console.log(OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide);
+console.log(OFFRAMP_RESOURCE_LINKS.agentSkill);
+console.log(OFFRAMP_INTEGRATION_PLAYBOOKS.map((entry) => entry.profile));
+console.log(getOfframpDeveloperResources("agent"));
+```
+
+`cashout()` accepts a human USDC amount as a string or number, or exact six-decimal base units as a bigint. The v8 flat helper is production-only and always requires `mode`.
+
+## Managed v5 compatibility
+
+Use the old managed EscrowV2 helpers only when maintaining a v5-shaped flow:
+
+```ts
+import {
+  close,
+  deposits,
+  disableOtc,
+  enableOtc,
+  getOtcLink,
+} from "@usdctofiat/offramp";
 
 // Retrofit OTC onto an existing deposit
 await enableOtc(walletClient, "362", "0xTakerAddress");
@@ -55,13 +83,6 @@ const list = await deposits("0x...");
 
 // Close deposit
 await close(walletClient, "362");
-
-// Canonical resources for apps, bots, agents, OTC, and Peerlytics
-console.log(OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide);
-console.log(OFFRAMP_RESOURCE_LINKS.agentSkill);
-console.log(OFFRAMP_INTEGRATION_PLAYBOOKS.map((entry) => entry.profile));
-console.log(getOfframpDeveloperResources("agent"));
-
 ```
 
 ## Resource bundle
@@ -109,7 +130,7 @@ CURRENCIES.EUR.countryCode // "eu"
 
 34 currencies: AED, ARS, AUD, BRL, CAD, CHF, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, JPY, KES, MXN, MYR, NOK, NZD, PHP, PLN, RON, SAR, SEK, SGD, THB, TRY, UGX, USD, VND, ZAR
 
-## React Hooks
+## Managed compatibility: React hooks
 
 ```ts
 import { useOfframp, usePeerExtensionRegistration } from "@usdctofiat/offramp/react";
@@ -135,7 +156,7 @@ const peer = usePeerExtensionRegistration(PLATFORMS.PAYPAL);
 // (openVerifySidebar() is a deprecated alias of startRegistrationCapture().)
 ```
 
-## Types
+## Managed compatibility: types
 
 ```ts
 interface OfframpParams {
@@ -189,7 +210,7 @@ interface DepositInfo {
 }
 ```
 
-## Errors
+## Managed compatibility: errors
 
 ```ts
 import { OfframpError, OFFRAMP_ERROR_CODES } from "@usdctofiat/offramp";
@@ -206,17 +227,17 @@ import { OfframpError, OFFRAMP_ERROR_CODES } from "@usdctofiat/offramp";
 // error.step, error.txHash, error.depositId
 ```
 
-Generic recovery: call offramp() again — it detects undelegated deposits and resumes.
+For the managed compatibility flow, call `offramp()` again to detect and resume an undelegated deposit.
 
 `EXTENSION_REGISTRATION_REQUIRED` recovery: walk the user through
 `usePeerExtensionRegistration(platform)` (React) or `peerExtensionSdk` directly
-(see Peer Extension section below), then call offramp() with the same handle.
+(see the managed Peer Extension section below), then call the compatibility `offramp()` helper with the same handle.
 
-## Peer Extension (PayPal, Wise, Venmo, Cash App)
+## Managed compatibility: Peer Extension (PayPal, Wise, Venmo, Cash App)
 
 PayPal, Wise, Venmo, and Cash App makers may need to register their handle
 inside the PeerAuth browser extension before curator's `/v2/makers/create`
-accepts them. `offramp()` throws `OfframpError` with code
+accepts them. The managed compatibility `offramp()` helper throws `OfframpError` with code
 `EXTENSION_REGISTRATION_REQUIRED` when this happens. The SDK re-exports the
 driver from `@zkp2p/sdk` so you don't need a direct dep on it:
 
@@ -243,7 +264,7 @@ else {
       identifier: "alicepay",
       capturedMetadata: message,
     });
-    // then call offramp() again with the same handle
+    // then retry the managed compatibility flow with the same handle
   });
   peerExtensionSdk.authenticate(params);
 }
@@ -265,7 +286,7 @@ const needsExt = lastError?.code === OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_
 //   peer.phase === "ready"            → peer.startRegistrationCapture()
 // When peer.capturedMetadata.sarCredentialCapture.credentialBundle is set:
 //   peer.completeRegistration(walletClient, params)  (uploads + retries deposit)
-// Or after the user confirms: call offramp() again with the same identifier.
+// Or after the user confirms: retry the managed flow with the same identifier.
 ```
 
 Check `platform.extensionRegistration` to decide whether to surface a PeerAuth
@@ -280,9 +301,9 @@ the headless metadata bridge: register `onMetadataMessage(callback)`, then call
 `authenticate({ actionType, captureMode, platform, providerConfig })`. Re-run
 `authenticate` if the active capture callback is missed.
 
-## How It Works
+## Managed compatibility flow
 
-offramp() is resumable. Before creating a new deposit, it checks for an existing undelegated deposit. If found, skips to delegation.
+The compatibility `offramp()` helper is resumable. Before creating a new deposit it checks for an existing undelegated deposit and, if found, skips to delegation.
 
 Full flow (3 wallet signatures — 4 when otcTaker is supplied):
 1. Approve USDC allowance (wallet tx)
@@ -296,7 +317,7 @@ All deposits are delegated, market-tracking, auto-closing, on Base (8453).
 
 ## OTC private orders
 
-Pass `otcTaker` to `offramp()` to whitelist a single taker wallet at creation time, or use `enableOtc` / `disableOtc` to toggle restriction on an existing deposit. Hand the returned `otcLink` (or `getOtcLink(depositId)`) to the taker — it deep-links into usdctofiat.xyz to the restricted deposit.
+Pass `otcTaker` to the v8 `cashout({ mode, ... })` input to whitelist one buyer at creation time. For an existing managed EscrowV2 deposit, use the compatibility `enableOtc` / `disableOtc` helpers. Hand the returned `usdctofiat.otcLink` (fast mode), `otcLink` (best mode), or `getOtcLink(depositId)` result to the buyer.
 
 ## Links
 

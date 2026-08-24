@@ -9,21 +9,22 @@ Examples and a live demo for the two SDKs covering ZKP2P on Base: server-side pr
 **Developer portals:** [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) · [peerlytics.xyz/developers](https://peerlytics.xyz/developers)
 **Workshop:** [by Galleon](https://galleonlabs.io/fleet/starter-kits)
 
-## 60-second deposit
+## 60-second cash-out
 
 ```ts
-import { CURRENCIES, PLATFORMS, offramp } from "@usdctofiat/offramp";
+import { cashout } from "@usdctofiat/offramp";
 
-const { depositId, txHash } = await offramp(walletClient, {
+const { depositId, txHash } = await cashout({
+  mode: "fast",
+  signer: walletClient,
   amount: "100",
-  platform: PLATFORMS.REVOLUT,
-  currency: CURRENCIES.EUR,
-  identifier: "alice",
-  integratorId: "your-app",
+  platform: "revolut",
+  currency: "EUR",
+  payee: "alice",
 });
 ```
 
-That single call approves USDC, creates the escrow deposit on Base, and delegates pricing to the managed vault. Settlement runs on Revolut, Venmo, Wise, Cash App, Zelle, Monzo, or PayPal — your users never leave your app. Use the `integratorId` on every call so deposits are attributable.
+That call creates a direct Peer Cash order on Base at the live oracle rate. Choose `mode: "best"` instead to delegate pricing to the managed rate manager. Settlement runs on Revolut, Venmo, Wise, Cash App, Zelle, Monzo, or PayPal — your users never leave your app. Persist `depositId` immediately so the order can be resumed from another process or device.
 
 Need a fresh app skeleton instead of dropping into an existing one?
 
@@ -53,7 +54,7 @@ peerlytics/                  @peerlytics/sdk examples (run standalone with tsx/b
   llms.txt                     LLM-friendly SDK reference
 
 usdctofiat/                  @usdctofiat/offramp examples
-  create-deposit.ts            create and delegate a USDC deposit
+  create-deposit.ts            cash out USDC in managed best mode
   close-deposit.ts             withdraw remaining USDC and close a deposit
   resume-deposit.ts            resume an interrupted deposit flow
   otc-deposit.ts               create an OTC deposit restricted to a single taker
@@ -124,14 +125,12 @@ Choose the smallest starter that matches where the cash-out flow will live:
 
 | Starter | Use it when | Required env |
 |---|---|---|
-| `next` | You want a production web app with Privy wallet auth | `NEXT_PUBLIC_PRIVY_APP_ID`, `NEXT_PUBLIC_INTEGRATOR_ID` |
-| `base-mini-app` | You are distributing a compact Base Account cash-out surface | `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_INTEGRATOR_ID`, `NEXT_PUBLIC_BASE_BUILDER_CODE` |
-| `vite` | You want a lean SPA without Next.js conventions | `VITE_PRIVY_APP_ID`, `VITE_INTEGRATOR_ID` |
-| `telegram-bot` | You are running a server-side maker bot with a managed wallet | `TELEGRAM_BOT_TOKEN`, `MAKER_PRIVATE_KEY`, `AUTHORIZED_TELEGRAM_USER_ID`, `INTEGRATOR_ID` |
+| `next` | You want a production web app with Privy wallet auth | `NEXT_PUBLIC_PRIVY_APP_ID` |
+| `base-mini-app` | You are distributing a compact Base Account cash-out surface | `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_BASE_BUILDER_CODE` |
+| `vite` | You want a lean SPA without Next.js conventions | `VITE_PRIVY_APP_ID` |
+| `telegram-bot` | You are running a server-side maker bot with a managed wallet | `TELEGRAM_BOT_TOKEN`, `MAKER_PRIVATE_KEY`, `AUTHORIZED_TELEGRAM_USER_ID` |
 
-`TODO_SET_REFERRAL_ID` is deliberately inert. The starters only pass
-`referralId` after you set a real referral value, so a generated app cannot
-accidentally attribute production deposits to the placeholder.
+The v8 flat `cashout()` helper applies the package's fixed USDCtoFiat attribution automatically; it does not need an integrator or referral environment variable.
 
 ## SDKs at a glance
 
@@ -161,22 +160,22 @@ Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 reque
 
 ### @usdctofiat/offramp
 
-Delegated USDC-to-fiat off-ramp on Base. Revolut, Venmo, Wise, PayPal, Cash App, Zelle, Monzo, and more.
+Non-custodial USDC-to-fiat cash-out on Base. Revolut, Venmo, Wise, PayPal, Cash App, Zelle, Monzo, and more.
 
 ```ts
-import { useOfframp } from "@usdctofiat/offramp/react";
-import { PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
+import { cashout } from "@usdctofiat/offramp";
 
-const { offramp, deposits, close } = useOfframp();
-await offramp(walletClient, {
+const order = await cashout({
+  mode: "best",
+  signer: walletClient,
   amount: "100",
-  platform: PLATFORMS.REVOLUT,
-  currency: CURRENCIES.USD,
-  identifier: "alice",
+  platform: "revolut",
+  currency: "USD",
+  payee: "alice",
 });
 ```
 
-Pass `otcTaker` to restrict a deposit to one wallet, or use `enableOtc` / `disableOtc` / `getOtcLink` to retrofit a public deposit. Both paths are in `usdctofiat/otc-deposit.ts`.
+Use `mode: "fast"` for the direct 0 bps oracle-spread route or `mode: "best"` for the Delegate-managed route. Pass `otcTaker` to restrict a cash-out to one buyer wallet. The legacy managed EscrowV2 helpers remain available as an explicit compatibility surface; see `usdctofiat/otc-deposit.ts` and the package's managed-v5 migration guide.
 
 **PayPal, Wise, Venmo, and Cash App** makers may need to register their handle in the PeerAuth browser extension before the first deposit. The SDK throws `EXTENSION_REGISTRATION_REQUIRED` and ships `usePeerExtensionRegistration(platform)` to drive the install / connect / verify flow. See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts` for the PayPal-shaped recovery pattern. PayPal uses the `paypal.me` **username**, not the account email.
 

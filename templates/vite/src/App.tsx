@@ -1,19 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import {
-  CURRENCIES,
   OFFRAMP_DEVELOPER_RESOURCES,
   PLATFORMS,
-  offramp,
+  cashout,
 } from "@usdctofiat/offramp";
 import { createWalletClient, custom, type WalletClient } from "viem";
 import { base } from "viem/chains";
 
-const DEFAULT_INTEGRATOR_ID = "__INTEGRATOR_ID__";
-const DEFAULT_REFERRAL_ID = "TODO_SET_REFERRAL_ID";
-const INTEGRATOR_ID = import.meta.env.VITE_INTEGRATOR_ID || DEFAULT_INTEGRATOR_ID;
-const REFERRAL_ID = import.meta.env.VITE_REFERRAL_ID || DEFAULT_REFERRAL_ID;
-const configuredReferralId = REFERRAL_ID === DEFAULT_REFERRAL_ID ? undefined : REFERRAL_ID;
 const resourceLinks = [
   ["SDK guide", OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide],
   ["App guide", OFFRAMP_DEVELOPER_RESOURCES.links.appGuide],
@@ -94,13 +88,13 @@ export function App() {
     setSubmitMessage("Creating deposit on Base...");
 
     try {
-      const result = await offramp(walletClient, {
+      const result = await cashout({
+        mode: "best",
+        signer: walletClient,
         amount,
-        currency: CURRENCIES.USD,
-        platform: PLATFORMS.REVOLUT,
-        identifier: identifier.trim(),
-        integratorId: INTEGRATOR_ID,
-        ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
+        currency: "USD",
+        platform: "revolut",
+        payee: validation?.valid ? validation.normalized : identifier.trim(),
       });
 
       setSubmitMessage(`Deposit #${result.depositId} created.`);
@@ -118,8 +112,8 @@ export function App() {
         <h1>Offramp Vite Starter</h1>
         <p className="lede">
           Uses {OFFRAMP_DEVELOPER_RESOURCES.packageName} v
-          {OFFRAMP_DEVELOPER_RESOURCES.sdkVersion} on Base. Deposits are
-          wallet-signed and delegate to the managed rate manager.
+          {OFFRAMP_DEVELOPER_RESOURCES.sdkVersion} on Base. Best mode delegates
+          pricing to the managed rate manager.
         </p>
       </header>
 

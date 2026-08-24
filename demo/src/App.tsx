@@ -76,17 +76,15 @@ const { orderbooks } = await client.getOrderbook({
   platform: "revolut",
 });`;
 
-const USDCTOFIAT_SNIPPET = `import { useOfframp } from "@usdctofiat/offramp/react";
-import { PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
+const USDCTOFIAT_SNIPPET = `import { cashout } from "@usdctofiat/offramp";
 
-const { offramp } = useOfframp();
-
-await offramp(walletClient, {
+await cashout({
+  mode: "best",
+  signer: walletClient,
   amount: "100",
-  platform: PLATFORMS.REVOLUT,
-  currency: CURRENCIES.GBP,
-  identifier: "alice",
-  integratorId: "your-app",
+  platform: "revolut",
+  currency: "GBP",
+  payee: "alice",
 });`;
 
 // === App ===
@@ -514,13 +512,13 @@ export default function App() {
 
             <h3 className="strip-name">USDCtoFiat</h3>
             <p className="strip-desc">
-              Sell USDC for fiat on 10 platforms and 34 currencies. One React
-              hook covers approval, registration, deposit, and delegation —
-              resumable across reloads and signature failures.
+              The copy-paste path uses v8 cashout(). This live playground keeps
+              the managed EscrowV2 React hook as an explicit compatibility demo
+              for approval, registration, deposit, and delegation.
             </p>
 
             <ul className="strip-features">
-              <li>Resumable multi-step deposit flow</li>
+              <li>Managed EscrowV2 compatibility flow</li>
               <li>Mandatory delegated pricing for monetizable deposits</li>
               <li>OTC private orders with a single taker wallet</li>
               <li>Demo wired for Revolut and Venmo</li>

@@ -59,6 +59,34 @@ const offrampPlatformNames = Object.values(offrampPlatforms)
 const defaultStarterPlatform = offrampPlatforms.REVOLUT;
 
 assert(
+  /^\^8\./.test(rootOfframpVersion ?? ""),
+  "package.json must depend on @usdctofiat/offramp v8.x",
+);
+
+const readmeQuickstart = rootReadme.slice(
+  rootReadme.indexOf("## 60-second"),
+  rootReadme.indexOf("Need a fresh app skeleton"),
+);
+const skillText = readText("skills/claude/integrate-usdctofiat-offramp/SKILL.md");
+const skillGoldenPath = skillText.slice(0, skillText.indexOf("## Keep managed v5 flows explicit"));
+const llmsGoldenPath = offrampLlms.slice(0, offrampLlms.indexOf("## Managed v5 compatibility"));
+
+for (const [file, text] of [
+  ["README.md 60-second path", readmeQuickstart],
+  ["usdctofiat/llms.txt golden path", llmsGoldenPath],
+  ["integrate-usdctofiat-offramp skill primary path", skillGoldenPath],
+]) {
+  assert(
+    text.includes("cashout({") &&
+      text.includes('mode: "') &&
+      text.includes("signer") &&
+      text.includes("payee:") &&
+      !text.includes("await offramp("),
+    `${file} must teach cashout({ mode, signer, payee }) before managed compatibility APIs`,
+  );
+}
+
+assert(
   rootReadme.includes(`Supported platforms: ${offrampPlatformNames}.`),
   "README.md must list the platforms exposed by the locked offramp SDK",
 );
@@ -149,26 +177,16 @@ for (const [pkgPath, names] of packageChecks) {
 
 const envFiles = {
   "demo/.env.example": ["PEERLYTICS_API_KEY"],
-  "templates/next/.env.example": [
-    "NEXT_PUBLIC_PRIVY_APP_ID",
-    "NEXT_PUBLIC_INTEGRATOR_ID",
-    "NEXT_PUBLIC_REFERRAL_ID",
-  ],
+  "templates/next/.env.example": ["NEXT_PUBLIC_PRIVY_APP_ID"],
   "templates/base-mini-app/.env.example": [
     "NEXT_PUBLIC_APP_URL",
     "NEXT_PUBLIC_BASE_BUILDER_CODE",
   ],
-  "templates/vite/.env.example": [
-    "VITE_PRIVY_APP_ID",
-    "VITE_INTEGRATOR_ID",
-    "VITE_REFERRAL_ID",
-  ],
+  "templates/vite/.env.example": ["VITE_PRIVY_APP_ID"],
   "templates/telegram-bot/.env.example": [
     "TELEGRAM_BOT_TOKEN",
     "MAKER_PRIVATE_KEY",
     "AUTHORIZED_TELEGRAM_USER_ID",
-    "INTEGRATOR_ID",
-    "REFERRAL_ID",
   ],
 };
 
@@ -225,14 +243,33 @@ const baseMiniAppPublicRoutes = [
   "templates/base-mini-app/app/opengraph-image.tsx",
 ];
 
+assert(exists(".github/workflows/check.yml"), "GitHub Actions must run the starter check");
+if (exists(".github/workflows/check.yml")) {
+  const checkWorkflow = readText(".github/workflows/check.yml");
+  assert(
+    checkWorkflow.includes("pull_request:") &&
+      checkWorkflow.includes("push:") &&
+      checkWorkflow.includes("npm ci") &&
+      checkWorkflow.includes("npm run check"),
+    ".github/workflows/check.yml must run npm run check on pull requests and pushes",
+  );
+}
+
 for (const file of baseMiniAppPublicRoutes) {
   assert(exists(file), `templates/base-mini-app must provide ${file}`);
 }
 
 for (const file of templateEntrypoints) {
   const text = readText(file);
-  assert(text.includes("__INTEGRATOR_ID__"), `${file} must keep the CLI integrator placeholder`);
-  assert(text.includes("TODO_SET_REFERRAL_ID"), `${file} must keep the referral placeholder visible`);
+  assert(
+    text.includes("cashout({") &&
+      text.includes('mode: "best"') &&
+      text.includes("signer:") &&
+      text.includes("payee:") &&
+      !text.includes("await offramp(") &&
+      !text.includes(".createDeposit("),
+    `${file} must use cashout({ mode: "best", signer, payee }) as its default path`,
+  );
   assert(
     text.includes("OFFRAMP_DEVELOPER_RESOURCES"),
     `${file} must expose OFFRAMP_DEVELOPER_RESOURCES so generated apps keep canonical docs and agent links`,
@@ -260,8 +297,6 @@ for (const [file, envKey] of templateReadmes) {
   assert(text.includes("## Customize"), `${file} must document customization points`);
   assert(text.includes("## Deploy"), `${file} must document deploy notes`);
   assert(text.includes(envKey), `${file} must document ${envKey}`);
-  assert(text.includes("__INTEGRATOR_ID__"), `${file} must mention the integrator placeholder`);
-  assert(text.includes("TODO_SET_REFERRAL_ID"), `${file} must mention the referral placeholder`);
 }
 
 const nextTemplate = readText("templates/next/app/page.tsx");
@@ -269,8 +304,7 @@ const baseMiniAppTemplate = readText("templates/base-mini-app/app/mini-app-casho
 const viteTemplate = readText("templates/vite/src/App.tsx");
 const telegramTemplate = readText("templates/telegram-bot/src/index.ts");
 const telegramSellHandler = telegramTemplate.slice(telegramTemplate.indexOf('bot.command("sell"'));
-const executableRevolutExamples = [
-  "usdctofiat/create-deposit.ts",
+const executableManagedRevolutExamples = [
   "usdctofiat/resume-deposit.ts",
   "usdctofiat/otc-deposit.ts",
 ];
@@ -352,7 +386,8 @@ for (const [file, text] of [
   );
   assert(
     text.includes("PLATFORMS.REVOLUT.validate") &&
-      text.includes("platform: PLATFORMS.REVOLUT"),
+      text.includes('platform: "revolut"') &&
+      text.includes('currency: "USD"'),
     `${file} must default to a USD route that does not require Peer extension registration`,
   );
 }
@@ -375,11 +410,6 @@ assert(
   "templates/next/app/page.tsx must not hardcode a payment identifier",
 );
 assert(
-  nextTemplate.includes("configuredReferralId") &&
-    !nextTemplate.includes("referralId: REFERRAL_ID"),
-  "templates/next/app/page.tsx must not send TODO_SET_REFERRAL_ID to the SDK",
-);
-assert(
   !nextTemplate.includes("style={{"),
   "templates/next/app/page.tsx must use reusable CSS classes instead of inline UI styling",
 );
@@ -388,16 +418,11 @@ assert(
   "templates/vite/src/App.tsx must not hardcode a payment identifier",
 );
 assert(
-  viteTemplate.includes("configuredReferralId") &&
-    !viteTemplate.includes("referralId: REFERRAL_ID"),
-  "templates/vite/src/App.tsx must not send TODO_SET_REFERRAL_ID to the SDK",
-);
-assert(
   !viteTemplate.includes("style={{"),
   "templates/vite/src/App.tsx must use reusable CSS classes instead of inline UI styling",
 );
 assert(
-  telegramTemplate.includes("Usage: /sell <amount> <identifier>"),
+  telegramTemplate.includes("Usage: /sell <amount> <payee>"),
   "templates/telegram-bot/src/index.ts must reject incomplete /sell commands",
 );
 assert(
@@ -408,8 +433,8 @@ assert(
   "templates/telegram-bot/src/index.ts must authorize /sell callers before parsing or wallet activity",
 );
 assert(
-  !telegramTemplate.includes('identifierRaw || "alice"'),
-  "templates/telegram-bot/src/index.ts must not silently default payment identifiers",
+  !telegramTemplate.includes('payeeRaw || "alice"'),
+  "templates/telegram-bot/src/index.ts must not silently default payment handles",
 );
 assert(
   telegramTemplate.includes("parsedAmount < 1") &&
@@ -426,7 +451,7 @@ assert(
   readText("templates/telegram-bot/README.md").includes("at most six decimal places"),
   "templates/telegram-bot/README.md must document the USDC amount precision limit",
 );
-for (const file of executableRevolutExamples) {
+for (const file of executableManagedRevolutExamples) {
   const text = readText(file);
   assert(
     text.includes("process.env.REVOLUT_REV_TAG") &&
@@ -436,6 +461,14 @@ for (const file of executableRevolutExamples) {
     `${file} must require and validate the operator's payout Revtag`,
   );
 }
+assert(
+  createDepositExample.includes("cashout({") &&
+    createDepositExample.includes('mode: "best"') &&
+    createDepositExample.includes("signer: walletClient") &&
+    createDepositExample.includes("payee: revolutRevTag") &&
+    !createDepositExample.includes("await offramp("),
+  "usdctofiat/create-deposit.ts must use the v8 best-mode cashout path",
+);
 assert(
   createDepositExample.includes("parseUnits(amount, 6) < 1_000_000n") &&
     createDepositExample.includes("at most 6 decimal places"),
@@ -482,18 +515,15 @@ assert(
   "usdctofiat/manage-deposits.ts must normalize pasted wallet addresses",
 );
 assert(
-  telegramTemplate.includes("configuredReferralId") &&
-    !telegramTemplate.includes("referralId: REFERRAL_ID"),
-  "templates/telegram-bot/src/index.ts must not send TODO_SET_REFERRAL_ID to the SDK",
-);
-assert(
   telegramTemplate.includes("await bot.start({") &&
     telegramTemplate.includes("onStart: (botInfo)") &&
     !telegramTemplate.includes('console.log("Telegram offramp bot started")'),
   "templates/telegram-bot/src/index.ts must only report readiness after Telegram authentication",
 );
 assert(
-  baseMiniAppTemplate.includes("validation?.valid ? validation.normalized : identifier.trim()"),
+  baseMiniAppTemplate.includes(
+    "payee: validation?.valid ? validation.normalized : identifier.trim()",
+  ),
   "templates/base-mini-app/app/mini-app-cashout.tsx must submit normalized payment identifiers",
 );
 assert(
@@ -514,6 +544,23 @@ const orderbookSnapshot = readText("peerlytics/orderbook-snapshot.ts");
 const platformExplorer = readText("usdctofiat/platform-explorer.ts");
 const rateMonitor = readText("peerlytics/rate-monitor.ts");
 const timeseriesChart = readText("peerlytics/timeseries-chart.ts");
+
+const demoSnippet = demoApp.slice(
+  demoApp.indexOf("const USDCTOFIAT_SNIPPET"),
+  demoApp.indexOf("// === App ==="),
+);
+assert(
+  demoSnippet.includes("cashout({") &&
+    demoSnippet.includes('mode: "best"') &&
+    demoSnippet.includes("signer: walletClient") &&
+    demoSnippet.includes("payee:") &&
+    !demoSnippet.includes("offramp(walletClient"),
+  "demo copy-paste snippet must teach the v8 cashout contract",
+);
+assert(
+  demoApp.includes("managed EscrowV2 React hook as an explicit compatibility demo"),
+  "demo must label its retained useOfframp flow as managed compatibility",
+);
 
 assert(
   demoServer.includes("const supportedRoutes"),

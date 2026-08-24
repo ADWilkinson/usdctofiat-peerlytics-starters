@@ -1,9 +1,8 @@
 # Base Mini App Template
 
 Compact USDCtoFiat starter for Base distribution. It is a standard Next.js app
-that uses Base Account and creates a USDCtoFiat deposit on Base. Attribution is
-configured through `NEXT_PUBLIC_INTEGRATOR_ID`; optional referral attribution
-uses `NEXT_PUBLIC_REFERRAL_ID`.
+that uses Base Account and creates a USDCtoFiat cash-out on Base. The v8 SDK
+applies USDCtoFiat attribution automatically.
 
 ## Run
 
@@ -16,18 +15,11 @@ npm run dev
 Set `NEXT_PUBLIC_APP_URL` to the public HTTPS origin before testing discovery
 or embeds. Local development can use `http://localhost:3000`.
 
-The template keeps `__INTEGRATOR_ID__` and `TODO_SET_REFERRAL_ID` as scaffold
-placeholders, but the UI does not show those implementation labels to users.
-
 ## Customize
 
 - Edit `app/mini-app-cashout.tsx` to change the default routes, labels, and
   identifier fields.
-- Keep `NEXT_PUBLIC_INTEGRATOR_ID` set so every `offramp()` call can be
-  attributed.
-- Set `NEXT_PUBLIC_REFERRAL_ID` only when you have a real referral code for
-  partner traffic. The starter omits `referralId` when the placeholder is still
-  present.
+- Keep an explicit `mode` on every `cashout()` call. This starter uses `best`.
 - Keep `NEXT_PUBLIC_BASE_BUILDER_CODE` set to the Builder Code issued by Base
   Dashboard. The default `bc_srxybeyl` is the USDCtoFiat code for the reference
   deployment.
@@ -59,8 +51,6 @@ Deploy like any standard Next.js app. In Vercel or your host, set:
 ```bash
 NEXT_PUBLIC_APP_URL=https://your-mini-app.example
 NEXT_PUBLIC_APP_KICKER=USDCtoFiat on Base
-NEXT_PUBLIC_INTEGRATOR_ID=your-app
-NEXT_PUBLIC_REFERRAL_ID=your-real-referral-code
 NEXT_PUBLIC_BASE_BUILDER_CODE=bc_srxybeyl
 ```
 

@@ -1,9 +1,8 @@
 /**
  * create-deposit.ts
  *
- * Creates a USDC-to-fiat offramp deposit on Base. Automatically delegated
- * to the Delegate vault. Resumable — if an undelegated deposit exists,
- * skips straight to delegation.
+ * Creates a USDC-to-fiat cash-out on Base in "best" mode, which delegates
+ * pricing to the managed rate manager.
  *
  * Usage:
  *   npx tsx usdctofiat/create-deposit.ts
@@ -16,7 +15,7 @@
  *   AMOUNT         USDC amount (default: 1)
  */
 
-import { offramp, PLATFORMS, CURRENCIES, type OfframpError } from "@usdctofiat/offramp";
+import { CURRENCIES, PLATFORMS, cashout } from "@usdctofiat/offramp";
 import { createWalletClient, http, parseUnits } from "viem";
 import { base } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
@@ -51,18 +50,6 @@ const fmt = {
   red: (s: string) => `\x1b[31m${s}\x1b[0m`,
   bold: (s: string) => `\x1b[1m${s}\x1b[0m`,
   cyan: (s: string) => `\x1b[36m${s}\x1b[0m`,
-  yellow: (s: string) => `\x1b[33m${s}\x1b[0m`,
-};
-
-const STEP_LABELS: Record<string, string> = {
-  resuming: "Resuming undelegated deposit",
-  approving: "Approving USDC allowance",
-  registering: "Registering payee details",
-  depositing: "Creating deposit on-chain",
-  confirming: "Waiting for confirmation",
-  delegating: "Delegating to vault",
-  restricting: "Restricting to OTC taker",
-  done: "Complete",
 };
 
 async function main() {
@@ -80,16 +67,15 @@ async function main() {
   console.log();
 
   try {
-    const result = await offramp(walletClient, {
+    const result = await cashout({
+      mode: "best",
+      signer: walletClient,
       amount,
-      platform: PLATFORMS.REVOLUT,
-      currency: CURRENCIES.USD,
-      identifier: revolutRevTag,
-    }, (progress) => {
-      const label = STEP_LABELS[progress.step] ?? progress.step;
-      const icon = progress.step === "done" ? fmt.green("✓") : fmt.yellow("⏳");
-      console.log(`  ${icon} ${label}`);
+      platform: "revolut",
+      currency: "USD",
+      payee: revolutRevTag,
     });
+    if (result.mode !== "best") throw new Error("Unexpected cash-out mode");
 
     console.log();
     console.log(fmt.green(`  ✓ Deposit ${result.resumed ? "resumed" : "created"} and delegated`));
@@ -97,11 +83,12 @@ async function main() {
     console.log(`  Tx hash:    ${fmt.dim(result.txHash)}`);
     console.log();
   } catch (err) {
-    const error = err as OfframpError;
+    const error = err as Error & { code?: string; depositId?: string; txHash?: string };
     console.log();
     console.log(fmt.red(`  ✗ ${error.message}`));
     if (error.code) console.log(fmt.dim(`    Code: ${error.code}`));
-    if (error.step) console.log(fmt.dim(`    Step: ${error.step}`));
+    if (error.depositId) console.log(fmt.dim(`    Deposit: ${error.depositId}`));
+    if (error.txHash) console.log(fmt.dim(`    Tx hash: ${error.txHash}`));
     console.log();
     process.exit(1);
   }

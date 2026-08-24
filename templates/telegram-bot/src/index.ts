@@ -1,10 +1,5 @@
 import { Bot } from "grammy";
-import {
-  CURRENCIES,
-  OFFRAMP_DEVELOPER_RESOURCES,
-  PLATFORMS,
-  createOfframp,
-} from "@usdctofiat/offramp";
+import { OFFRAMP_DEVELOPER_RESOURCES, PLATFORMS, cashout } from "@usdctofiat/offramp";
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { base } from "viem/chains";
@@ -12,11 +7,6 @@ import { base } from "viem/chains";
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
 const MAKER_PRIVATE_KEY = process.env.MAKER_PRIVATE_KEY as `0x${string}` | undefined;
 const AUTHORIZED_TELEGRAM_USER_ID = process.env.AUTHORIZED_TELEGRAM_USER_ID?.trim() || "";
-const DEFAULT_INTEGRATOR_ID = "__INTEGRATOR_ID__";
-const DEFAULT_REFERRAL_ID = "TODO_SET_REFERRAL_ID";
-const INTEGRATOR_ID = process.env.INTEGRATOR_ID || DEFAULT_INTEGRATOR_ID;
-const REFERRAL_ID = process.env.REFERRAL_ID || DEFAULT_REFERRAL_ID;
-const configuredReferralId = REFERRAL_ID === DEFAULT_REFERRAL_ID ? undefined : REFERRAL_ID;
 const USDC_DECIMALS = 6;
 
 if (!BOT_TOKEN) {
@@ -38,13 +28,13 @@ const walletClient = createWalletClient({
 
 const bot = new Bot(BOT_TOKEN);
 
-function parseSellCommand(text: string): { amount: string; identifier: string } {
-  const [, amountRaw, identifierRaw] = text.trim().split(/\s+/);
+function parseSellCommand(text: string): { amount: string; payee: string } {
+  const [, amountRaw, payeeRaw] = text.trim().split(/\s+/);
   const amount = amountRaw?.trim() ?? "";
-  const identifier = identifierRaw?.trim() ?? "";
+  const payee = payeeRaw?.trim() ?? "";
 
-  if (!amount || !identifier) {
-    throw new Error("Usage: /sell <amount> <identifier>");
+  if (!amount || !payee) {
+    throw new Error("Usage: /sell <amount> <payee>");
   }
 
   if (!/^\d+(\.\d+)?$/.test(amount)) {
@@ -62,12 +52,12 @@ function parseSellCommand(text: string): { amount: string; identifier: string } 
     throw new Error("Amount must be at least 1 USDC.");
   }
 
-  return { amount, identifier };
+  return { amount, payee };
 }
 
 bot.command("start", (ctx) => {
   void ctx.reply(
-    "USDC offramp bot online. Use /sell <amount> <identifier>. Example: /sell 50 alice\n\nUse /resources for SDK docs, Peerlytics, and the agent skill.",
+    "USDC offramp bot online. Use /sell <amount> <payee>. Example: /sell 50 alice\n\nUse /resources for SDK docs, Peerlytics, and the agent skill.",
   );
 });
 
@@ -95,21 +85,19 @@ bot.command("sell", async (ctx) => {
 
   try {
     const text = ctx.message?.text || "";
-    const { amount, identifier } = parseSellCommand(text);
+    const { amount, payee } = parseSellCommand(text);
+    const payeeValidation = PLATFORMS.REVOLUT.validate(payee);
+    if (!payeeValidation.valid) {
+      throw new Error(payeeValidation.error);
+    }
 
-    const sdk = createOfframp({
-      walletClient,
-      integratorId: INTEGRATOR_ID,
-      ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
-    });
-
-    const result = await sdk.createDeposit({
+    const result = await cashout({
+      mode: "best",
+      signer: walletClient,
       amount,
-      platform: PLATFORMS.REVOLUT,
-      currency: CURRENCIES.USD,
-      identifier,
-      integratorId: INTEGRATOR_ID,
-      ...(configuredReferralId ? { referralId: configuredReferralId } : {}),
+      platform: "revolut",
+      currency: "USD",
+      payee: payeeValidation.normalized,
     });
 
     await ctx.reply(

@@ -51,6 +51,8 @@ const rootReadme = readText("README.md");
 const offrampLlms = readText("usdctofiat/llms.txt");
 const rootOfframpVersion = dependencyVersion(rootPkg, "@usdctofiat/offramp");
 const rootPeerlyticsVersion = dependencyVersion(rootPkg, "@peerlytics/sdk");
+const peerlyticsLlms = readText("peerlytics/llms.txt");
+const peerlyticsSkillText = readText("skills/claude/query-peerlytics-data/SKILL.md");
 const rootZkp2pSdkOverride = rootPkg.overrides?.["@zkp2p/sdk"];
 const offrampPlatformKeys = Object.keys(offrampPlatforms).join(", ");
 const offrampPlatformNames = Object.values(offrampPlatforms)
@@ -62,6 +64,24 @@ assert(
   /^\^8\./.test(rootOfframpVersion ?? ""),
   "package.json must depend on @usdctofiat/offramp v8.x",
 );
+assert(
+  /^\^3\./.test(rootPeerlyticsVersion ?? ""),
+  "package.json must depend on @peerlytics/sdk v3.x",
+);
+
+// SDK 3 removed lockScore in favour of cancelledVolumeUsd. The starters teach
+// agents as much as they teach people, so a doc that still offers the dead field
+// as a returned value is a defect, not a stale sentence. Naming it in backticks
+// to explain the removal is fine; the prose form was how it was taught as live.
+for (const [file, text] of [
+  ["peerlytics/llms.txt", peerlyticsLlms],
+  ["query-peerlytics-data skill", peerlyticsSkillText],
+]) {
+  assert(
+    !/lock score/i.test(text) && text.includes("cancelledVolumeUsd"),
+    `${file} must teach cancelledVolumeUsd instead of the lock score removed in @peerlytics/sdk v3`,
+  );
+}
 
 const readmeQuickstart = rootReadme.slice(
   rootReadme.indexOf("## 60-second"),

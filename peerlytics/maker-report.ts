@@ -2,7 +2,8 @@
  * maker-report.ts
  *
  * Generates a portfolio report for any maker address, showing
- * deposits, profit, estimated APR, and platform breakdown.
+ * deposits, profit, estimated APR, manual-release exposure, and
+ * platform breakdown.
  *
  * Usage:
  *   PEERLYTICS_API_KEY=pk_live_... npx tsx peerlytics/maker-report.ts 0x1234...
@@ -99,6 +100,19 @@ async function main(): Promise<void> {
 
   const apr = summary.weightedAvgApr;
   row("Estimated APR", apr != null && apr > 0 ? fmt.green(fmt.pct(apr)) : fmt.dim("--"));
+
+  // Share of released volume the maker unlocked without a payment proof. The raw
+  // count carries no exposure information, so read the share: null means the
+  // indexer reported no release volume at all, which is not the same as 0%.
+  const manualShare = summary.manualReleaseShare;
+  row(
+    "Manual Release",
+    manualShare == null
+      ? fmt.dim("--")
+      : manualShare >= 0.25
+        ? fmt.red(fmt.pct(manualShare))
+        : fmt.pct(manualShare),
+  );
 
   bottom();
   console.log();

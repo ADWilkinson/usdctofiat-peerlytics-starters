@@ -147,11 +147,12 @@ const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "r
 
 Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base. SDK ≥ 1.0 can drive x402 directly with `auth: { mode: "x402", signer }`.
 
-**Gotchas worth knowing** (SDK ≥ 1.0, Stripe-style v2 wire format):
+**Gotchas worth knowing** (SDK 3.x, Stripe-style v2 wire format):
 
 - List methods (`getActivity`, `getDeposits`, `getIntents`, `getMarketSummary`) return paginated envelopes like `{ events, count, hasMore, ... }` — iterate over `.events` / `.deposits` / etc, not the top-level result.
 - `getDeposits()` requires at least one of `depositor`, `delegate`, `platform`, `currency`; `getIntents()` requires at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`. Both throw `ValidationError` client-side if called empty.
-- `getOrderbook({ taker })` includes private deposits whitelisted for that buyer wallet alongside public liquidity.
+- `getOrderbook()` returns only publicly takeable liquidity. Passing `taker` adds the gated deposits that wallet can actually fill — resolved from per-address whitelists *and* AddressGroupRegistry membership — and reports the unlocking groups in `filters.applied.takerGroupIds`.
+- `getTaker()` exposes `cancelledVolumeUsd`; the old `lockScore` label was removed in SDK 3. Taker `tier`/`tierSource` are verified address-group labels and imply no order cap.
 - `DepositMarket.currency` / `deposit.currencies[].currency` are resolved ISO codes (e.g. `"GBP"`). `currencyCode` is the raw bytes32 hash — use `currency` for display.
 - Key management uses the opaque `id` from `listKeys()` (not the raw key): `deleteKey(id)`, `rotateKey(idOrKey)`, `createKey(label?)`.
 - Some timestamp fields (`ApiKeyInfo.createdAt`, `lastUsedAt`, `freeCreditsResetAt`) are typed `number | string` — v2 emits Unix seconds (integer); convert with `Number(value) * 1000` to get a JS `Date`.

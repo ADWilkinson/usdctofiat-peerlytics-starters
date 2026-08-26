@@ -25,6 +25,20 @@ The SDK targets the Stripe-style v2 wire format (snake_case fields, Unix-seconds
 - Some timestamp fields (`ApiKeyInfo.createdAt`, `lastUsedAt`, `freeCreditsResetAt`) are now Unix seconds (integer) on v2; the TS type is `number | string` because the v1-compat path still emits ISO strings. Convert with `Number(value) * 1000` when you need a JS `Date`.
 - `getTimeseries(...)` returns `{ buckets: TimeseriesBucket[] | null, series: TimeseriesSeries[] | null, ... }` — `buckets` is populated when `groupBy` is unset, `series` when it's set. Default with `data.buckets ?? []` before iterating.
 
+## Moving off SDK 1.x
+
+These fields no longer exist — code or docs written against 1.x will read `undefined`:
+
+- `lockScore` is gone. Address summaries expose `takerCancelledVolumeUsd`; taker portfolio and history expose `cancelledVolumeUsd`. That was always the underlying metric, now named for what it measures.
+- The taker leaderboard's trust ranking is `byTrustScore`, not `byLockScore`, and is ranked by the returned trust score.
+- Synthetic taker tier-progression fields and the always-zero leaderboard `tierCap` are gone. `tier` plus `tierSource` remain as a verified address-group membership label; they imply no order cap or volume ladder.
+- Route and deposit-context handoffs no longer offer a `watch` action.
+
+Two correctness fixes are worth re-reading your integration against:
+
+- `getOrderbook()` gates on the EscrowV2 whitelist policy's authoritative `whitelistEnabled` flag (2.1.0). Group-gated deposits are no longer advertised as publicly takeable, so an unscoped book is smaller — and honest. The old heuristic missed them entirely.
+- Composite deposit ids keep their underscore through the response adapter (1.4.3), so `intentsByDeposit`, `expiredCounts`, and `paymentDetails` can be indexed by `deposit.id` without two ids colliding onto one entry.
+
 ## Required filters (throws `ValidationError` client-side)
 
 - `client.getDeposits(filters)` — at least one of `depositor`, `delegate`, `platform`, `currency`
@@ -45,12 +59,12 @@ If you need your own mapping, `client.getCurrencies()` returns every supported c
 
 Analytics:
 - client.getProtocolSummary() - protocol MTD/QTD/YTD/all-time volume, liquidity, deposits
-- client.getLeaderboard({ limit?, offset? }) - top makers/takers by volume, APR, profit
+- client.getLeaderboard({ limit?, offset? }) - top makers/takers by volume, APR, profit; takers also ranked `byTrustScore`
 - client.getProtocolOverview(range) - full analytics overview for mtd, 3mtd, ytd, all
 
 Market:
 - client.getMarketSummary({ currency?, platform?, includeRates?, limit?, offset? }) - rate stats per pair
-- client.getOrderbook({ currency?, platform?, minSize?, taker? }) - live orderbook by rate level; `taker` includes private deposits whitelisted for that wallet
+- client.getOrderbook({ currency?, platform?, minSize?, taker? }) - live orderbook by rate level. Unscoped, it returns only publicly takeable liquidity. A `taker` scope adds the gated deposits that wallet can actually fill, resolved from both per-address whitelists and AddressGroupRegistry membership; `filters.applied.takerGroupIds` reports which groups unlocked them
 
 Explorer:
 - client.getDeposit(id, { limit?, offset? }) - deposit detail with intents
@@ -58,8 +72,8 @@ Explorer:
 - client.getIntent(hash) - intent detail
 - client.getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? }) - query intents — **at least one of owner/recipient/verifier/depositId/status is required**; returns `{ intents, count, hasMore, ... }`
 - client.getAddress(address, { limit?, offset? }) - address profile with stats
-- client.getMaker(address) - maker portfolio with allocations and profit
-- client.getTaker(address) - taker portfolio: fills, tier, lock score, currency/platform mix
+- client.getMaker(address) - maker portfolio with allocations, profit, verified `groupMemberships`, and manual-release exposure (`summary.manualReleaseShare`, `platformAllocations[].manualReleaseShare`)
+- client.getTaker(address) - taker portfolio: fills, success rate, `cancelledVolumeUsd`, verified `tier`/`tierSource`, currency/platform mix
 - client.getIntegrator(code, { windowDays? }) - ERC-8021 integrator rollup: volume, unique makers, top markets, recent deposits. `windowDays` is currently materialized for 90 only — omit or pass 90 (any other value throws).
 - client.getPlatform(platform, { windowDays? }) - platform rollup: currencies, makers, takers, recent intents. Same 90-day materialization rule as `getIntegrator`.
 - client.getDelegate(address) - delegate rollup: rate managers, delegated deposits, PnL

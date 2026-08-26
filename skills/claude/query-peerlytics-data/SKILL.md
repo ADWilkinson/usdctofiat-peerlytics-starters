@@ -79,13 +79,19 @@ const takerView = await client.getOrderbook({
   currency: "GBP",
   taker: "0xBuyerWallet",
 });
-// Includes private deposits whitelisted for that taker wallet.
+// Adds the gated deposits this wallet can actually fill, resolved from both
+// per-address whitelists and AddressGroupRegistry membership. Read
+// filters.applied.takerGroupIds to see which groups unlocked them.
+// Without `taker`, the book contains only publicly takeable liquidity.
 ```
 
 ### Maker portfolio
 ```typescript
 const maker = await client.getMaker("0xMakerAddress");
-// Deposits, profit, APR, allocation breakdown, active currencies
+// Deposits, profit, APR, allocation breakdown, active currencies.
+// summary.manualReleaseShare is volume released without a payment proof,
+// as a share of released volume — null (never 0) when there is no release
+// volume to divide by, so "no data" stays distinguishable from "never".
 ```
 
 ### Deposit detail
@@ -117,12 +123,12 @@ const vaults = await client.getVaultsOverview();
 
 Analytics:
 - `getProtocolSummary()` — protocol MTD/QTD/YTD/all-time volume, liquidity, deposits
-- `getLeaderboard({ limit?, offset? })` — top makers/takers by volume, APR, profit
+- `getLeaderboard({ limit?, offset? })` — top makers/takers by volume, APR, profit; takers also ranked `byTrustScore`
 - `getProtocolOverview(range)` — full analytics overview for mtd, 3mtd, ytd, all
 
 Market:
 - `getMarketSummary({ currency?, platform?, includeRates?, limit?, offset? })` — rate stats per pair
-- `getOrderbook({ currency?, platform?, minSize?, taker? })` — live orderbook by rate level; `taker` includes private deposits whitelisted for that wallet
+- `getOrderbook({ currency?, platform?, minSize?, taker? })` — live orderbook by rate level. Unscoped it returns only publicly takeable liquidity; `taker` adds the gated deposits that wallet can fill (per-address whitelists plus address-group membership) and reports the unlocking groups in `filters.applied.takerGroupIds`
 
 Explorer:
 - `getDeposit(id, { limit?, offset? })` — deposit detail with intents
@@ -130,8 +136,8 @@ Explorer:
 - `getIntent(hash)` — intent detail
 - `getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? })` — query intents. **Requires at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`**. Returns `{ intents, count, hasMore, ... }`.
 - `getAddress(address, { limit?, offset? })` — address profile with stats
-- `getMaker(address)` — maker portfolio with allocations and profit
-- `getTaker(address)` — taker portfolio: fills, tier, lock score, currency/platform mix
+- `getMaker(address)` — maker portfolio with allocations, profit, verified `groupMemberships`, and manual-release exposure (`summary.manualReleaseShare`)
+- `getTaker(address)` — taker portfolio: fills, success rate, `cancelledVolumeUsd`, verified `tier`/`tierSource`, currency/platform mix
 - `getIntegrator(code, { windowDays? })` — ERC-8021 integrator rollup. `windowDays` is currently materialized for 90 only (omit or pass 90).
 - `getIntegratorIntents(code, opts?)` / `getIntegratorReferralFees(code, opts?)` — convenience wrappers over `getIntegrator()` returning `recentIntents` / `recentReferralFees`.
 - `getPlatform(platform, { windowDays? })` — platform rollup: currencies, makers, takers, recent intents. Same 90-day rule as `getIntegrator`.

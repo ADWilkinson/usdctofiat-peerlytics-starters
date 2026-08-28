@@ -20,3 +20,41 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: demo/package-lock.json
+      - run: npm ci
+        working-directory: demo
+      - run: npm run build
+        working-directory: demo
+
+  # The templates are what create-offramp-app hands to users, and the root check
+  # only greps them as text. Build each one so an SDK bump or upstream release
+  # that breaks a scaffold fails here instead of in someone's new app. They ship
+  # without lockfiles on purpose, so this resolves the same ranges a user gets.
+  templates:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template:
+          - next
+          - base-mini-app
+          - vite
+          - telegram-bot
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+        working-directory: templates/${{ matrix.template }}
+      - run: npm run build
+        working-directory: templates/${{ matrix.template }}

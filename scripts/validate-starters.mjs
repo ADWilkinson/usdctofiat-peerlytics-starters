@@ -263,6 +263,8 @@ const baseMiniAppPublicRoutes = [
   "templates/base-mini-app/app/opengraph-image.tsx",
 ];
 
+const templateNames = ["next", "base-mini-app", "vite", "telegram-bot"];
+
 assert(exists(".github/workflows/check.yml"), "GitHub Actions must run the starter check");
 if (exists(".github/workflows/check.yml")) {
   const checkWorkflow = readText(".github/workflows/check.yml");
@@ -272,6 +274,39 @@ if (exists(".github/workflows/check.yml")) {
       checkWorkflow.includes("npm ci") &&
       checkWorkflow.includes("npm run check"),
     ".github/workflows/check.yml must run npm run check on pull requests and pushes",
+  );
+  // This validator only reads the templates and demo as text. Their real
+  // contract is that they still build against the versions a user resolves, so
+  // the workflow has to compile them too or the drift lands in someone's app.
+  assert(
+    checkWorkflow.includes("working-directory: demo"),
+    ".github/workflows/check.yml must build the demo app",
+  );
+  for (const template of templateNames) {
+    assert(
+      checkWorkflow.includes(`- ${template}\n`),
+      `.github/workflows/check.yml must build the ${template} template`,
+    );
+  }
+  assert(
+    checkWorkflow.includes("working-directory: templates/${{ matrix.template }}"),
+    ".github/workflows/check.yml must run the template matrix against each template directory",
+  );
+}
+
+// Every scaffold has to be buildable by the workflow above, and a user who runs
+// that build then commits their new app must not pick up its artifacts.
+for (const template of templateNames) {
+  const pkg = readJson(`templates/${template}/package.json`);
+  assert(
+    Boolean(pkg.scripts?.build),
+    `templates/${template}/package.json must expose a build script for CI to run`,
+  );
+  assert(
+    readText(`templates/${template}/.gitignore`)
+      .split("\n")
+      .includes("*.tsbuildinfo"),
+    `templates/${template}/.gitignore must ignore TypeScript build info`,
   );
 }
 

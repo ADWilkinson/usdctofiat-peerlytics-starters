@@ -176,7 +176,9 @@ const order = await cashout({
 });
 ```
 
-Use `mode: "fast"` for the direct 0 bps oracle-spread route or `mode: "best"` for the Delegate-managed route. Pass `otcTaker` to restrict a cash-out to one buyer wallet. The legacy managed EscrowV2 helpers remain available as an explicit compatibility surface; see `usdctofiat/otc-deposit.ts` and the package's managed-v5 migration guide.
+Use `mode: "fast"` for the direct 0 bps oracle-spread route or `mode: "best"` for the Delegate-managed route. Pass `disabledPlatforms` to drop a rail from discovery and reject it before any new deposit — Cash App ships disabled by default in `OFFRAMP_DISABLED_PAYMENT_PLATFORMS`. The legacy managed EscrowV2 helpers remain available as an explicit compatibility surface; see `usdctofiat/otc-deposit.ts` and the package's managed-v5 migration guide.
+
+For a private order, create the deposit first and restrict it once it confirms with `enableOtc(walletClient, depositId, takerAddress)`. offramp 9 rejects `otcTaker` on fresh creation with `UNSUPPORTED`, because the protocol cannot yet create a deposit paused and private atomically; the option survives only to recover an exact existing undelegated deposit. Newly created deposits carry the protocol's 1,500 USDC default per-order cap.
 
 **PayPal, Wise, Venmo, and Cash App** makers may need to register their handle in the PeerAuth browser extension before the first deposit. The SDK throws `EXTENSION_REGISTRATION_REQUIRED` and ships `usePeerExtensionRegistration(platform)` to drive the install / connect / verify flow. See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts` for the PayPal-shaped recovery pattern. PayPal uses the `paypal.me` **username**, not the account email.
 

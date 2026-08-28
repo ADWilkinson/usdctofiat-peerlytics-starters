@@ -82,7 +82,14 @@ preparation. Keep the client stable across React renders. React hooks live at
 
 ## Create a private OTC cash-out
 
+offramp 9 rejects `otcTaker` on fresh creation with `UNSUPPORTED`. The protocol
+cannot create a deposit paused and private atomically, so a one-call private
+order would leave a public window open between creation and restriction.
+Restrict the deposit after it confirms instead:
+
 ```typescript
+import { cashout, enableOtc, getOtcLink } from "@usdctofiat/offramp";
+
 const order = await cashout({
   mode: "fast",
   signer,
@@ -90,15 +97,26 @@ const order = await cashout({
   currency: "EUR",
   platform: "revolut",
   payee: "alice",
-  otcTaker: "0xBuyerWallet",
 });
 
-console.log(order.usdctofiat.otcLink);
+const { otcLink } = await enableOtc(signer, order.depositId, "0xBuyerWallet");
+console.log(otcLink, getOtcLink(order.depositId));
 ```
 
-For `best` results, read `order.otcLink`. If restriction fails after cash-out
-creation, preserve the returned `depositId` and `txHash`; do not create a
-second order. Recover the existing deposit with `enableOtc()`.
+Reopen the deposit with `disableOtc(signer, depositId, {})`; the options
+argument is required in v9. Both helpers resolve the exact payment-method set
+from ProtocolViewer and fail before any policy write when that projection is
+stale, partial, or contradictory. If restriction fails after cash-out creation,
+preserve the returned `depositId` and `txHash` and retry `enableOtc()`; do not
+create a second order.
+
+## Gate a payment rail
+
+Pass `disabledPlatforms` to `cashout()` or `createOfframp()` to drop rails from
+capability discovery and reject them before any new deposit. Cash App ships
+disabled by default in `OFFRAMP_DISABLED_PAYMENT_PLATFORMS`; read
+`DISABLED_PAYMENT_PLATFORM_MESSAGE` for the user-facing copy and check a rail
+with `isPaymentPlatformDisabled(platform, disabledPlatforms)`.
 
 ## Handle errors
 

@@ -2,8 +2,14 @@
  * otc-deposit.ts
  *
  * Creates a USDC-to-fiat deposit restricted to a single taker wallet (OTC
- * private order). Demonstrates both the one-call path via `otcTaker` and the
- * retrofit path via `enableOtc` / `disableOtc` / `getOtcLink`.
+ * private order), then hands the taker an OTC link.
+ *
+ * offramp 9 rejects `otcTaker` on fresh creation: the protocol cannot yet
+ * create a deposit paused and private in one atomic step, so a fresh private
+ * order would leave a public window open between creation and restriction.
+ * The supported shape is the one below — create the deposit, let it confirm,
+ * then restrict it with `enableOtc()`. `otcTaker` survives only as recovery
+ * for an exact existing undelegated deposit.
  *
  * Usage:
  *   npx tsx usdctofiat/otc-deposit.ts
@@ -15,7 +21,6 @@
  *
  * Optional:
  *   AMOUNT         USDC amount (default: 1)
- *   MODE           "one-call" (default) or "retrofit"
  */
 
 import {
@@ -35,12 +40,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const OTC_TAKER = process.env.OTC_TAKER;
 const REVOLUT_REV_TAG = process.env.REVOLUT_REV_TAG?.trim();
 const amount = (process.env.AMOUNT ?? "1").trim();
-const mode = process.env.MODE ?? "one-call";
 
-if (mode !== "one-call" && mode !== "retrofit") {
-  console.error('Set MODE env var to either "one-call" or "retrofit"');
-  process.exit(1);
-}
 if (!PRIVATE_KEY) {
   console.error("Set PRIVATE_KEY env var (hex, 0x-prefixed)");
   process.exit(1);
@@ -104,43 +104,12 @@ async function main() {
   console.log(`  Platform:   ${PLATFORMS.REVOLUT.name}`);
   console.log(`  Currency:   ${CURRENCIES.USD.code} (${CURRENCIES.USD.symbol})`);
   console.log(`  Recipient:  @${revolutRevTag}`);
-  console.log(`  Mode:       ${fmt.cyan(mode)}`);
   console.log();
 
   try {
-    if (mode === "one-call") {
-      // One-call OTC: pass otcTaker to offramp() and the SDK handles restriction
-      // as a final step after delegation.
-      const result = await offramp(
-        walletClient,
-        {
-          amount,
-          platform: PLATFORMS.REVOLUT,
-          currency: CURRENCIES.USD,
-          identifier: revolutRevTag,
-          otcTaker: taker,
-        },
-        (progress) => {
-          const label = STEP_LABELS[progress.step] ?? progress.step;
-          const icon = progress.step === "done" ? fmt.green("✓") : fmt.yellow("⏳");
-          console.log(`  ${icon} ${label}`);
-        },
-      );
-
-      console.log();
-      console.log(fmt.green("  ✓ OTC deposit created, delegated, and restricted"));
-      console.log(`  Deposit ID: ${fmt.bold(result.depositId)}`);
-      console.log(`  Tx hash:    ${fmt.dim(result.txHash)}`);
-      if (result.otcLink) {
-        console.log(`  OTC link:   ${fmt.cyan(result.otcLink)}`);
-        console.log(fmt.dim("  Share this link with the taker — only OTC_TAKER can fill it."));
-      }
-      console.log();
-      return;
-    }
-
-    // Retrofit: create a public deposit first, then restrict it with enableOtc.
-    // Useful when you want the taker wallet to be decided after deposit creation.
+    // Create the deposit first, then restrict the confirmed deposit. offramp 9
+    // fails `UNSUPPORTED` if `otcTaker` is passed here, so the taker wallet is
+    // always applied after the deposit exists.
     const result = await offramp(
       walletClient,
       {
@@ -170,11 +139,14 @@ async function main() {
     // Sanity check: getOtcLink() is a pure function — no tx, no API call.
     console.log(fmt.dim(`  getOtcLink(): ${getOtcLink(result.depositId)}`));
     console.log();
-    console.log(fmt.dim("  To unrestrict later: disableOtc(walletClient, depositId)"));
+    console.log(fmt.dim("  To unrestrict later: disableOtc(walletClient, depositId, {})"));
     console.log();
-    // disableOtc example (not executed by default — uncomment to run):
-    // await disableOtc(walletClient, result.depositId);
-    void disableOtc; // keep the import live in retrofit-only builds
+    // disableOtc example (not executed by default — uncomment to run).
+    // The options argument is required in offramp 9. Leave it empty and the SDK
+    // resolves the exact payment-method set from ProtocolViewer itself; a stale
+    // or partial set supplied by hand fails before any policy write.
+    // await disableOtc(walletClient, result.depositId, {});
+    void disableOtc; // keep the import live while the example stays commented
   } catch (err) {
     const error = err as OfframpError;
     console.log();

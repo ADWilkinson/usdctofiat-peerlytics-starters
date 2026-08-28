@@ -61,8 +61,8 @@ const offrampPlatformNames = Object.values(offrampPlatforms)
 const defaultStarterPlatform = offrampPlatforms.REVOLUT;
 
 assert(
-  /^\^8\./.test(rootOfframpVersion ?? ""),
-  "package.json must depend on @usdctofiat/offramp v8.x",
+  /^\^9\./.test(rootOfframpVersion ?? ""),
+  "package.json must depend on @usdctofiat/offramp v9.x",
 );
 assert(
   /^\^3\./.test(rootPeerlyticsVersion ?? ""),
@@ -539,10 +539,19 @@ assert(
     paypalDepositExample.includes("at most 6 decimal places"),
   "usdctofiat/paypal-deposit.ts must validate USDC amounts before wallet activity",
 );
+// offramp 9 rejects `otcTaker` on fresh creation: the protocol cannot create a
+// deposit paused and private atomically, so a one-call private order would open
+// a public window between creation and restriction. The starter must teach the
+// supported order — create, confirm, then restrict — and must not hand `otcTaker`
+// to a fresh cash-out, which now fails UNSUPPORTED at runtime.
 assert(
-  otcDepositExample.includes('mode !== "one-call" && mode !== "retrofit"') &&
-    !otcDepositExample.includes('as "one-call" | "retrofit"'),
-  "usdctofiat/otc-deposit.ts must reject invalid MODE values instead of silently using retrofit",
+  !/otcTaker:/.test(otcDepositExample) &&
+    otcDepositExample.includes("await enableOtc(walletClient, result.depositId, taker)"),
+  "usdctofiat/otc-deposit.ts must restrict a confirmed deposit with enableOtc() instead of passing otcTaker to fresh creation",
+);
+assert(
+  otcDepositExample.includes("disableOtc(walletClient, result.depositId, {})"),
+  "usdctofiat/otc-deposit.ts must pass the options argument disableOtc() requires in offramp 9",
 );
 assert(
   closeDepositExample.includes("!/^\\d+$/.test(depositId)") &&

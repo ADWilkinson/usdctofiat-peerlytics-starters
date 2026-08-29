@@ -192,6 +192,51 @@ assert(
   offrampLlms.includes(`Keys: ${offrampPlatformKeys}`),
   "usdctofiat/llms.txt must list the platform keys exposed by the locked offramp SDK",
 );
+
+// The progress vocabulary is the one part of the React surface a typecheck
+// cannot police: `step` is a string union rendered through `&&` guards, so an
+// unhandled value paints an empty panel mid-transaction rather than failing the
+// build. offramp 9 added "protecting" for the managed dispute-protection
+// reconciliation that runs before delegation, and both the agent-facing union
+// and the reference component missed it. Read the union out of the installed
+// types so the next step the SDK adds fails here instead of in someone's UI.
+const offrampTypeDir = path.dirname(require.resolve("@usdctofiat/offramp"));
+let offrampStepDeclaration = null;
+for (const name of fs.readdirSync(offrampTypeDir)) {
+  if (!name.endsWith(".d.ts") && !name.endsWith(".d.cts")) continue;
+  const match = fs
+    .readFileSync(path.join(offrampTypeDir, name), "utf8")
+    .match(/type OfframpStep =([^;]+);/);
+  if (match) {
+    offrampStepDeclaration = match[1];
+    break;
+  }
+}
+const offrampSteps = (offrampStepDeclaration?.match(/"[a-z_]+"/g) ?? []).map((step) =>
+  step.slice(1, -1),
+);
+assert(
+  offrampSteps.includes("approving") && offrampSteps.includes("done"),
+  "could not read the OfframpStep union out of the installed @usdctofiat/offramp types",
+);
+
+const reactExample = readText("usdctofiat/react-example.tsx");
+for (const step of offrampSteps) {
+  assert(
+    offrampLlms.includes(`| "${step}"`),
+    `usdctofiat/llms.txt must document the "${step}" step the locked offramp SDK can emit`,
+  );
+  // "done" ends the flow, so the component returns its form instead of a label.
+  if (step === "done") continue;
+  assert(
+    reactExample.includes(`step === "${step}"`),
+    `usdctofiat/react-example.tsx must label the "${step}" step instead of rendering an empty progress panel`,
+  );
+}
+assert(
+  reactExample.includes(`@usdctofiat/offramp v${rootOfframpVersion?.replace(/[^0-9]*(\d+).*/, "$1")}`),
+  "usdctofiat/react-example.tsx must name the offramp major the starters pin",
+);
 assert(
   Boolean(defaultStarterPlatform) &&
     defaultStarterPlatform.currencies.includes("USD") &&

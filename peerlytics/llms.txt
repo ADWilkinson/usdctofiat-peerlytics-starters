@@ -25,26 +25,26 @@ The SDK targets the Stripe-style v2 wire format (snake_case fields, Unix-seconds
 - Some timestamp fields (`ApiKeyInfo.createdAt`, `lastUsedAt`, `freeCreditsResetAt`) are now Unix seconds (integer) on v2; the TS type is `number | string` because the v1-compat path still emits ISO strings. Convert with `Number(value) * 1000` when you need a JS `Date`.
 - `getTimeseries(...)` returns `{ buckets: TimeseriesBucket[] | null, series: TimeseriesSeries[] | null, ... }` — `buckets` is populated when `groupBy` is unset, `series` when it's set. Default with `data.buckets ?? []` before iterating.
 
-## Moving off SDK 1.x
+## Moving off an older major
 
-These fields no longer exist — code or docs written against 1.x will read `undefined`:
+These fields no longer exist — code or docs written against 1.x-3.x will read `undefined`:
 
 - `lockScore` is gone. Address summaries expose `takerCancelledVolumeUsd`; taker portfolio and history expose `cancelledVolumeUsd`. That was always the underlying metric, now named for what it measures.
 - The taker leaderboard's trust ranking is `byTrustScore`, not `byLockScore`, and is ranked by the returned trust score.
-- Synthetic taker tier-progression fields and the always-zero leaderboard `tierCap` are gone. `tier` plus `tierSource` remain as a verified address-group membership label; they imply no order cap or volume ladder.
+- The Peer/Plus/Pro wallet classification is gone as of 4.0.0. Leaderboard, maker portfolio, taker portfolio, and taker history no longer carry a wallet-class label or its source, and the `AddressGroupMemberships`, `TakerGroupMemberships`, and `VerifiedPeerGroup` type exports were removed with it. Rank takers by `trustScore`.
 - Route and deposit-context handoffs no longer offer a `watch` action.
 
 Two correctness fixes are worth re-reading your integration against:
 
-- `getOrderbook()` gates on the EscrowV2 whitelist policy's authoritative `whitelistEnabled` flag (2.1.0). Group-gated deposits are no longer advertised as publicly takeable, so an unscoped book is smaller — and honest. The old heuristic missed them entirely.
+- `getOrderbook()` does not advertise restricted deposits as publicly takeable, so an unscoped book is smaller — and honest. As of 4.0.0 the policy inputs behind that decision are no longer public: payment pairs carry an exact `isPublic` access result, and deposits carry a derived `isRestricted` display flag. Read the result, not the policy.
 - Composite deposit ids keep their underscore through the response adapter (1.4.3), so `intentsByDeposit`, `expiredCounts`, and `paymentDetails` can be indexed by `deposit.id` without two ids colliding onto one entry.
 
-## Required filters (throws `ValidationError` client-side)
+## Optional filters on the list endpoints
 
-- `client.getDeposits(filters)` — at least one of `depositor`, `delegate`, `platform`, `currency`
-- `client.getIntents(filters)` — at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`
+- `client.getDeposits(filters?)` — narrow with `depositor`, `delegate`, `platform`, `currency`
+- `client.getIntents(filters?)` — narrow with `owner`, `recipient`, `verifier`, `depositId`, `status`
 
-The SDK fails fast before hitting the network; the raw API returns a 400 `missing_filter` with the same guidance.
+Both accept an empty filter set as of 4.0.0 and return a bounded page (`limit` defaults to 50, hard-capped at 200). Earlier majors rejected an unfiltered call; if you wrote a dummy filter to satisfy that, drop it.
 
 ## Currency hashes vs codes
 
@@ -64,16 +64,16 @@ Analytics:
 
 Market:
 - client.getMarketSummary({ currency?, platform?, includeRates?, limit?, offset? }) - rate stats per pair
-- client.getOrderbook({ currency?, platform?, minSize?, taker? }) - live orderbook by rate level. Unscoped, it returns only publicly takeable liquidity. A `taker` scope adds the gated deposits that wallet can actually fill, resolved from both per-address whitelists and AddressGroupRegistry membership; `filters.applied.takerGroupIds` reports which groups unlocked them
+- client.getOrderbook({ currency?, platform?, minSize?, taker?, includeGated? }) - live orderbook by rate level. Unscoped, it returns only publicly takeable liquidity. A `taker` scope adds the restricted deposits that wallet can actually fill and counts them in `filters.applied.accessibleRestrictedDepositCount`; add `includeGated: true` to get that viewer's permitted payment-method hashes in `takerAccess.paymentMethodsByDeposit`. Payment pairs expose `isPublic` plus `disputeProtectionOptedOut` / `disputeProtectionRequiresStake` — protection is default-on, so read the opt-*out* flag (both are null only on a taker-authorized legacy fallback without tuple projection)
 
 Explorer:
 - client.getDeposit(id, { limit?, offset? }) - deposit detail with intents
-- client.getDeposits({ depositor?, delegate?, platform?, currency?, status?, accepting?, limit?, offset? }) - query deposits — **at least one of depositor/delegate/platform/currency is required**; returns `{ deposits, count, hasMore, ... }`
+- client.getDeposits({ depositor?, delegate?, platform?, currency?, status?, accepting?, limit?, offset? }) - query deposits — all filters optional; an empty call returns a bounded page (default 50, max 200). Returns `{ deposits, count, hasMore, ... }`
 - client.getIntent(hash) - intent detail
-- client.getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? }) - query intents — **at least one of owner/recipient/verifier/depositId/status is required**; returns `{ intents, count, hasMore, ... }`
+- client.getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? }) - query intents — all filters optional; an empty call returns a bounded page (default 50, max 200). Returns `{ intents, count, hasMore, ... }`
 - client.getAddress(address, { limit?, offset? }) - address profile with stats
-- client.getMaker(address) - maker portfolio with allocations, profit, verified `groupMemberships`, and manual-release exposure (`summary.manualReleaseShare`, `platformAllocations[].manualReleaseShare`)
-- client.getTaker(address) - taker portfolio: fills, success rate, `cancelledVolumeUsd`, verified `tier`/`tierSource`, currency/platform mix
+- client.getMaker(address) - maker portfolio with allocations, profit, and manual-release exposure (`summary.manualReleaseShare`, `platformAllocations[].manualReleaseShare`)
+- client.getTaker(address) - taker portfolio: fills, success rate, `cancelledVolumeUsd`, currency/platform mix
 - client.getIntegrator(code, { windowDays? }) - ERC-8021 integrator rollup: volume, unique makers, top markets, recent deposits. `windowDays` is currently materialized for 90 only — omit or pass 90 (any other value throws).
 - client.getPlatform(platform, { windowDays? }) - platform rollup: currencies, makers, takers, recent intents. Same 90-day materialization rule as `getIntegrator`.
 - client.getDelegate(address) - delegate rollup: rate managers, delegated deposits, PnL
@@ -121,7 +121,7 @@ Account & keys (SDK ≥ 1.0 takes the opaque `id` from `listKeys()`, not the raw
 import { PeerlyticsError, RateLimitError, NotFoundError, ValidationError } from "@peerlytics/sdk";
 ```
 
-Types: ActivityStreamFilters, ActivityStreamEvent (for streamActivity), TimeseriesData, TimeseriesParams, TimeseriesBucket, TimeseriesSeries (for getTimeseries).
+Types: ActivityStreamFilters, ActivityStreamEvent (for streamActivity), TimeseriesData, TimeseriesParams, TimeseriesBucket, TimeseriesSeries (for getTimeseries), OrderbookTakerAccess (for getOrderbook), ExplorerQuoteCandidate (the typed `quoteCandidates` on getDeposit/getIntent detail responses, including the tuple-level `isPublic` access result).
 
 ## Examples in this repo
 

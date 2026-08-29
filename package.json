@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@peerlytics/sdk": "^3.0.0",
+    "@peerlytics/sdk": "^4.0.0",
     "@usdctofiat/offramp": "^9.0.0",
     "react": "^19.2.7",
     "viem": "^2.54.2"

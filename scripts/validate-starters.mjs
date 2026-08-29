@@ -65,8 +65,8 @@ assert(
   "package.json must depend on @usdctofiat/offramp v9.x",
 );
 assert(
-  /^\^3\./.test(rootPeerlyticsVersion ?? ""),
-  "package.json must depend on @peerlytics/sdk v3.x",
+  /^\^4\./.test(rootPeerlyticsVersion ?? ""),
+  "package.json must depend on @peerlytics/sdk v4.x",
 );
 
 // SDK 3 removed lockScore in favour of cancelledVolumeUsd. The starters teach
@@ -80,6 +80,78 @@ for (const [file, text] of [
   assert(
     !/lock score/i.test(text) && text.includes("cancelledVolumeUsd"),
     `${file} must teach cancelledVolumeUsd instead of the lock score removed in @peerlytics/sdk v3`,
+  );
+}
+
+// SDK 4 retired the Peer/Plus/Pro wallet classification and every raw whitelist
+// or group-policy projection. Same reasoning as the lock score above: these docs
+// are the agent-facing contract, so naming a removed field as a returned value
+// teaches a call that now yields undefined. Only the derived access and
+// protection projections survive.
+const removedInV4 = [
+  ["tierSource", /tierSource/],
+  ["verifiedGroups", /verifiedGroups/],
+  ["groupMemberships", /groupMemberships/],
+  ["filters.applied.takerGroupIds", /takerGroupIds/],
+  ["trust.whitelistEntries", /whitelistEntries/],
+  ["AddressStats.whitelistedDepositsTotal", /whitelistedDepositsTotal/],
+  ["disputeProtectionOptedIn", /disputeProtectionOptedIn\b/],
+  ["AddressGroupMemberships", /AddressGroupMemberships/],
+  ["TakerGroupMemberships", /TakerGroupMemberships/],
+  ["VerifiedPeerGroup", /VerifiedPeerGroup/],
+];
+
+// llms.txt keeps a migration section whose whole job is to name dead fields, so
+// check the teaching prose around it rather than the file as a whole. Same
+// carve-out the lock score check makes for a backticked removal note.
+const llmsMigration = peerlyticsLlms.indexOf("## Moving off an older major");
+const llmsAfterMigration = peerlyticsLlms.indexOf("## Optional filters");
+assert(
+  llmsMigration !== -1 && llmsAfterMigration > llmsMigration,
+  "peerlytics/llms.txt must keep a migration section ahead of the filter notes",
+);
+const peerlyticsLlmsTeaching =
+  peerlyticsLlms.slice(0, llmsMigration) + peerlyticsLlms.slice(llmsAfterMigration);
+
+for (const [file, text] of [
+  ["README.md", rootReadme],
+  ["peerlytics/llms.txt", peerlyticsLlmsTeaching],
+  ["query-peerlytics-data skill", peerlyticsSkillText],
+]) {
+  for (const [field, pattern] of removedInV4) {
+    assert(
+      !pattern.test(text),
+      `${file} must not teach \`${field}\`, removed in @peerlytics/sdk v4`,
+    );
+  }
+}
+
+// The replacement projections are what agents should reach for instead.
+for (const [file, text] of [
+  ["peerlytics/llms.txt", peerlyticsLlms],
+  ["query-peerlytics-data skill", peerlyticsSkillText],
+]) {
+  assert(
+    text.includes("disputeProtectionOptedOut") &&
+      text.includes("disputeProtectionRequiresStake"),
+    `${file} must teach the v4 disputeProtectionOptedOut/disputeProtectionRequiresStake pair`,
+  );
+  assert(
+    text.includes("takerAccess") && text.includes("paymentMethodsByDeposit"),
+    `${file} must teach takerAccess.paymentMethodsByDeposit as the v4 replacement for group provenance`,
+  );
+}
+
+// v4 dropped the client-side missing_filter guard: getDeposits()/getIntents()
+// accept an empty filter set and return a bounded page instead of throwing.
+for (const [file, text] of [
+  ["README.md", rootReadme],
+  ["peerlytics/llms.txt", peerlyticsLlms],
+  ["query-peerlytics-data skill", peerlyticsSkillText],
+]) {
+  assert(
+    !/missing_filter/.test(text),
+    `${file} must not teach the missing_filter guard removed in @peerlytics/sdk v4`,
   );
 }
 

@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@peerlytics/sdk": "^3.0.0",
+    "@peerlytics/sdk": "^4.0.0",
     "@usdctofiat/offramp": "^9.0.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

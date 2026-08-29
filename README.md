@@ -147,12 +147,13 @@ const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "r
 
 Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base. SDK ≥ 1.0 can drive x402 directly with `auth: { mode: "x402", signer }`.
 
-**Gotchas worth knowing** (SDK 3.x, Stripe-style v2 wire format):
+**Gotchas worth knowing** (SDK 4.x, Stripe-style v2 wire format):
 
 - List methods (`getActivity`, `getDeposits`, `getIntents`, `getMarketSummary`) return paginated envelopes like `{ events, count, hasMore, ... }` — iterate over `.events` / `.deposits` / etc, not the top-level result.
-- `getDeposits()` requires at least one of `depositor`, `delegate`, `platform`, `currency`; `getIntents()` requires at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`. Both throw `ValidationError` client-side if called empty.
-- `getOrderbook()` returns only publicly takeable liquidity. Passing `taker` adds the gated deposits that wallet can actually fill — resolved from per-address whitelists *and* AddressGroupRegistry membership — and reports the unlocking groups in `filters.applied.takerGroupIds`.
-- `getTaker()` exposes `cancelledVolumeUsd`; the old `lockScore` label was removed in SDK 3. Taker `tier`/`tierSource` are verified address-group labels and imply no order cap.
+- `getDeposits()` and `getIntents()` take optional filters since SDK 4 — an empty call returns a bounded page (`limit` 50 by default, capped at 200) rather than throwing. Narrow with `depositor`/`delegate`/`platform`/`currency` and `owner`/`recipient`/`verifier`/`depositId`/`status` respectively.
+- `getOrderbook()` returns only publicly takeable liquidity. Passing `taker` adds the restricted deposits that wallet can actually fill and counts them in `filters.applied.accessibleRestrictedDepositCount`; add `includeGated: true` to get the viewer's permitted payment-method hashes in `takerAccess.paymentMethodsByDeposit`. SDK 4 removed the enforcement provenance — you get the access result, not the policy that produced it.
+- `getTaker()` exposes `cancelledVolumeUsd`; the old `lockScore` label was removed in SDK 3. SDK 4 removed the Peer/Plus/Pro wallet classification entirely — leaderboard, maker portfolio, taker portfolio, and taker history carry no wallet-class label, and takers rank by `trustScore`.
+- Orderbook payment pairs carry `isPublic` plus the `disputeProtectionOptedOut` / `disputeProtectionRequiresStake` pair. Protection is default-on, so read the opt-*out* flag; both are null only on a taker-authorized legacy fallback without tuple projection.
 - `DepositMarket.currency` / `deposit.currencies[].currency` are resolved ISO codes (e.g. `"GBP"`). `currencyCode` is the raw bytes32 hash — use `currency` for display.
 - Key management uses the opaque `id` from `listKeys()` (not the raw key): `deleteKey(id)`, `rotateKey(idOrKey)`, `createKey(label?)`.
 - Some timestamp fields (`ApiKeyInfo.createdAt`, `lastUsedAt`, `freeCreditsResetAt`) are typed `number | string` — v2 emits Unix seconds (integer); convert with `Number(value) * 1000` to get a JS `Date`.

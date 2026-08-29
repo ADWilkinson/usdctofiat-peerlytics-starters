@@ -38,15 +38,15 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 Pass `auth: { mode: "x402", signer }` and the SDK handles the 402 challenge,
 payment payload, paid retry, and settlement callback.
 
-## Response shapes & required filters
+## Response shapes & filters
 
 The SDK (≥ 1.0) targets the Stripe-style v2 wire format (snake_case + Unix seconds + `{ data, ... }` envelopes) but exposes an idiomatic camelCase TS surface — the legacy `success: true` envelope flag is gone, the SDK unwraps `data` for you. A few gotchas worth knowing up front:
 
 - **List endpoints return objects, not raw arrays.** `getActivity`, `getDeposits`, `getIntents`, and `getMarketSummary` all return a paginated envelope like `{ events, count, hasMore, limit, offset, filters }`. Iterate over `.events` / `.deposits` / `.intents` / `.markets`, not the top-level result.
 
-- **`getDeposits` and `getIntents` require at least one filter.** The SDK throws a `ValidationError` with `code: "missing_filter"` client-side if you call them with none:
-  - `getDeposits`: needs one of `depositor`, `delegate`, `platform`, `currency`
-  - `getIntents`: needs one of `owner`, `recipient`, `verifier`, `depositId`, `status`
+- **`getDeposits` and `getIntents` take optional filters.** Since SDK 4 an empty call returns a bounded page (`limit` 50 by default, hard-capped at 200) instead of throwing. Narrow it when you can:
+  - `getDeposits`: `depositor`, `delegate`, `platform`, `currency`
+  - `getIntents`: `owner`, `recipient`, `verifier`, `depositId`, `status`
 
 - **Currency resolution on deposits.** Deposit responses expose both the raw bytes32 hash and the resolved ISO code: use `market.currency` / `deposit.currencies[].currency` (e.g. `"GBP"`), not `market.currencyCode` / `deposit.currencies[].currencyCode` (e.g. `0xc4ae21...`). Call `getCurrencies()` if you need to build your own hash→code map.
 
@@ -78,11 +78,18 @@ const orderbook = await client.getOrderbook({ currency: "GBP" });
 const takerView = await client.getOrderbook({
   currency: "GBP",
   taker: "0xBuyerWallet",
+  includeGated: true,
 });
-// Adds the gated deposits this wallet can actually fill, resolved from both
-// per-address whitelists and AddressGroupRegistry membership. Read
-// filters.applied.takerGroupIds to see which groups unlocked them.
+// Adds the restricted deposits this wallet can actually fill; count them with
+// filters.applied.accessibleRestrictedDepositCount, and read the permitted
+// payment-method hashes from takerAccess.paymentMethodsByDeposit.
+// SDK 4 returns the access result, not the policy that produced it.
 // Without `taker`, the book contains only publicly takeable liquidity.
+
+// Each payment pair carries isPublic plus the disputeProtectionOptedOut /
+// disputeProtectionRequiresStake pair. Protection is default-on, so branch on
+// the opt-*out* flag; both are null only on a taker-authorized legacy fallback
+// that lacks tuple projection.
 ```
 
 ### Maker portfolio
@@ -128,16 +135,16 @@ Analytics:
 
 Market:
 - `getMarketSummary({ currency?, platform?, includeRates?, limit?, offset? })` — rate stats per pair
-- `getOrderbook({ currency?, platform?, minSize?, taker? })` — live orderbook by rate level. Unscoped it returns only publicly takeable liquidity; `taker` adds the gated deposits that wallet can fill (per-address whitelists plus address-group membership) and reports the unlocking groups in `filters.applied.takerGroupIds`
+- `getOrderbook({ currency?, platform?, minSize?, taker?, includeGated? })` — live orderbook by rate level. Unscoped it returns only publicly takeable liquidity; `taker` adds the restricted deposits that wallet can fill and counts them in `filters.applied.accessibleRestrictedDepositCount`, and `includeGated: true` returns that viewer's permitted payment-method hashes in `takerAccess.paymentMethodsByDeposit`
 
 Explorer:
 - `getDeposit(id, { limit?, offset? })` — deposit detail with intents
-- `getDeposits({ depositor?, delegate?, platform?, currency?, status?, accepting?, limit?, offset? })` — query deposits. **Requires at least one of `depositor`, `delegate`, `platform`, `currency`** (throws `ValidationError` otherwise). Returns `{ deposits, count, hasMore, ... }`.
+- `getDeposits({ depositor?, delegate?, platform?, currency?, status?, accepting?, limit?, offset? })` — query deposits. All filters optional; an empty call returns a bounded page (default 50, max 200). Returns `{ deposits, count, hasMore, ... }`.
 - `getIntent(hash)` — intent detail
-- `getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? })` — query intents. **Requires at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`**. Returns `{ intents, count, hasMore, ... }`.
+- `getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? })` — query intents. All filters optional; an empty call returns a bounded page (default 50, max 200). Returns `{ intents, count, hasMore, ... }`.
 - `getAddress(address, { limit?, offset? })` — address profile with stats
-- `getMaker(address)` — maker portfolio with allocations, profit, verified `groupMemberships`, and manual-release exposure (`summary.manualReleaseShare`)
-- `getTaker(address)` — taker portfolio: fills, success rate, `cancelledVolumeUsd`, verified `tier`/`tierSource`, currency/platform mix
+- `getMaker(address)` — maker portfolio with allocations, profit, and manual-release exposure (`summary.manualReleaseShare`)
+- `getTaker(address)` — taker portfolio: fills, success rate, `cancelledVolumeUsd`, currency/platform mix. SDK 4 removed the wallet-class label; rank takers by `trustScore` from `getLeaderboard()`
 - `getIntegrator(code, { windowDays? })` — ERC-8021 integrator rollup. `windowDays` is currently materialized for 90 only (omit or pass 90).
 - `getIntegratorIntents(code, opts?)` / `getIntegratorReferralFees(code, opts?)` — convenience wrappers over `getIntegrator()` returning `recentIntents` / `recentReferralFees`.
 - `getPlatform(platform, { windowDays? })` — platform rollup: currencies, makers, takers, recent intents. Same 90-day rule as `getIntegrator`.
@@ -185,7 +192,7 @@ try {
 }
 ```
 
-`ValidationError` covers both server-returned 400s (e.g. `invalid_range`, `unknown_platform`) and client-side checks (e.g. `missing_filter` on `getDeposits`/`getIntents` with no filters).
+`ValidationError` covers both server-returned 400s (e.g. `invalid_range`, `unknown_platform`) and client-side checks (`invalid_address` for a malformed address, `unsupported_window` for a `windowDays` other than 90).
 
 ## Links
 

@@ -143,7 +143,7 @@ const {
   lastError, isLoading, reset,
 } = useOfframp({ integratorId: "your-app", referralId: "partner-123" });
 // state: "idle" | "approving" | "registering" | "depositing" | "confirming" | "delegating" | "done" | "error"
-// step:  granular OfframpStep (also includes "resuming" and "restricting" — `state` collapses those into "delegating")
+// step:  granular OfframpStep (also includes "resuming", "restricting" and "protecting" — `state` collapses those into "delegating")
 // lastError: OfframpError | null — has .code, .step, .txHash, .depositId, .cause
 // (`error` is also returned for legacy callers but is deprecated — use `lastError`.)
 
@@ -191,6 +191,7 @@ type OfframpStep =
   | "registering"
   | "depositing"
   | "confirming"
+  | "protecting"   // managed flow reconciling dispute protection before delegation
   | "delegating"
   | "restricting"  // only during otcTaker recovery of an existing deposit
   | "resuming"

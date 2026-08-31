@@ -5,6 +5,11 @@ on:
   push:
     branches:
       - main
+  # Both SDKs ship majors far faster than this repo takes commits, and CI only
+  # fires on push. Wake it up daily so drift has a bounded blast radius.
+  schedule:
+    - cron: "23 7 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -31,6 +36,28 @@ jobs:
           cache: npm
           cache-dependency-path: demo/package-lock.json
       - run: npm ci
+        working-directory: demo
+      - run: npm run build
+        working-directory: demo
+
+  # check and demo above install from committed lockfiles, so they keep passing
+  # against whatever version was pinned the last time someone pushed -- not the
+  # version a reader resolves from the caret ranges in the README and the
+  # templates. Between 2026-08-13 and 2026-08-24 npm shipped @usdctofiat/offramp
+  # v6, v7 and v8 while these starters pinned ^5, and CI stayed green the whole
+  # time because nothing re-resolved. Install without a lockfile so the next
+  # major fails here instead of in someone's new app.
+  published:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install --no-package-lock
+      - run: npm run check
+      - run: npm install --no-package-lock
         working-directory: demo
       - run: npm run build
         working-directory: demo

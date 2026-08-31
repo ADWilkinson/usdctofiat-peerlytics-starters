@@ -452,6 +452,20 @@ if (exists(".github/workflows/check.yml")) {
     checkWorkflow.includes("working-directory: templates/${{ matrix.template }}"),
     ".github/workflows/check.yml must run the template matrix against each template directory",
   );
+
+  // The check and demo jobs install from committed lockfiles, so they cannot
+  // see a published major land. Between 2026-08-13 and 2026-08-24 npm shipped
+  // @usdctofiat/offramp v6, v7 and v8 while this repo pinned ^5 and CI stayed
+  // green, because nothing pushed and nothing re-resolved. A scheduled job that
+  // installs without a lockfile is what turns that silence into a red run.
+  assert(
+    checkWorkflow.includes("schedule:") && checkWorkflow.includes("cron:"),
+    ".github/workflows/check.yml must run on a schedule so SDK drift surfaces between pushes",
+  );
+  assert(
+    checkWorkflow.includes("npm install --no-package-lock"),
+    ".github/workflows/check.yml must re-resolve the published SDK ranges without a lockfile",
+  );
 }
 
 // Every scaffold has to be buildable by the workflow above, and a user who runs

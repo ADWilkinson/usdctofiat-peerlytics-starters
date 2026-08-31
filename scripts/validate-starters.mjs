@@ -381,6 +381,49 @@ const baseMiniAppPublicRoutes = [
 ];
 
 const templateNames = ["next", "base-mini-app", "vite", "telegram-bot"];
+const templatesReadme = readText("templates/README.md");
+const baseMiniAppReadme = readText("templates/base-mini-app/README.md");
+const offrampMajor = rootOfframpVersion?.replace(/[^0-9]*(\d+).*/, "$1");
+
+// create-offramp-app@0.1.16 (and every published build through that) only
+// scaffolds next | vite | telegram-bot. Listing base-mini-app on the npx line
+// is a command that throws `Unsupported template`. Keep the in-repo starter;
+// do not teach it as a CLI flag.
+assert(
+  rootReadme.includes(
+    "npx create-offramp-app@latest my-offramp --template=next         # next | vite | telegram-bot",
+  ),
+  "README.md must document create-offramp-app templates as next | vite | telegram-bot",
+);
+assert(
+  rootReadme.includes(
+    "`create-offramp-app --template=base-mini-app` fails",
+  ) &&
+    rootReadme.includes(
+      "base-mini-app/               Next.js 16 + Base Account compact cash-out app (copy from this repo)",
+    ),
+  "README.md must say the published CLI rejects base-mini-app and that the starter is copied from this repo",
+);
+assert(
+  templatesReadme.includes("CLI templates: `next`, `vite`, `telegram-bot`.") &&
+    templatesReadme.includes(
+      "the published `create-offramp-app` CLI does not accept that name",
+    ),
+  "templates/README.md must separate CLI templates from the copy-only base-mini-app starter",
+);
+assert(
+  baseMiniAppReadme.includes(
+    "The published `create-offramp-app` CLI does not scaffold it",
+  ),
+  "templates/base-mini-app/README.md must say the published CLI does not scaffold it",
+);
+assert(
+  Boolean(offrampMajor) &&
+    templatesReadme.includes(`@usdctofiat/offramp\` v${offrampMajor}.x`) &&
+    templatesReadme.includes(`the v${offrampMajor} production API`) &&
+    baseMiniAppReadme.includes(`The v${offrampMajor} SDK`),
+  "template READMEs must name the offramp major the starters pin",
+);
 
 assert(exists(".github/workflows/check.yml"), "GitHub Actions must run the starter check");
 if (exists(".github/workflows/check.yml")) {

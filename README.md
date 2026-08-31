@@ -29,8 +29,10 @@ That call creates a direct Peer Cash order on Base at the live oracle rate. Choo
 Need a fresh app skeleton instead of dropping into an existing one?
 
 ```bash
-npx create-offramp-app@latest my-offramp --template=next         # next | base-mini-app | vite | telegram-bot
+npx create-offramp-app@latest my-offramp --template=next         # next | vite | telegram-bot
 ```
+
+The published CLI accepts those three names. Copy [`templates/base-mini-app`](templates/base-mini-app) from this repo for a Base Account surface — `create-offramp-app --template=base-mini-app` fails.
 
 **Agent skills (Claude Code, Cursor):** [`integrate-usdctofiat-offramp`](skills/claude/integrate-usdctofiat-offramp/SKILL.md) · [`query-peerlytics-data`](skills/claude/query-peerlytics-data/SKILL.md). For other assistants, hand them the canonical `llms-full.txt`: [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt) · [peerlytics.xyz/llms-full.txt](https://peerlytics.xyz/llms-full.txt).
 
@@ -66,9 +68,9 @@ usdctofiat/                  @usdctofiat/offramp examples
   developer-resources.ts       print SDK links, delegation config, and app/bot/agent playbooks
   llms.txt                     LLM-friendly SDK reference
 
-templates/                   Scaffold-ready integrations (used by create-offramp-app)
+templates/                   Scaffold-ready integrations (CLI: next, vite, telegram-bot)
   next/                        Next.js 16 App Router + Privy
-  base-mini-app/               Next.js 16 + Base Account compact cash-out app
+  base-mini-app/               Next.js 16 + Base Account compact cash-out app (copy from this repo)
   vite/                        Vite + React 19 + viem
   telegram-bot/                Node 22 + grammy + viem (server-side maker bot)
   README.md                    template selection + v1/v2 upgrade notes
@@ -130,7 +132,9 @@ Choose the smallest starter that matches where the cash-out flow will live:
 | `vite` | You want a lean SPA without Next.js conventions | `VITE_PRIVY_APP_ID` |
 | `telegram-bot` | You are running a server-side maker bot with a managed wallet | `TELEGRAM_BOT_TOKEN`, `MAKER_PRIVATE_KEY`, `AUTHORIZED_TELEGRAM_USER_ID` |
 
-The v8 flat `cashout()` helper applies the package's fixed USDCtoFiat attribution automatically; it does not need an integrator or referral environment variable.
+`npx create-offramp-app` scaffolds `next`, `vite`, and `telegram-bot`. Copy `templates/base-mini-app` when you need the Base Account surface.
+
+The v9 flat `cashout()` helper applies the package's fixed USDCtoFiat attribution automatically; it does not need an integrator or referral environment variable.
 
 ## SDKs at a glance
 

@@ -1,8 +1,9 @@
 # Base Mini App Template
 
 Compact USDCtoFiat starter for Base distribution. It is a standard Next.js app
-that uses Base Account and creates a USDCtoFiat cash-out on Base. The v8 SDK
-applies USDCtoFiat attribution automatically.
+that uses Base Account and creates a USDCtoFiat cash-out on Base. Copy this
+directory from the starters repo. The published `create-offramp-app` CLI does not scaffold it.
+The v9 SDK applies USDCtoFiat attribution automatically.
 
 ## Run
 

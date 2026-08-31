@@ -8,7 +8,8 @@ Scaffolds for `@usdctofiat/offramp`. Each template is a working app with the wal
 npx create-offramp-app@latest my-offramp --template=next
 ```
 
-Templates: `next`, `base-mini-app`, `vite`, `telegram-bot`. Default is `next`.
+CLI templates: `next`, `vite`, `telegram-bot`. Default is `next`.
+Copy [`base-mini-app`](./base-mini-app) from this repo for a Base Account surface — the published `create-offramp-app` CLI does not accept that name.
 
 ## Templates
 
@@ -21,9 +22,9 @@ Templates: `next`, `base-mini-app`, `vite`, `telegram-bot`. Default is `next`.
 
 ## What ships in each template
 
-- `package.json` pinned to `@usdctofiat/offramp` v8.x
+- `package.json` pinned to `@usdctofiat/offramp` v9.x
 - A working `cashout({ mode: "best" })` path wired to Revolut / USD — edit to taste
-- Fixed USDCtoFiat attribution applied by the v8 SDK
+- Fixed USDCtoFiat attribution applied by the v9 SDK
 - Type-checked TypeScript
 - `OFFRAMP_DEVELOPER_RESOURCES` exposed in-app so generated projects keep canonical SDK, OTC, agent, and Peerlytics links
 - A README inside the template covering run, deploy, and customize
@@ -32,7 +33,7 @@ Templates: `next`, `base-mini-app`, `vite`, `telegram-bot`. Default is `next`.
 
 All four templates call the standalone `cashout({ mode, signer, amount,
 currency, platform, payee })` helper. They default to `best` mode to preserve
-Delegate-managed pricing while using the v8 production API. None of them touch
+Delegate-managed pricing while using the v9 production API. None of them touch
 the React hooks or low-level extension client.
 
 ## Upgrading from v5

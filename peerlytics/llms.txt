@@ -110,10 +110,14 @@ Account & keys (SDK ≥ 1.0 takes the opaque `id` from `listKeys()`, not the raw
 - client.getCredits() - credit balance, free-tier window, and purchase history
 - client.createCheckout(pkg) - purchase credits (starter/growth/scale)
 
+## Status (2026-09-02)
+
+The hosted API is down: peerlytics.xyz/api/v1/* returns 404 for every route below, authenticated or not, and peerlytics.xyz/developers, /llms.txt and /api/openapi are 404 too, so no new key can be issued. The explorer at peerlytics.xyz/explorer is the only surface still serving. Everything documented here describes the SDK contract accurately; the host is not answering it.
+
 ## Auth
 
-1. API key: set PEERLYTICS_API_KEY env var or pass { apiKey: "pk_live_..." }. Each key includes 1000 free requests/month. Generate via peerlytics.xyz/developers or programmatically with client.createKey().
-2. x402: pay per request with USDC on Base, no key needed. Pass `auth: { mode: "x402", signer }` to the SDK, or provide `paymentHandler` in custom agent runtimes that build the `PAYMENT-SIGNATURE` header themselves.
+1. API key: set PEERLYTICS_API_KEY env var or pass { apiKey: "pk_live_..." }. Each key includes 1000 free requests/month. Keys were generated via peerlytics.xyz/developers (now 404) or programmatically with client.createKey().
+2. x402: pay per request with USDC on Base, no key needed. This reaches the same 404 routes, so it is not a workaround. Pass `auth: { mode: "x402", signer }` to the SDK, or provide `paymentHandler` in custom agent runtimes that build the `PAYMENT-SIGNATURE` header themselves.
 
 ## Errors
 
@@ -136,8 +140,9 @@ Types: ActivityStreamFilters, ActivityStreamEvent (for streamActivity), Timeseri
 
 ## Links
 
-- API docs: https://peerlytics.xyz/developers
 - SDK: https://www.npmjs.com/package/@peerlytics/sdk
-- OpenAPI: https://peerlytics.xyz/api/openapi
-- LLM context: https://peerlytics.xyz/llms.txt
+- Explorer: https://peerlytics.xyz/explorer
+- Starters: https://github.com/ADWilkinson/usdctofiat-peerlytics-starters
 - Protocol: https://zkp2p.xyz
+
+The hosted API docs, OpenAPI spec and LLM context are 404 — see Status above.

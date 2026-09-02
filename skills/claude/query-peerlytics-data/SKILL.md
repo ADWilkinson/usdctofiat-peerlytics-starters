@@ -9,6 +9,16 @@ description: Query ZKP2P protocol data using the @peerlytics/sdk — rates, orde
 
 Guide the user to query ZKP2P protocol data using `@peerlytics/sdk`. The SDK provides real-time access to P2P exchange rates, orderbooks, maker portfolios, protocol activity, and vault analytics on Base.
 
+## Upstream status (2026-09-02)
+
+The Peerlytics REST API is down. `peerlytics.xyz/api/v1/*` returns 404 for every documented
+route — authenticated and not — and `/developers`, `/llms.txt` and `/api/openapi` are 404 too, so
+no new API key can be issued. Every SDK call below will fail against the live host until that is
+resolved ([#15](https://github.com/ADWilkinson/usdctofiat-peerlytics-starters/issues/15)).
+
+Tell the user this before writing code against it. The shapes, filters and error semantics
+documented here are still accurate and worth building against; the host is not answering.
+
 ## When to use
 
 - User asks about USDC exchange rates or P2P liquidity
@@ -31,10 +41,11 @@ Two options:
 ```typescript
 import { Peerlytics } from "@peerlytics/sdk";
 const client = new Peerlytics({ apiKey: "pk_live_..." });
-// Get a key at https://peerlytics.xyz/developers
+// The portal that issues keys (peerlytics.xyz/developers) is 404 — see Upstream status.
 ```
 
-**x402** (keyless): Pay per request with USDC on Base. No account needed.
+**x402** (keyless): Pay per request with USDC on Base. No account needed. This routes to the
+same 404 endpoints, so it is not a workaround for the outage.
 Pass `auth: { mode: "x402", signer }` and the SDK handles the 402 challenge,
 payment payload, paid retry, and settlement callback.
 
@@ -196,8 +207,9 @@ try {
 
 ## Links
 
-- API docs: https://peerlytics.xyz/developers
 - npm: https://www.npmjs.com/package/@peerlytics/sdk
-- OpenAPI spec: https://peerlytics.xyz/api/openapi
-- llms.txt: https://peerlytics.xyz/llms.txt
+- llms.txt: https://github.com/ADWilkinson/usdctofiat-peerlytics-starters/blob/main/peerlytics/llms.txt
+- Explorer: https://peerlytics.xyz/explorer
 - Starters: https://github.com/ADWilkinson/usdctofiat-peerlytics-starters
+
+The developer portal, OpenAPI spec and hosted llms.txt are 404 — see Upstream status.

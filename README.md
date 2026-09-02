@@ -6,8 +6,27 @@ Examples and a live demo for the two SDKs covering ZKP2P on Base: server-side pr
 [![npm: @usdctofiat/offramp](https://img.shields.io/npm/v/@usdctofiat/offramp?label=%40usdctofiat%2Fofframp&color=6e4a0e)](https://www.npmjs.com/package/@usdctofiat/offramp)
 
 **Live demo:** [offramp-sdk.vercel.app](https://offramp-sdk.vercel.app)
-**Developer portals:** [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) · [peerlytics.xyz/developers](https://peerlytics.xyz/developers)
-**Workshop:** [by Galleon](https://galleonlabs.io/fleet/starter-kits)
+**Machine reference:** [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt)
+**Workshop:** [galleonlabs.io](https://galleonlabs.io/)
+
+> **Both hosted developer portals are gone, and the Peerlytics API with them.** Verified
+> 2026-09-02 21:28–21:35 UTC from a clean host.
+>
+> - **Peerlytics is down, code and docs.** `peerlytics.xyz/api/v1/*` returns 404 for every
+>   documented route — with an API key, with a bearer token, and unauthenticated — so this is a
+>   missing route, not an auth rejection. `/developers`, `/llms.txt`, `/llms-full.txt` and
+>   `/api/openapi` are 404 too, so no new key can be issued and x402 is no workaround. The eight
+>   `peerlytics/` examples and the demo's orderbook panel now report the upstream status instead
+>   of data. [The explorer](https://peerlytics.xyz/explorer) is the only surface still serving.
+> - **`@usdctofiat/offramp` still works; only its docs hub moved.**
+>   `usdctofiat.xyz/developers/*` and `/skills/usdctofiat.md` are 404, and the site's own
+>   `llms.txt` no longer lists a developer hub. The SDK itself is unaffected: the coordination
+>   API it calls (`api.zkp2p.xyz`) answers, and deposits settle on Base. Use
+>   [`usdctofiat/llms.txt`](usdctofiat/llms.txt) and
+>   [`peerlytics/llms.txt`](peerlytics/llms.txt) in this repo, or the still-live
+>   [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt).
+>
+> Tracking: [#15](https://github.com/ADWilkinson/usdctofiat-peerlytics-starters/issues/15).
 
 ## 60-second cash-out
 
@@ -34,7 +53,7 @@ npx create-offramp-app@latest my-offramp --template=next         # next | vite |
 
 The published CLI accepts those three names. Copy [`templates/base-mini-app`](templates/base-mini-app) from this repo for a Base Account surface — `create-offramp-app --template=base-mini-app` fails.
 
-**Agent skills (Claude Code, Cursor):** [`integrate-usdctofiat-offramp`](skills/claude/integrate-usdctofiat-offramp/SKILL.md) · [`query-peerlytics-data`](skills/claude/query-peerlytics-data/SKILL.md). For other assistants, hand them the canonical `llms-full.txt`: [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt) · [peerlytics.xyz/llms-full.txt](https://peerlytics.xyz/llms-full.txt).
+**Agent skills (Claude Code, Cursor):** [`integrate-usdctofiat-offramp`](skills/claude/integrate-usdctofiat-offramp/SKILL.md) · [`query-peerlytics-data`](skills/claude/query-peerlytics-data/SKILL.md). For other assistants, hand them the canonical `llms-full.txt`: [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt). The Peerlytics equivalent is 404 upstream; use this repo's copy at [`peerlytics/llms.txt`](peerlytics/llms.txt).
 
 ## What's in this repo
 
@@ -99,7 +118,10 @@ npx tsx usdctofiat/platform-explorer.ts
 The deposit scripts default to the public Base RPC. Set `RPC_URL` to a private
 endpoint (Alchemy, QuickNode, etc.) to avoid rate limits on real deposit runs.
 
-Get a free API key at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) for the Peerlytics paid API. Lifecycle state now lives in the explorer, activity stream, and deposit/intent reads.
+The Peerlytics paid API needs an API key, and the portal that issues them is 404 (see the notice
+above), so the `peerlytics/` scripts have no working credential path today. They still typecheck
+and run — they print the upstream status rather than data. Lifecycle state lives in the explorer,
+activity stream, and deposit/intent reads.
 
 ## Run the demo locally
 
@@ -150,7 +172,9 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "revolut" });
 ```
 
-Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base. SDK ≥ 1.0 can drive x402 directly with `auth: { mode: "x402", signer }`.
+Auth: a free API key (1,000 requests/month) or x402 pay-per-request with USDC on Base; SDK ≥ 1.0
+drives x402 directly with `auth: { mode: "x402", signer }`. Both paths resolve
+`peerlytics.xyz/api/v1/*`, which is currently 404, so keyless x402 is no more reachable than a key.
 
 **Gotchas worth knowing** (SDK 4.x, Stripe-style v2 wire format):
 
@@ -163,7 +187,7 @@ Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 reque
 - Key management uses the opaque `id` from `listKeys()` (not the raw key): `deleteKey(id)`, `rotateKey(idOrKey)`, `createKey(label?)`.
 - Some timestamp fields (`ApiKeyInfo.createdAt`, `lastUsedAt`, `freeCreditsResetAt`) are typed `number | string` — v2 emits Unix seconds (integer); convert with `Number(value) * 1000` to get a JS `Date`.
 
-[npm](https://www.npmjs.com/package/@peerlytics/sdk) · [Developer portal](https://peerlytics.xyz/developers) · [OpenAPI spec](https://peerlytics.xyz/api/openapi) · [llms.txt](https://peerlytics.xyz/llms.txt)
+[npm](https://www.npmjs.com/package/@peerlytics/sdk) · [llms.txt](peerlytics/llms.txt) (in this repo) · [Explorer](https://peerlytics.xyz/explorer). The hosted developer portal, OpenAPI spec and llms.txt are 404 — see the notice at the top.
 
 ### @usdctofiat/offramp
 
@@ -190,9 +214,9 @@ For a private order, create the deposit first and restrict it once it confirms w
 
 Supported platforms: Venmo, Cash App, Chime, Revolut, Wise, Mercado Pago, Zelle, PayPal, Monzo.
 
-[npm](https://www.npmjs.com/package/@usdctofiat/offramp) · [Developer portal](https://usdctofiat.xyz/developers) · [SDK guide](https://usdctofiat.xyz/developers/offramp-sdk/)
+[npm](https://www.npmjs.com/package/@usdctofiat/offramp) · [llms.txt](usdctofiat/llms.txt) (in this repo) · [llms-full.txt](https://usdctofiat.xyz/llms-full.txt) · [Sell USDC](https://usdctofiat.xyz/sell). The hosted developer portal and SDK guide are 404 — see the notice at the top.
 
-The SDK also exports the canonical self-serve resource bundle, so apps, bots, CLIs, and coding agents do not need to hardcode docs URLs:
+The SDK also exports the canonical self-serve resource bundle, so apps, bots, CLIs, and coding agents do not need to hardcode docs URLs. Note that the bundle is baked into the published package and most of the pages it names have since been taken down — `npx tsx usdctofiat/developer-resources.ts` flags each dead link:
 
 ```ts
 import { OFFRAMP_DEVELOPER_RESOURCES, getOfframpDeveloperResources } from "@usdctofiat/offramp";
@@ -205,12 +229,11 @@ Run `npx tsx usdctofiat/developer-resources.ts` or `npx tsx usdctofiat/developer
 
 ## Links
 
-- [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) — self-serve developer hub
-- [usdctofiat.xyz/developers/offramp-sdk](https://usdctofiat.xyz/developers/offramp-sdk/) — SDK guide
+- [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt) — canonical machine reference, and the developer hub's live replacement
+- [usdctofiat.xyz/sell](https://usdctofiat.xyz/sell) — the product the SDK drives
 - [How USDC to fiat works](https://usdctofiat.xyz/usdc-to-fiat/) — what your users get: methods, currencies, fees
 - [Base USDC](https://usdctofiat.xyz/learn/base-usdc/) — the exact token the off-ramp sells (native, not USDbC)
-- [peerlytics.xyz/developers](https://peerlytics.xyz/developers) — analytics SDK + API key dashboard
-- [Peerlytics Explorer](https://peerlytics.xyz/) — protocol explorer and market intel
+- [Peerlytics Explorer](https://peerlytics.xyz/explorer) — protocol explorer and market intel, and the only Peerlytics surface still serving
 - [ZKP2P Protocol](https://zkp2p.xyz)
 - [@andrewwilkinson](https://x.com/andrewwilkinson)
 

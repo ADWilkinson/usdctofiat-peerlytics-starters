@@ -4,8 +4,8 @@
  * Renders a terminal sparkbar chart of protocol volume, deposits, or intents
  * over time using the Peerlytics historical time-series API.
  *
- * Pro tier: 20 credits per call. Grab a key at
- * https://peerlytics.xyz/developers → Account.
+ * Pro tier: 20 credits per call. Keys came from peerlytics.xyz/developers → Account, which is
+ * 404 as of 2026-09-02, as is the API this calls. See the README.
  *
  * Uses `client.getTimeseries(...)` from @peerlytics/sdk.
  *
@@ -27,7 +27,7 @@ import { describeUpstreamError } from "./describe-error.js";
 const apiKey = process.env.PEERLYTICS_API_KEY;
 if (!apiKey) {
   console.error(
-    "Set PEERLYTICS_API_KEY. Pro-tier endpoint (20 credits/call). Key: https://peerlytics.xyz/developers",
+    "Set PEERLYTICS_API_KEY. Pro-tier endpoint (20 credits/call). The key portal at\npeerlytics.xyz/developers is 404 as of 2026-09-02, as is this endpoint — see the README.",
   );
   process.exit(1);
 }
@@ -165,7 +165,7 @@ main().catch((err) => {
   if (err instanceof PeerlyticsError) {
     console.error(`Peerlytics ${err.status} ${err.code}: ${describeUpstreamError(err)}`);
     if (err.code === "insufficient_credits") {
-      console.error(fmt.dim("  Top up credits at https://peerlytics.xyz/developers?tab=account"));
+      console.error(fmt.dim("  Credits were topped up at peerlytics.xyz/developers, now 404 — see the README."));
     }
     process.exit(1);
   }

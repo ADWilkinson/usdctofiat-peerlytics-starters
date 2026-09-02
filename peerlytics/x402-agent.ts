@@ -87,7 +87,7 @@ async function main(): Promise<void> {
   console.log();
   console.log(`     ${fmt.cyan("AGENT_PRIVATE_KEY=0x... npx tsx peerlytics/x402-agent.ts")}`);
   console.log();
-  console.log(`  ${fmt.dim("Docs:")} https://peerlytics.xyz/developers`);
+  console.log(`  ${fmt.dim("Docs:")} peerlytics/llms.txt in this repo — peerlytics.xyz/developers is 404`);
   console.log();
 }
 

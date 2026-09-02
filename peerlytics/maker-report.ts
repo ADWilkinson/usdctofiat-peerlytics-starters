@@ -13,6 +13,7 @@
  */
 
 import { Peerlytics, PeerlyticsError, NotFoundError } from "@peerlytics/sdk";
+import { describeUpstreamError, respondedWithMarkup } from "./describe-error.js";
 import { isAddress } from "viem";
 
 // ── Formatting ──────────────────────────────────────────────────
@@ -225,12 +226,12 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  if (err instanceof NotFoundError) {
+  if (err instanceof NotFoundError && !respondedWithMarkup(err)) {
     console.error(`Address not found. Check it is a valid maker address.`);
   } else if (err instanceof PeerlyticsError) {
-    console.error(`API error [${err.status}]: ${err.message}`);
+    console.error(`API error [${err.status}]: ${describeUpstreamError(err)}`);
   } else {
-    console.error("Error:", err instanceof Error ? err.message : err);
+    console.error("Error:", describeUpstreamError(err));
   }
   process.exit(1);
 });

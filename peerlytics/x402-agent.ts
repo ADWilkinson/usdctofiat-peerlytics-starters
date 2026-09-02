@@ -16,6 +16,7 @@
  */
 
 import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
+import { describeUpstreamError } from "./describe-error.js";
 import { privateKeyToAccount } from "viem/accounts";
 
 // Formatting
@@ -132,9 +133,9 @@ function parsePaymentRequired(rawHeader: string): Record<string, unknown> {
 
 main().catch((err) => {
   if (err instanceof PeerlyticsError) {
-    console.error("Peerlytics error:", err.status, err.code, err.message);
+    console.error("Peerlytics error:", err.status, err.code, describeUpstreamError(err));
   } else {
-    console.error("Error:", err instanceof Error ? err.message : err);
+    console.error("Error:", describeUpstreamError(err));
   }
   process.exit(1);
 });

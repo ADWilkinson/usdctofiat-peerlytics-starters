@@ -22,6 +22,7 @@
  */
 
 import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
+import { describeUpstreamError } from "./describe-error.js";
 
 const apiKey = process.env.PEERLYTICS_API_KEY;
 if (!apiKey) {
@@ -162,13 +163,13 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   if (err instanceof PeerlyticsError) {
-    console.error(`Peerlytics ${err.status} ${err.code}: ${err.message}`);
+    console.error(`Peerlytics ${err.status} ${err.code}: ${describeUpstreamError(err)}`);
     if (err.code === "insufficient_credits") {
       console.error(fmt.dim("  Top up credits at https://peerlytics.xyz/developers?tab=account"));
     }
     process.exit(1);
   }
-  console.error("Request failed:", err instanceof Error ? err.message : err);
+  console.error("Request failed:", describeUpstreamError(err));
   process.exit(1);
 });
 

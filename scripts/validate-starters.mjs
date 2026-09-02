@@ -848,6 +848,24 @@ assert(
   "demo/api/orderbook.ts must use an ESM-resolvable local import in Vercel functions",
 );
 assert(
+  demoServer.includes("export function describeUpstreamError"),
+  "demo/server/peerlytics.ts must own the upstream orderbook error description",
+);
+// A Peerlytics outage answers with the site's ~46KB HTML 404 page and the SDK
+// rethrows that document as the error message. Both orderbook entry points used
+// to forward it verbatim, so the demo rendered a whole web page as its error
+// text. Keep the containment on the shared helper rather than either call site.
+assert(
+  demoApi.includes("describeUpstreamError(error)") &&
+    !demoApi.includes("error instanceof Error ? error.message"),
+  "demo/api/orderbook.ts must describe upstream failures instead of forwarding the raw message",
+);
+assert(
+  demoViteConfig.includes("describeUpstreamError(error)") &&
+    !demoViteConfig.includes("error instanceof Error ? error.message"),
+  "demo/vite.config.ts must describe upstream failures instead of forwarding the raw message",
+);
+assert(
   demoWallet.match(/method: "wallet_switchEthereumChain"/g)?.length === 2 &&
     demoWallet.indexOf('method: "wallet_addEthereumChain"') <
       demoWallet.lastIndexOf('method: "wallet_switchEthereumChain"'),

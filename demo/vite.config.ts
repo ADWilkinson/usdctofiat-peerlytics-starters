@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import {
+  describeUpstreamError,
   fetchOrderbookSnapshot,
   getPeerlyticsApiKey,
   isSupportedRoute,
@@ -71,9 +72,7 @@ function peerlyticsOrderbookProxy(): Plugin {
             "Cache-Control": "s-maxage=30, stale-while-revalidate=300",
           });
         } catch (error) {
-          const message =
-            error instanceof Error ? error.message : "Unable to load orderbook.";
-          sendJson(res, 502, { error: message });
+          sendJson(res, 502, { error: describeUpstreamError(error) });
         }
       });
     },

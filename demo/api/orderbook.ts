@@ -1,4 +1,5 @@
 import {
+  describeUpstreamError,
   fetchOrderbookSnapshot,
   getPeerlyticsApiKey,
   isSupportedRoute,
@@ -42,7 +43,6 @@ export default async function handler(
     res.setHeader("Cache-Control", "s-maxage=30, stale-while-revalidate=300");
     res.status(200).json(payload);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to load orderbook.";
-    res.status(502).json({ error: message });
+    res.status(502).json({ error: describeUpstreamError(error) });
   }
 }

@@ -199,9 +199,10 @@ console.log(getOfframpDeveloperResources("bot"));
 
 ## References
 
-- Developer portal: https://usdctofiat.xyz/developers
-- SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
 - Canonical machine reference: https://usdctofiat.xyz/llms-full.txt
-- Canonical skill: https://usdctofiat.xyz/skills/usdctofiat.md
 - Starters: https://github.com/ADWilkinson/usdctofiat-peerlytics-starters
-- Peerlytics: https://peerlytics.xyz/developers
+- SDK reference in the starters: https://github.com/ADWilkinson/usdctofiat-peerlytics-starters/blob/main/usdctofiat/llms.txt
+
+The hosted developer portal, SDK guide and canonical skill under usdctofiat.xyz/developers are 404
+as of 2026-09-02; the SDK itself is unaffected and its coordination API still answers.
+- Peerlytics explorer: https://peerlytics.xyz/explorer (the Peerlytics API and developer portal are 404 as of 2026-09-02)

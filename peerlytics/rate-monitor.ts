@@ -8,7 +8,8 @@
  *   PEERLYTICS_API_KEY=pk_live_... npx tsx peerlytics/rate-monitor.ts
  *
  * Environment:
- *   PEERLYTICS_API_KEY  - API key (get one at peerlytics.xyz/developers)
+ *   PEERLYTICS_API_KEY  - API key. The portal that issues them, peerlytics.xyz/developers,
+ *                         is 404 as of 2026-09-02, as is the API this calls. See the README.
  *   CURRENCY            - Fiat currency to watch (default: GBP)
  *   THRESHOLD           - Alert when best rate drops below this (default: 1.02)
  *   POLL_SECONDS        - Polling interval (default: 60)

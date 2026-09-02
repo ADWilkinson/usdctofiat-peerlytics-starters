@@ -26,6 +26,6 @@ Deploy like any standard Next.js app. In Vercel, set
 
 ## Resources
 
-- SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
-- App guide: https://usdctofiat.xyz/developers/apps/
-- Peerlytics developers: https://peerlytics.xyz/developers
+- SDK reference: usdctofiat/llms.txt in the starters repo, or https://usdctofiat.xyz/llms-full.txt
+  (usdctofiat.xyz/developers is 404 as of 2026-09-02)
+- Peerlytics explorer: https://peerlytics.xyz/explorer (the Peerlytics API and developer portal are 404 as of 2026-09-02)

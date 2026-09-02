@@ -30,6 +30,6 @@ Run it as a long-lived process on your server or container host. Keep `MAKER_PRI
 
 ## Resources
 
-- Bot guide: https://usdctofiat.xyz/developers/bots/
-- SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
-- Peerlytics developers: https://peerlytics.xyz/developers
+- SDK reference: usdctofiat/llms.txt in the starters repo, or https://usdctofiat.xyz/llms-full.txt
+  (usdctofiat.xyz/developers is 404 as of 2026-09-02)
+- Peerlytics explorer: https://peerlytics.xyz/explorer (the Peerlytics API and developer portal are 404 as of 2026-09-02)

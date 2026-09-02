@@ -1081,6 +1081,96 @@ assert(
   "templates/next/.gitignore must ignore Next's generated next-env.d.ts",
 );
 
+// Both hosted developer portals were removed, and every URL this repo used to
+// hand readers went with them: the Peerlytics portal that issued API keys, its
+// OpenAPI spec and llms.txt, and the whole usdctofiat.xyz/developers hub. All
+// 404 as of 2026-09-02 (#15), with and without credentials. Prose may name those
+// paths to explain that they are down; nothing may present one as a link a
+// reader or a coding agent is meant to follow. The repo saw 80 unique cloners in
+// a trailing fortnight, so a confident pointer at a dead portal is the most
+// expensive line here. Guard the linkified form only, so the explainers stay.
+const DEAD_DOC_URLS = [
+  "https://peerlytics.xyz/developers",
+  "https://peerlytics.xyz/llms.txt",
+  "https://peerlytics.xyz/llms-full.txt",
+  "https://peerlytics.xyz/api/openapi",
+  "https://peerlytics.xyz/api-reference",
+  "https://peerlytics.xyz/activity",
+  "https://usdctofiat.xyz/developers",
+  "https://usdctofiat.xyz/skills/",
+  "https://galleonlabs.io/fleet",
+  // The SDK monorepo is private; the link 404s for everyone but its owner.
+  "https://github.com/ADWilkinson/galleonlabs-zkp2p",
+];
+const documentedTextFiles = [
+  "README.md",
+  "templates/README.md",
+  ...listFiles("peerlytics", new Set(["node_modules"])),
+  ...listFiles("usdctofiat", new Set(["node_modules"])),
+  ...listFiles("skills", new Set(["node_modules"])),
+  ...["next", "base-mini-app", "vite", "telegram-bot"].map(
+    (template) => `templates/${template}/README.md`,
+  ),
+].filter((file) => /\.(md|txt|ts|tsx)$/.test(file));
+
+// One file is allowed to hold the dead URLs, because its whole job is to
+// recognise them: the SDK bakes the old docs bundle into the published package,
+// so developer-resources.ts prints that bundle and marks the entries that no
+// longer resolve. Exempt it from the link ban, then assert it still does the
+// marking -- otherwise the exemption quietly becomes a hole.
+const DEAD_URL_MATCHER = "usdctofiat/developer-resources.ts";
+
+for (const file of documentedTextFiles) {
+  if (file === DEAD_URL_MATCHER) continue;
+  const source = readText(file);
+  for (const deadUrl of DEAD_DOC_URLS) {
+    assert(
+      !source.includes(deadUrl),
+      `${file} must not link ${deadUrl} -- it has been 404 since 2026-09-02 (#15)`,
+    );
+  }
+}
+
+assert(
+  developerResources.includes("DEAD_LINK_PREFIXES") &&
+    developerResources.includes("isKnownDeadLink(href)") &&
+    developerResources.includes("404 as of 2026-09-02"),
+  `${DEAD_URL_MATCHER} must flag the removed pages the published SDK still advertises`,
+);
+// The script prints links from two branches -- the full bundle and a per-profile
+// playbook -- and the playbook branch is the one an agent hits. Both must mark.
+assert(
+  developerResources.includes("printLinks(Object.entries(resource.links))") &&
+    developerResources.includes("printLinks(resource.resources.map("),
+  `${DEAD_URL_MATCHER} must mark dead links in both the bundle and playbook output`,
+);
+for (const prefix of [
+  "https://usdctofiat.xyz/developers",
+  "https://usdctofiat.xyz/skills/",
+  "https://peerlytics.xyz/developers",
+]) {
+  assert(
+    developerResources.includes(`"${prefix}"`),
+    `${DEAD_URL_MATCHER} must recognise ${prefix} as a dead link`,
+  );
+}
+
+// The README is what a cloner reads before running anything, and the machine
+// reference is what they hand an assistant. Both have to carry the outage.
+assert(
+  rootReadme.includes("Both hosted developer portals are gone") &&
+    rootReadme.includes("issues/15"),
+  "README.md must state the developer-portal outage and link the tracking issue",
+);
+assert(
+  peerlyticsLlms.includes("The hosted API is down"),
+  "peerlytics/llms.txt must state the Peerlytics API outage",
+);
+assert(
+  peerlyticsSkillText.includes("## Upstream status"),
+  "skills/claude/query-peerlytics-data/SKILL.md must state the Peerlytics API outage before teaching calls against it",
+);
+
 if (failures.length > 0) {
   console.error("Starter validation failed:");
   for (const failure of failures) {

@@ -9,7 +9,8 @@
  *   PEERLYTICS_API_KEY=pk_live_... npx tsx peerlytics/live-activity.ts
  *
  * Environment:
- *   PEERLYTICS_API_KEY  - API key (get one at peerlytics.xyz/developers)
+ *   PEERLYTICS_API_KEY  - API key. The portal that issues them, peerlytics.xyz/developers,
+ *                         is 404 as of 2026-09-02, as is the API this calls. See the README.
  *   POLL_SECONDS        - Polling interval (default: 10)
  *   EVENT_TYPE          - Filter by type: intent_signaled, intent_fulfilled, etc. (default: all)
  */

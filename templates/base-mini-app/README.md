@@ -84,6 +84,6 @@ Then test the real flow in a browser/client with Base Account:
 - Standard web app path: https://docs.base.org/apps/guides/migrate-to-standard-web-app
 - Base app rewards: https://docs.base.org/apps/growth/rewards
 - Builder Codes: https://docs.base.org/apps/builder-codes/app-developers
-- SDK guide: https://usdctofiat.xyz/developers/offramp-sdk/
-- App guide: https://usdctofiat.xyz/developers/apps/
-- Peerlytics developers: https://peerlytics.xyz/developers
+- SDK reference: usdctofiat/llms.txt in the starters repo, or https://usdctofiat.xyz/llms-full.txt
+  (usdctofiat.xyz/developers is 404 as of 2026-09-02)
+- Peerlytics explorer: https://peerlytics.xyz/explorer (the Peerlytics API and developer portal are 404 as of 2026-09-02)

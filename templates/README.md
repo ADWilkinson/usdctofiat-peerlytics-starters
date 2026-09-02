@@ -42,7 +42,7 @@ Replace the managed `offramp(walletClient, { identifier })` path with
 `cashout({ mode, signer: walletClient, payee })`. Choose `fast` for the direct
 Peer Cash route or `best` for Delegate-managed pricing. The old managed API is
 still available as an explicit compatibility surface under
-`@usdctofiat/offramp/managed`. See the [SDK CHANGELOG](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md).
+`@usdctofiat/offramp/managed`. See the [published release history](https://www.npmjs.com/package/@usdctofiat/offramp?activeTab=versions).
 
 PayPal, Wise, Venmo, and Cash App makers may need to register their handle
 through the PeerAuth browser extension before the first deposit; in React that
@@ -55,7 +55,6 @@ Copy a template directory into your project and run `npm install`.
 
 ## See also
 
-- SDK guide: [usdctofiat.xyz/developers/offramp-sdk](https://usdctofiat.xyz/developers/offramp-sdk/)
-- App guide: [usdctofiat.xyz/developers/apps](https://usdctofiat.xyz/developers/apps/)
-- Bot guide: [usdctofiat.xyz/developers/bots](https://usdctofiat.xyz/developers/bots/)
+- SDK reference: [`usdctofiat/llms.txt`](../usdctofiat/llms.txt) in this repo, or [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt)
+- The hosted guides at `usdctofiat.xyz/developers/*` are 404 as of 2026-09-02
 - One-shot scripts that don't need scaffolding: [`/usdctofiat`](../usdctofiat) at the repo root

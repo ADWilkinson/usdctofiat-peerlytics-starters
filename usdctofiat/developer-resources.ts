@@ -6,6 +6,13 @@
  * that need the right SDK guide, agent skill, OTC guide, and Peerlytics
  * upgrade path without hardcoding URLs.
  *
+ * Caveat as of 2026-09-02: the bundle is baked into the published package, and
+ * most of the pages it names have since been taken down -- everything under
+ * usdctofiat.xyz/developers, usdctofiat.xyz/skills, and peerlytics.xyz/developers
+ * returns 404. Only llms.txt, llms-full.txt, the starters repo and the npm page
+ * still resolve. This script marks each dead link so the list is not read as a
+ * set of working destinations. See the README.
+ *
  * Usage:
  *   npx tsx usdctofiat/developer-resources.ts
  *   npx tsx usdctofiat/developer-resources.ts bot
@@ -26,6 +33,31 @@ const validProfiles = OFFRAMP_DEVELOPER_RESOURCES.playbooks.map(
   (playbook) => playbook.profile,
 );
 
+// Prefix match, because the bundle ships both bare and trailing-slash forms and
+// query-string variants of the same removed pages.
+const DEAD_LINK_PREFIXES = [
+  "https://usdctofiat.xyz/developers",
+  "https://usdctofiat.xyz/skills/",
+  "https://peerlytics.xyz/developers",
+];
+
+function isKnownDeadLink(href: string): boolean {
+  return DEAD_LINK_PREFIXES.some((prefix) => href.startsWith(prefix));
+}
+
+function printLinks(links: ReadonlyArray<[string, string]>): void {
+  let dead = 0;
+  for (const [label, href] of links) {
+    const isDead = isKnownDeadLink(href);
+    if (isDead) dead += 1;
+    console.log(`- ${label}: ${href}${isDead ? "   [404 as of 2026-09-02]" : ""}`);
+  }
+  if (dead === 0) return;
+  console.log();
+  console.log(`  ${dead} of these are baked into the published SDK and no longer resolve.`);
+  console.log("  Use usdctofiat/llms.txt and peerlytics/llms.txt in this repo instead.");
+}
+
 function isPlaybook(value: typeof resource): value is OfframpIntegrationPlaybook {
   return "profile" in value;
 }
@@ -42,9 +74,7 @@ function main() {
       console.log(`   ${step.detail}`);
     }
     console.log();
-    for (const link of resource.resources) {
-      console.log(`- ${link.label}: ${link.href}`);
-    }
+    printLinks(resource.resources.map((link) => [link.label, link.href]));
     console.log();
     return;
   }
@@ -58,9 +88,7 @@ function main() {
   console.log();
 
   console.log("Links");
-  for (const [label, href] of Object.entries(resource.links)) {
-    console.log(`- ${label}: ${href}`);
-  }
+  printLinks(Object.entries(resource.links));
   console.log();
 
   console.log("Playbooks");

@@ -329,7 +329,7 @@ Create the deposit, let it confirm, then restrict it with `enableOtc(walletClien
 
 - npm: https://www.npmjs.com/package/@usdctofiat/offramp
 - usdctofiat.xyz: https://usdctofiat.xyz
-- usdctofiat.xyz/developers: developer hub
-- usdctofiat.xyz/developers/offramp-sdk: canonical SDK docs
-- usdctofiat.xyz/developers/agents: coding-agent integration guide
+- usdctofiat.xyz/llms-full.txt: canonical machine reference (live)
+- The developer hub under usdctofiat.xyz/developers is 404 as of 2026-09-02, as is
+  usdctofiat.xyz/skills/usdctofiat.md. The SDK is unaffected: api.zkp2p.xyz still answers.
 - @usdctofiat: https://x.com/usdctofiat

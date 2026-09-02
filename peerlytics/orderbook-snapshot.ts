@@ -13,6 +13,7 @@
  */
 
 import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
+import { describeUpstreamError } from "./describe-error.js";
 
 // ── Config ──────────────────────────────────────────────────────
 
@@ -139,11 +140,8 @@ async function main(): Promise<void> {
       console.log();
     } catch (err) {
       process.exitCode = 1;
-      if (err instanceof PeerlyticsError) {
-        console.log(`  ${fmt.dim(currency)}: ${err.message}`);
-      } else {
-        console.log(`  ${fmt.dim(currency)}: ${err instanceof Error ? err.message : "unknown error"}`);
-      }
+      const status = err instanceof PeerlyticsError ? `[${err.status}] ` : "";
+      console.log(`  ${fmt.dim(currency)}: ${status}${describeUpstreamError(err)}`);
       console.log();
     }
   }
@@ -153,6 +151,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  console.error("Fatal:", err instanceof Error ? err.message : err);
+  console.error("Fatal:", describeUpstreamError(err));
   process.exit(1);
 });

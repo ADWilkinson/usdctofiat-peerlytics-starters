@@ -16,6 +16,7 @@
 
 import type { LiveEvent, EventType, ActivityFilters } from "@peerlytics/sdk";
 import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
+import { describeUpstreamError } from "./describe-error.js";
 
 // ── Config ──────────────────────────────────────────────────────
 
@@ -163,16 +164,13 @@ async function main(): Promise<void> {
     try {
       await poll();
     } catch (err) {
-      if (err instanceof PeerlyticsError) {
-        console.error(`  ${fmt.dim(fmt.time())}  ${fmt.red("ERR")} ${err.message}`);
-      } else {
-        console.error(`  ${fmt.dim(fmt.time())}  ${fmt.red("ERR")} ${err instanceof Error ? err.message : err}`);
-      }
+      const status = err instanceof PeerlyticsError ? `[${err.status}] ` : "";
+      console.error(`  ${fmt.dim(fmt.time())}  ${fmt.red("ERR")} ${status}${describeUpstreamError(err)}`);
     }
   }, POLL_SECONDS * 1000);
 }
 
 main().catch((err) => {
-  console.error("Fatal:", err instanceof Error ? err.message : err);
+  console.error("Fatal:", describeUpstreamError(err));
   process.exit(1);
 });

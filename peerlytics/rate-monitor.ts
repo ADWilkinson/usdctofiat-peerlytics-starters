@@ -15,6 +15,7 @@
  */
 
 import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
+import { describeUpstreamError } from "./describe-error.js";
 
 // ── Config ──────────────────────────────────────────────────────
 
@@ -95,11 +96,8 @@ async function monitorRates(): Promise<void> {
     try {
       await checkRates();
     } catch (err) {
-      if (err instanceof PeerlyticsError) {
-        console.error(`${fmt.dim(fmt.time())}  ${fmt.red("ERR")}  ${err.message}`);
-      } else {
-        console.error(`${fmt.dim(fmt.time())}  ${fmt.red("ERR")}  ${err instanceof Error ? err.message : err}`);
-      }
+      const status = err instanceof PeerlyticsError ? `[${err.status}] ` : "";
+      console.error(`${fmt.dim(fmt.time())}  ${fmt.red("ERR")}  ${status}${describeUpstreamError(err)}`);
     }
   }
 }

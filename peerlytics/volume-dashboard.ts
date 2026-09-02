@@ -10,6 +10,7 @@
  */
 
 import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
+import { describeUpstreamError } from "./describe-error.js";
 
 // ── Formatting ──────────────────────────────────────────────────
 
@@ -134,9 +135,9 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   if (err instanceof PeerlyticsError) {
-    console.error(`Error [${err.status}]: ${err.message}`);
+    console.error(`Error [${err.status}]: ${describeUpstreamError(err)}`);
   } else {
-    console.error("Error:", err instanceof Error ? err.message : err);
+    console.error("Error:", describeUpstreamError(err));
   }
   process.exit(1);
 });

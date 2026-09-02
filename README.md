@@ -53,6 +53,7 @@ peerlytics/                  @peerlytics/sdk examples (run standalone with tsx/b
   timeseries-chart.ts          hourly/daily rollups in a terminal sparkbar chart
   live-activity.ts             near-real-time protocol activity polling feed
   x402-agent.ts                x402 pay-per-request flow (no API key needed)
+  describe-error.ts            shared containment for upstream failure bodies
   llms.txt                     LLM-friendly SDK reference
 
 usdctofiat/                  @usdctofiat/offramp examples

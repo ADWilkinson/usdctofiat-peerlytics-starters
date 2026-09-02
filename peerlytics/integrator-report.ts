@@ -19,6 +19,7 @@
  */
 
 import { Peerlytics, NotFoundError, PeerlyticsError } from "@peerlytics/sdk";
+import { describeUpstreamError, respondedWithMarkup } from "./describe-error.js";
 
 const code = process.env.CODE?.trim();
 if (!code) {
@@ -123,16 +124,16 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  if (err instanceof NotFoundError) {
+  if (err instanceof NotFoundError && !respondedWithMarkup(err)) {
     console.error(`Unknown integrator code: ${code}`);
     console.error(fmt.dim(`  See ${baseUrl}/explorer/integrator for the registered list.`));
     process.exit(1);
   }
   if (err instanceof PeerlyticsError) {
-    console.error(`Peerlytics ${err.status} ${err.code}: ${err.message}`);
+    console.error(`Peerlytics ${err.status} ${err.code}: ${describeUpstreamError(err)}`);
     process.exit(1);
   }
-  console.error("Request failed:", err instanceof Error ? err.message : err);
+  console.error("Request failed:", describeUpstreamError(err));
   process.exit(1);
 });
 

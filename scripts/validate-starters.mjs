@@ -991,6 +991,83 @@ assert(
   "peerlytics/timeseries-chart.ts must enforce the SDK's 400-day window cap",
 );
 
+// The SDK rethrows a non-JSON error body as the error message verbatim, so when
+// peerlytics.xyz/api/v1/* started answering with the site's HTML 404 page every
+// example that printed `err.message` dumped a ~46KB document into the reader's
+// terminal, once per request. The demo grew describeUpstreamError in #14; the
+// standalone scripts are the other half of the same blast radius. Exercise the
+// helper against a real markup body rather than only grepping for the call, and
+// hold the demo's copy to the same suffix so the two do not drift apart.
+const { describeUpstreamError, respondedWithMarkup } = await import(
+  "../peerlytics/describe-error.ts"
+);
+const MARKUP_SUFFIX = "Peerlytics answered with an HTML page instead of JSON.";
+const markupBody = `<!DOCTYPE html><html lang="en"><head><title>404</title></head><body>${"x".repeat(46_000)}</body></html>`;
+
+const containmentCases = [
+  ["an HTML 404 page", new Error(markupBody), MARKUP_SUFFIX],
+  ["prose ahead of the markup", new Error(`Not Found\n\n${markupBody}`), `Not Found ${MARKUP_SUFFIX}`],
+  ["a plain SDK message", new Error("insufficient_credits"), "insufficient_credits"],
+  ["a thrown non-Error", "boom", "Unable to reach the Peerlytics API."],
+  ["an Error with no message", new Error(""), "Unable to reach the Peerlytics API."],
+];
+
+for (const [label, input, expected] of containmentCases) {
+  const described = describeUpstreamError(input);
+  assert(
+    described === expected,
+    `peerlytics/describe-error.ts must contain ${label}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(described.slice(0, 120))} (${described.length} chars)`,
+  );
+}
+
+const overlong = describeUpstreamError(new Error("y".repeat(5_000)));
+assert(
+  overlong.length === 200 && overlong.endsWith("…"),
+  `peerlytics/describe-error.ts must cap a long message at 200 characters, got ${overlong.length}`,
+);
+
+assert(
+  respondedWithMarkup(new Error(markupBody)) &&
+    !respondedWithMarkup(new Error("deposit not found")) &&
+    !respondedWithMarkup("not an error"),
+  "peerlytics/describe-error.ts must tell a markup body apart from an API response",
+);
+
+// The SDK maps a missing route and a missing record to the same NotFoundError,
+// so a script that reads the class alone tells the reader to go fix an address
+// or a slug that was never the problem.
+for (const [file, guardedMessage] of [
+  ["peerlytics/maker-report.ts", "Address not found"],
+  ["peerlytics/integrator-report.ts", "Unknown integrator code"],
+]) {
+  const source = readText(file);
+  assert(
+    source.includes("err instanceof NotFoundError && !respondedWithMarkup(err)") &&
+      source.includes(guardedMessage),
+    `${file} must not blame the caller's input when the site answered instead of the API`,
+  );
+}
+
+assert(
+  readText("demo/server/peerlytics.ts").includes(MARKUP_SUFFIX),
+  "demo/server/peerlytics.ts must keep the same containment suffix as peerlytics/describe-error.ts",
+);
+
+// Every example that renders an SDK failure has to go through the helper. A
+// bare `err.message` in a catch is the passthrough this replaced.
+for (const file of listFiles("peerlytics").filter((name) => name.endsWith(".ts"))) {
+  if (file.endsWith("describe-error.ts")) continue;
+  const source = readText(file);
+  assert(
+    source.includes('from "./describe-error.js"') && source.includes("describeUpstreamError("),
+    `${file} must describe SDK failures through describeUpstreamError`,
+  );
+  assert(
+    !/\berr\.message\b/.test(source),
+    `${file} must not print a raw SDK error message`,
+  );
+}
+
 const installClaudeScript = readText("demo/scripts/install-claude.sh");
 assert(
   installClaudeScript.includes("${SCRIPT_DIR}/../..") &&

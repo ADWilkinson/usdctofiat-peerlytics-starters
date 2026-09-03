@@ -7,6 +7,7 @@
   "scripts": {
     "check": "npm run typecheck && npm run validate",
     "validate": "node scripts/validate-starters.mjs",
+    "probe": "node scripts/probe-documented-urls.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

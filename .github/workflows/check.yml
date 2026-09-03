@@ -57,6 +57,10 @@ jobs:
           node-version: 22
       - run: npm install --no-package-lock
       - run: npm run check
+      # Typecheck stays green when a documented URL 404s — that is how #15
+      # shipped past CI. Fetch the live set on the same schedule as the
+      # published-SDK install so the next disappearance fails here.
+      - run: npm run probe
       - run: npm install --no-package-lock
         working-directory: demo
       - run: npm run build

@@ -87,5 +87,7 @@ jobs:
           node-version: 22
       - run: npm install
         working-directory: templates/${{ matrix.template }}
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: templates/${{ matrix.template }}
       - run: npm run build
         working-directory: templates/${{ matrix.template }}

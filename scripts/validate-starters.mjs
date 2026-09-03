@@ -1,6 +1,14 @@
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
+import {
+  DEAD_DOC_URLS,
+  DEAD_URL_MATCHER,
+  LIVE_DOC_URLS,
+  extractHttpsUrls,
+  isDeadDocUrl,
+  isUnprobed,
+} from "./documented-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -1089,37 +1097,26 @@ assert(
 // reader or a coding agent is meant to follow. The repo saw 80 unique cloners in
 // a trailing fortnight, so a confident pointer at a dead portal is the most
 // expensive line here. Guard the linkified form only, so the explainers stay.
-const DEAD_DOC_URLS = [
-  "https://peerlytics.xyz/developers",
-  "https://peerlytics.xyz/llms.txt",
-  "https://peerlytics.xyz/llms-full.txt",
-  "https://peerlytics.xyz/api/openapi",
-  "https://peerlytics.xyz/api-reference",
-  "https://peerlytics.xyz/activity",
-  "https://usdctofiat.xyz/developers",
-  "https://usdctofiat.xyz/skills/",
-  "https://galleonlabs.io/fleet",
-  // The SDK monorepo is private; the link 404s for everyone but its owner.
-  "https://github.com/ADWilkinson/galleonlabs-zkp2p",
-];
+// The URL lists live in documented-urls.mjs so the scheduled probe cannot drift
+// from this check.
 const documentedTextFiles = [
   "README.md",
   "templates/README.md",
+  "demo/.env.example",
   ...listFiles("peerlytics", new Set(["node_modules"])),
   ...listFiles("usdctofiat", new Set(["node_modules"])),
   ...listFiles("skills", new Set(["node_modules"])),
   ...["next", "base-mini-app", "vite", "telegram-bot"].map(
     (template) => `templates/${template}/README.md`,
   ),
-].filter((file) => /\.(md|txt|ts|tsx)$/.test(file));
+].filter((file) => /\.(md|txt|ts|tsx|example)$/.test(file));
 
 // One file is allowed to hold the dead URLs, because its whole job is to
 // recognise them: the SDK bakes the old docs bundle into the published package,
 // so developer-resources.ts prints that bundle and marks the entries that no
 // longer resolve. Exempt it from the link ban, then assert it still does the
 // marking -- otherwise the exemption quietly becomes a hole.
-const DEAD_URL_MATCHER = "usdctofiat/developer-resources.ts";
-
+const documentedLiveUrls = new Set();
 for (const file of documentedTextFiles) {
   if (file === DEAD_URL_MATCHER) continue;
   const source = readText(file);
@@ -1129,7 +1126,34 @@ for (const file of documentedTextFiles) {
       `${file} must not link ${deadUrl} -- it has been 404 since 2026-09-02 (#15)`,
     );
   }
+  for (const url of extractHttpsUrls(source)) {
+    if (LIVE_DOC_URLS.includes(url)) {
+      documentedLiveUrls.add(url);
+      continue;
+    }
+    if (isUnprobed(url) || isDeadDocUrl(url)) continue;
+    assert(
+      false,
+      `${file} documents ${url} but it is not in LIVE_DOC_URLS or the unprobed set -- add it to the scheduled probe or classify it`,
+    );
+  }
 }
+
+assert(
+  LIVE_DOC_URLS.length > 0,
+  "LIVE_DOC_URLS must not be empty; the scheduled probe would no-op",
+);
+for (const url of LIVE_DOC_URLS) {
+  assert(
+    documentedLiveUrls.has(url),
+    `LIVE_DOC_URLS includes ${url} but no documented file links it -- the probe set drifted from the docs`,
+  );
+}
+assert(
+  readText(".github/workflows/check.yml").includes("npm run probe") &&
+    readText("package.json").includes('"probe": "node scripts/probe-documented-urls.mjs"'),
+  "the scheduled published job must run npm run probe from package.json",
+);
 
 assert(
   developerResources.includes("DEAD_LINK_PREFIXES") &&

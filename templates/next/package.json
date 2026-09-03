@@ -14,7 +14,7 @@
     "@solana-program/token": "^0.14.0",
     "@solana/kit": "^6.10.0",
     "@usdctofiat/offramp": "^9.0.0",
-    "next": "16.2.10",
+    "next": "16.3.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "viem": "^2.54.2"
@@ -24,5 +24,9 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "axios": "1.20.0",
+    "ws": "8.21.3"
   }
 }

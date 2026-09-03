@@ -460,6 +460,10 @@ if (exists(".github/workflows/check.yml")) {
     checkWorkflow.includes("working-directory: templates/${{ matrix.template }}"),
     ".github/workflows/check.yml must run the template matrix against each template directory",
   );
+  assert(
+    checkWorkflow.includes("npm audit --omit=dev --audit-level=high"),
+    ".github/workflows/check.yml must reject high-severity production dependency advisories",
+  );
 
   // The check and demo jobs install from committed lockfiles, so they cannot
   // see a published major land. Between 2026-08-13 and 2026-08-24 npm shipped

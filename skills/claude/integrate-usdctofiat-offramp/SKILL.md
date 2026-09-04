@@ -185,7 +185,7 @@ import {
   getOfframpDeveloperResources,
 } from "@usdctofiat/offramp";
 
-console.log(OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide);
+console.log(OFFRAMP_DEVELOPER_RESOURCES.links.fullMachineReference);
 console.log(getOfframpDeveloperResources("bot"));
 ```
 

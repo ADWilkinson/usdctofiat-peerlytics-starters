@@ -29,7 +29,7 @@ or embeds. Local development can use `http://localhost:3000`.
 - Do not add social-client manifests, frame SDKs, or client-specific discovery
   files. Base discovery should come from the public Next.js origin and Base.dev
   app metadata.
-- Keep `OFFRAMP_DEVELOPER_RESOURCES` links visible for builders and agents.
+- Keep `OFFRAMP_DEVELOPER_RESOURCES` links visible for builders and agents, but only the keys that resolve — the bundle still advertises the developer portal removed on 2026-09-02.
 
 ## Base Hooks
 

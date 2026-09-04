@@ -10,11 +10,15 @@ import {
 import { createWalletClient, custom, type WalletClient } from "viem";
 import { base } from "viem/chains";
 
+// The SDK bakes its link bundle into the published package, and the hosted
+// developer portal it advertises has been 404 since 2026-09-02 (#15):
+// sdkGuide, appGuide, botGuide, agentSkill and peerlyticsDevelopers all point
+// at removed pages. A scaffolded app renders this row to its own users, so name
+// only the keys that still resolve.
 const resourceLinks = [
-  ["SDK guide", OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide],
-  ["App guide", OFFRAMP_DEVELOPER_RESOURCES.links.appGuide],
-  ["Peerlytics", OFFRAMP_DEVELOPER_RESOURCES.links.peerlyticsDevelopers],
-  ["Agent skill", OFFRAMP_DEVELOPER_RESOURCES.links.agentSkill],
+  ["SDK reference", OFFRAMP_DEVELOPER_RESOURCES.links.fullMachineReference],
+  ["Starters", OFFRAMP_DEVELOPER_RESOURCES.links.starters],
+  ["npm", OFFRAMP_DEVELOPER_RESOURCES.links.npm],
 ] as const;
 
 function useWalletClient(): WalletClient | null {

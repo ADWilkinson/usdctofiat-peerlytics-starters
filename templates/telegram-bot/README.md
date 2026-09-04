@@ -22,7 +22,7 @@ Base RPC.
 - Edit `src/index.ts` to change the platform, currency, and command vocabulary.
 - Keep the `/sell` authorization check ahead of all parsing and wallet activity.
 - Keep an explicit `mode` on every `cashout()` call. This bot uses `best`.
-- Keep the `/resources` command or equivalent operator command so maintainers can retrieve canonical SDK, agent, and Peerlytics links from `OFFRAMP_DEVELOPER_RESOURCES`.
+- Keep the `/resources` command or equivalent operator command so maintainers can retrieve canonical SDK links from `OFFRAMP_DEVELOPER_RESOURCES`. Reply with only the keys that resolve — the bundle still advertises the developer portal removed on 2026-09-02.
 
 ## Deploy
 

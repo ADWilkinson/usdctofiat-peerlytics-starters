@@ -50,9 +50,13 @@ const gated = await cashout({
   disabledPlatforms: ["cashapp"],
 });
 
-// Canonical resources for apps, bots, agents, OTC, and Peerlytics
-console.log(OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide);
-console.log(OFFRAMP_RESOURCE_LINKS.agentSkill);
+// Canonical resources for apps, bots, agents, OTC, and Peerlytics. The bundle is
+// baked into the published package and its hosted developer portal is 404 since
+// 2026-09-02: sdkGuide, appGuide, botGuide, agentGuide, agentSkill,
+// peerlyticsDevelopers and peerlyticsGuide no longer resolve. Read
+// fullMachineReference, shortMachineReference, starters or npm instead.
+console.log(OFFRAMP_DEVELOPER_RESOURCES.links.fullMachineReference);
+console.log(OFFRAMP_RESOURCE_LINKS.starters);
 console.log(OFFRAMP_INTEGRATION_PLAYBOOKS.map((entry) => entry.profile));
 console.log(getOfframpDeveloperResources("agent"));
 ```

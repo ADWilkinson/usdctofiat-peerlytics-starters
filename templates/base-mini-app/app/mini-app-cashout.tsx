@@ -46,10 +46,14 @@ const routes = [
   },
 ] as const;
 
+// The SDK bakes its link bundle into the published package, and the hosted
+// developer portal it advertises has been 404 since 2026-09-02 (#15):
+// sdkGuide, appGuide, botGuide, agentSkill and peerlyticsDevelopers all point
+// at removed pages. A scaffolded app renders this row to its own users, so name
+// only the keys that still resolve.
 const resourceLinks = [
-  ["SDK", OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide],
-  ["Docs", OFFRAMP_DEVELOPER_RESOURCES.links.appGuide],
-  ["Peerlytics", OFFRAMP_DEVELOPER_RESOURCES.links.peerlyticsDevelopers],
+  ["SDK", OFFRAMP_DEVELOPER_RESOURCES.links.fullMachineReference],
+  ["Starters", OFFRAMP_DEVELOPER_RESOURCES.links.starters],
 ] as const;
 
 async function getMiniAppWalletClient(): Promise<WalletClient> {

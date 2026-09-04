@@ -221,7 +221,7 @@ The SDK also exports the canonical self-serve resource bundle, so apps, bots, CL
 ```ts
 import { OFFRAMP_DEVELOPER_RESOURCES, getOfframpDeveloperResources } from "@usdctofiat/offramp";
 
-console.log(OFFRAMP_DEVELOPER_RESOURCES.links.agentSkill);
+console.log(OFFRAMP_DEVELOPER_RESOURCES.links.fullMachineReference);
 console.log(getOfframpDeveloperResources("bot"));
 ```
 

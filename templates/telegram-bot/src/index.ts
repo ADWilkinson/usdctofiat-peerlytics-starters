@@ -57,10 +57,12 @@ function parseSellCommand(text: string): { amount: string; payee: string } {
 
 bot.command("start", (ctx) => {
   void ctx.reply(
-    "USDC offramp bot online. Use /sell <amount> <payee>. Example: /sell 50 alice\n\nUse /resources for SDK docs, Peerlytics, and the agent skill.",
+    "USDC offramp bot online. Use /sell <amount> <payee>. Example: /sell 50 alice\n\nUse /resources for the SDK reference and starters.",
   );
 });
 
+// Same caveat as the web templates: the bundle still advertises the removed
+// developer portal, so reply with the keys that still resolve.
 bot.command("resources", (ctx) => {
   const links = OFFRAMP_DEVELOPER_RESOURCES.links;
   void ctx.reply(
@@ -69,10 +71,9 @@ bot.command("resources", (ctx) => {
       `Chain: Base mainnet (${OFFRAMP_DEVELOPER_RESOURCES.chainId})`,
       `Delegation required: ${OFFRAMP_DEVELOPER_RESOURCES.delegation.required ? "yes" : "no"}`,
       "",
-      `SDK guide: ${links.sdkGuide}`,
-      `Bot guide: ${links.botGuide}`,
-      `Agent skill: ${links.agentSkill}`,
-      `Peerlytics: ${links.peerlyticsDevelopers}`,
+      `SDK reference: ${links.fullMachineReference}`,
+      `Starters: ${links.starters}`,
+      `npm: ${links.npm}`,
     ].join("\n"),
   );
 });

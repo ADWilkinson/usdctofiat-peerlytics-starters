@@ -26,7 +26,7 @@ Copy [`base-mini-app`](./base-mini-app) from this repo for a Base Account surfac
 - A working `cashout({ mode: "best" })` path wired to Revolut / USD — edit to taste
 - Fixed USDCtoFiat attribution applied by the v9 SDK
 - Type-checked TypeScript
-- `OFFRAMP_DEVELOPER_RESOURCES` exposed in-app so generated projects keep canonical SDK, OTC, agent, and Peerlytics links
+- `OFFRAMP_DEVELOPER_RESOURCES` exposed in-app so generated projects keep the SDK reference, starters, and npm links that still resolve (the bundle's `sdkGuide`, `appGuide`, `botGuide`, `agentSkill` and `peerlyticsDevelopers` entries have been 404 since 2026-09-02)
 - A README inside the template covering run, deploy, and customize
 
 ## What surface these templates use

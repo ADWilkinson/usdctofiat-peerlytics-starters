@@ -476,7 +476,7 @@ export default function App() {
               @peerlytics/sdk
             </a>
             <a
-              href={OFFRAMP_DEVELOPER_RESOURCES.links.sdkGuide}
+              href={OFFRAMP_DEVELOPER_RESOURCES.links.fullMachineReference}
               target="_blank"
               rel="noreferrer"
               className="sdk-badge sdk-badge-offramp"
@@ -484,12 +484,12 @@ export default function App() {
               @usdctofiat/offramp v{OFFRAMP_DEVELOPER_RESOURCES.sdkVersion}
             </a>
             <a
-              href={OFFRAMP_DEVELOPER_RESOURCES.links.agentGuide}
+              href={OFFRAMP_DEVELOPER_RESOURCES.links.starters}
               target="_blank"
               rel="noreferrer"
               className="sdk-badge"
             >
-              agent resources
+              starters
             </a>
           </div>
           {copyError && <InlineMessage tone="error">{copyError}</InlineMessage>}

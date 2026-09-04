@@ -17,7 +17,7 @@ builds without secrets and shows a setup screen until the app ID is present.
 
 - Edit `app/page.tsx` to change the default platform/currency and input labels.
 - Keep an explicit `mode` on every `cashout()` call. This starter uses `best`.
-- Keep `OFFRAMP_DEVELOPER_RESOURCES` visible somewhere in your developer/admin surface so future maintainers and agents have canonical SDK, OTC, and Peerlytics links.
+- Keep `OFFRAMP_DEVELOPER_RESOURCES` visible somewhere in your developer/admin surface so future maintainers and agents have canonical SDK links. Render only the keys that resolve — the bundle still advertises the developer portal removed on 2026-09-02.
 
 ## Deploy
 

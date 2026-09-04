@@ -15,6 +15,7 @@ const failures = [];
 const require = createRequire(import.meta.url);
 const {
   getPeerExtensionRegistrationInfo,
+  OFFRAMP_DEVELOPER_RESOURCES,
   PLATFORMS: offrampPlatforms,
 } = require("@usdctofiat/offramp");
 
@@ -515,6 +516,40 @@ for (const file of templateEntrypoints) {
     text.includes("OFFRAMP_DEVELOPER_RESOURCES"),
     `${file} must expose OFFRAMP_DEVELOPER_RESOURCES so generated apps keep canonical docs and agent links`,
   );
+}
+
+// Every template renders a resource row out of the SDK's baked-in link bundle
+// by property name, so the literal-URL sweep at the bottom of this file never
+// sees the URLs behind it. That is how #15 escaped the templates: the developer
+// portal went 404, all four scaffolds kept naming sdkGuide / appGuide /
+// agentSkill / peerlyticsDevelopers, and every generated app shipped a row of
+// dead links while CI stayed green. Resolve each referenced key against the
+// installed bundle so a template can only advertise a link the scheduled probe
+// already covers.
+const offrampBundleLinks = Object.entries(OFFRAMP_DEVELOPER_RESOURCES.links);
+const bundleLinkRenderers = [
+  ...templateEntrypoints,
+  "README.md",
+  "demo/src/App.tsx",
+  "skills/claude/integrate-usdctofiat-offramp/SKILL.md",
+  "usdctofiat/llms.txt",
+];
+
+for (const file of bundleLinkRenderers) {
+  const text = readText(file);
+  for (const [key, href] of offrampBundleLinks) {
+    // The SDK exports the same object twice, as OFFRAMP_DEVELOPER_RESOURCES.links
+    // and as OFFRAMP_RESOURCE_LINKS, and usdctofiat/llms.txt reads the second.
+    if (!new RegExp(`(?:links|OFFRAMP_RESOURCE_LINKS)\\.${key}\\b`).test(text)) continue;
+    assert(
+      !isDeadDocUrl(href),
+      `${file} points readers at OFFRAMP_DEVELOPER_RESOURCES.links.${key} (${href}), 404 since 2026-09-02 (#15)`,
+    );
+    assert(
+      LIVE_DOC_URLS.includes(href) || isUnprobed(href),
+      `${file} points readers at OFFRAMP_DEVELOPER_RESOURCES.links.${key} (${href}) but it is not in LIVE_DOC_URLS or the unprobed set -- add it to the scheduled probe or classify it`,
+    );
+  }
 }
 
 assert(

@@ -87,7 +87,9 @@ jobs:
           node-version: 22
       - run: npm install
         working-directory: templates/${{ matrix.template }}
-      - run: npm audit --omit=dev --audit-level=high
-        working-directory: templates/${{ matrix.template }}
+      # Parse the audit JSON so an npm registry outage (#22) is not the same
+      # red as a high/critical advisory. Warn-and-pass on pull_request/push;
+      # fail on schedule/workflow_dispatch if the endpoint still cannot be reached.
+      - run: npm run audit-template -- templates/${{ matrix.template }}
       - run: npm run build
         working-directory: templates/${{ matrix.template }}

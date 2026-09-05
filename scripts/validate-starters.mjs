@@ -462,8 +462,15 @@ if (exists(".github/workflows/check.yml")) {
     ".github/workflows/check.yml must run the template matrix against each template directory",
   );
   assert(
-    checkWorkflow.includes("npm audit --omit=dev --audit-level=high"),
-    ".github/workflows/check.yml must reject high-severity production dependency advisories",
+    checkWorkflow.includes("npm run audit-template -- templates/${{ matrix.template }}") &&
+      readText("package.json").includes(
+        '"audit-template": "node scripts/audit-template.mjs"',
+      ),
+    ".github/workflows/check.yml must run npm run audit-template so an audit-endpoint outage is not indistinguishable from an advisory",
+  );
+  assert(
+    !checkWorkflow.includes("npm audit --omit=dev --audit-level=high"),
+    ".github/workflows/check.yml must not call npm audit directly; that exit code conflates an outage with an advisory",
   );
 
   // The check and demo jobs install from committed lockfiles, so they cannot

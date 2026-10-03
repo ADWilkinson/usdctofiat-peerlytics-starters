@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "check": "npm run typecheck && npm run validate",
-    "validate": "node scripts/validate-starters.mjs",
+    "validate": "node --import tsx scripts/validate-starters.mjs",
     "probe": "node scripts/probe-documented-urls.mjs",
     "audit-template": "node scripts/audit-template.mjs",
     "typecheck": "tsc --noEmit"

@@ -192,10 +192,21 @@ assert(
   "README.md must list the platforms exposed by the locked offramp SDK",
 );
 assert(
-  rootReadme.includes(
-    "live-activity.ts             near-real-time protocol activity polling feed",
-  ) && !rootReadme.includes("live-activity.ts             real-time protocol event stream (SSE)"),
-  "README.md must describe live-activity.ts as polling rather than SSE",
+  rootReadme.includes("[Peerlytics](https://peerlytics.xyz/)") &&
+    rootReadme.includes("[explorer](https://peerlytics.xyz/explorer)") &&
+    rootReadme.includes("[connect page](https://peerlytics.xyz/connect)") &&
+    rootReadme.includes("read-only"),
+  "README.md must describe Peerlytics as the live public activity view, read-only explorer, and /connect page",
+);
+assert(
+  !/(@peerlytics\/sdk|PEERLYTICS_API_KEY|peerlytics\.xyz\/developers|peerlytics\.xyz\/api-reference|peerlytics\.xyz\/api\/openapi|x402)/i.test(
+    rootReadme,
+  ),
+  "README.md must not advertise a Peerlytics API, API key path, developer hub, OpenAPI route, or x402 access",
+);
+assert(
+  !/Both hosted developer portals are gone/i.test(rootReadme),
+  "README.md must not carry the old Peerlytics outage banner wording",
 );
 assert(
   offrampLlms.includes(`Keys: ${offrampPlatformKeys}`),
@@ -1225,20 +1236,14 @@ for (const prefix of [
   );
 }
 
-// The README is what a cloner reads before running anything, and the machine
-// reference is what they hand an assistant. Both have to carry the outage.
+// The README is what a cloner reads before running anything. It should align
+// to the currently live product surfaces.
 assert(
-  rootReadme.includes("Both hosted developer portals are gone") &&
-    rootReadme.includes("issues/15"),
-  "README.md must state the developer-portal outage and link the tracking issue",
-);
-assert(
-  peerlyticsLlms.includes("The hosted API is down"),
-  "peerlytics/llms.txt must state the Peerlytics API outage",
-);
-assert(
-  peerlyticsSkillText.includes("## Upstream status"),
-  "skills/claude/query-peerlytics-data/SKILL.md must state the Peerlytics API outage before teaching calls against it",
+  rootReadme.includes("## Peerlytics") &&
+    rootReadme.includes("https://peerlytics.xyz/") &&
+    rootReadme.includes("https://peerlytics.xyz/explorer") &&
+    rootReadme.includes("https://peerlytics.xyz/connect"),
+  "README.md must keep the live Peerlytics activity, explorer, and /connect links",
 );
 
 if (failures.length > 0) {

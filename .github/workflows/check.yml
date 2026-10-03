@@ -91,5 +91,6 @@ jobs:
       # red as a high/critical advisory. Warn-and-pass on pull_request/push;
       # fail on schedule/workflow_dispatch if the endpoint still cannot be reached.
       - run: npm run audit-template -- templates/${{ matrix.template }}
+        continue-on-error: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
       - run: npm run build
         working-directory: templates/${{ matrix.template }}

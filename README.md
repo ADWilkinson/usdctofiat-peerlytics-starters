@@ -1,32 +1,18 @@
 # Peerlytics & USDCtoFiat Starters
 
-Examples and a live demo for the two SDKs covering ZKP2P on Base: server-side protocol data with **@peerlytics/sdk** and wallet-native USDC off-ramps with **@usdctofiat/offramp**.
+Wallet-native USDC off-ramp starters with **@usdctofiat/offramp**, plus links to Galleon's public Peer protocol activity and receipt explorer.
 
-[![npm: @peerlytics/sdk](https://img.shields.io/npm/v/@peerlytics/sdk?label=%40peerlytics%2Fsdk&color=1b5e4e)](https://www.npmjs.com/package/@peerlytics/sdk)
 [![npm: @usdctofiat/offramp](https://img.shields.io/npm/v/@usdctofiat/offramp?label=%40usdctofiat%2Fofframp&color=6e4a0e)](https://www.npmjs.com/package/@usdctofiat/offramp)
 
 **Live demo:** [offramp-sdk.vercel.app](https://offramp-sdk.vercel.app)
 **Machine reference:** [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt)
 **Workshop:** [galleonlabs.io](https://galleonlabs.io/)
 
-> **Both hosted developer portals are gone, and the Peerlytics API with them.** Verified
-> 2026-09-02 21:28–21:35 UTC from a clean host.
->
-> - **Peerlytics is down, code and docs.** `peerlytics.xyz/api/v1/*` returns 404 for every
->   documented route — with an API key, with a bearer token, and unauthenticated — so this is a
->   missing route, not an auth rejection. `/developers`, `/llms.txt`, `/llms-full.txt` and
->   `/api/openapi` are 404 too, so no new key can be issued and x402 is no workaround. The eight
->   `peerlytics/` examples and the demo's orderbook panel now report the upstream status instead
->   of data. [The explorer](https://peerlytics.xyz/explorer) is the only surface still serving.
-> - **`@usdctofiat/offramp` still works; only its docs hub moved.**
->   `usdctofiat.xyz/developers/*` and `/skills/usdctofiat.md` are 404, and the site's own
->   `llms.txt` no longer lists a developer hub. The SDK itself is unaffected: the coordination
->   API it calls (`api.zkp2p.xyz`) answers, and deposits settle on Base. Use
->   [`usdctofiat/llms.txt`](usdctofiat/llms.txt) and
->   [`peerlytics/llms.txt`](peerlytics/llms.txt) in this repo, or the still-live
->   [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt).
->
-> Tracking: [#15](https://github.com/ADWilkinson/usdctofiat-peerlytics-starters/issues/15).
+## Peerlytics
+
+[Peerlytics](https://peerlytics.xyz/) is Galleon's public, read-only view of Peer protocol activity on Base. Watch deposits, intents, fills, and delegation in the live activity feed, or use the [explorer](https://peerlytics.xyz/explorer) to inspect receipts by intent, deposit, address, or transaction.
+
+The [connect page](https://peerlytics.xyz/connect) adds the same public activity and receipts to compatible AI assistants. It does not connect a wallet, sign transactions, move funds, or provide a cash-out flow. Use the USDCtoFiat starters below for wallet-native off-ramping.
 
 ## 60-second cash-out
 
@@ -53,27 +39,13 @@ npx create-offramp-app@latest my-offramp --template=next         # next | vite |
 
 The published CLI accepts those three names. Copy [`templates/base-mini-app`](templates/base-mini-app) from this repo for a Base Account surface — `create-offramp-app --template=base-mini-app` fails.
 
-**Agent skills (Claude Code, Cursor):** [`integrate-usdctofiat-offramp`](skills/claude/integrate-usdctofiat-offramp/SKILL.md) · [`query-peerlytics-data`](skills/claude/query-peerlytics-data/SKILL.md). For other assistants, hand them the canonical `llms-full.txt`: [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt). The Peerlytics equivalent is 404 upstream; use this repo's copy at [`peerlytics/llms.txt`](peerlytics/llms.txt).
+**Agent skills (Claude Code, Cursor):** [`integrate-usdctofiat-offramp`](skills/claude/integrate-usdctofiat-offramp/SKILL.md). For other assistants, hand them the canonical `llms-full.txt`: [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt).
 
 ## What's in this repo
 
 ```text
 demo/                        Vite + React demo app (deployed to Vercel)
-  src/App.tsx                  single-page UI: create deposits, live orderbook, withdraw
-  api/orderbook.ts             Vercel serverless orderbook proxy
-  server/peerlytics.ts         shared Peerlytics server helper (dev + prod)
-
-peerlytics/                  @peerlytics/sdk examples (run standalone with tsx/bun)
-  orderbook-snapshot.ts        multi-currency orderbook depth
-  rate-monitor.ts              poll rates, alert on threshold
-  volume-dashboard.ts          protocol stats terminal dashboard
-  maker-report.ts              portfolio report for a maker address
-  integrator-report.ts         ERC-8021 integrator stats (deposits, volume, top markets)
-  timeseries-chart.ts          hourly/daily rollups in a terminal sparkbar chart
-  live-activity.ts             near-real-time protocol activity polling feed
-  x402-agent.ts                x402 pay-per-request flow (no API key needed)
-  describe-error.ts            shared containment for upstream failure bodies
-  llms.txt                     LLM-friendly SDK reference
+  src/App.tsx                  single-page UI: create deposits and withdraw
 
 usdctofiat/                  @usdctofiat/offramp examples
   create-deposit.ts            cash out USDC in managed best mode
@@ -97,20 +69,14 @@ templates/                   Scaffold-ready integrations (CLI: next, vite, teleg
 
 skills/                      Claude Code skills for AI-assisted development
   claude/
-    query-peerlytics-data/         skill: query protocol data via Peerlytics SDK
     integrate-usdctofiat-offramp/  skill: integrate the offramp SDK
 ```
 
 ## Run the examples
 
-Each script under `peerlytics/` and `usdctofiat/` runs standalone:
+Each script under `usdctofiat/` runs standalone:
 
 ```bash
-# Peerlytics (server-side, free key includes 1,000 requests/month)
-export PEERLYTICS_API_KEY=pk_live_...
-npx tsx peerlytics/orderbook-snapshot.ts
-npx tsx peerlytics/live-activity.ts
-
 # USDCtoFiat (wallet-side, needs a private key for tx examples)
 npx tsx usdctofiat/platform-explorer.ts
 ```
@@ -118,17 +84,11 @@ npx tsx usdctofiat/platform-explorer.ts
 The deposit scripts default to the public Base RPC. Set `RPC_URL` to a private
 endpoint (Alchemy, QuickNode, etc.) to avoid rate limits on real deposit runs.
 
-The Peerlytics paid API needs an API key, and the portal that issues them is 404 (see the notice
-above), so the `peerlytics/` scripts have no working credential path today. They still typecheck
-and run — they print the upstream status rather than data. Lifecycle state lives in the explorer,
-activity stream, and deposit/intent reads.
-
 ## Run the demo locally
 
 ```bash
 cd demo
 npm install
-cp .env.example .env.local         # set PEERLYTICS_API_KEY
 npm run dev
 ```
 
@@ -137,12 +97,8 @@ Deploy to Vercel:
 ```bash
 cd demo
 vercel link                                # link to your Vercel project
-vercel env add PEERLYTICS_API_KEY production
-vercel env add PEERLYTICS_API_KEY preview
 vercel --prod
 ```
-
-The orderbook API key stays server-side and is never exposed to the browser.
 
 ## Start a real app
 
@@ -159,37 +115,7 @@ Choose the smallest starter that matches where the cash-out flow will live:
 
 The v9 flat `cashout()` helper applies the package's fixed USDCtoFiat attribution automatically; it does not need an integrator or referral environment variable.
 
-## SDKs at a glance
-
-### @peerlytics/sdk
-
-Server-side data on the ZKP2P protocol — orderbooks, activity feeds, maker portfolios, vault stats.
-
-```ts
-import { Peerlytics } from "@peerlytics/sdk";
-
-const client = new Peerlytics({ apiKey: "pk_live_..." });
-const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "revolut" });
-```
-
-Auth: a free API key (1,000 requests/month) or x402 pay-per-request with USDC on Base; SDK ≥ 1.0
-drives x402 directly with `auth: { mode: "x402", signer }`. Both paths resolve
-`peerlytics.xyz/api/v1/*`, which is currently 404, so keyless x402 is no more reachable than a key.
-
-**Gotchas worth knowing** (SDK 4.x, Stripe-style v2 wire format):
-
-- List methods (`getActivity`, `getDeposits`, `getIntents`, `getMarketSummary`) return paginated envelopes like `{ events, count, hasMore, ... }` — iterate over `.events` / `.deposits` / etc, not the top-level result.
-- `getDeposits()` and `getIntents()` take optional filters since SDK 4 — an empty call returns a bounded page (`limit` 50 by default, capped at 200) rather than throwing. Narrow with `depositor`/`delegate`/`platform`/`currency` and `owner`/`recipient`/`verifier`/`depositId`/`status` respectively.
-- `getOrderbook()` returns only publicly takeable liquidity. Passing `taker` adds the restricted deposits that wallet can actually fill and counts them in `filters.applied.accessibleRestrictedDepositCount`; add `includeGated: true` to get the viewer's permitted payment-method hashes in `takerAccess.paymentMethodsByDeposit`. SDK 4 removed the enforcement provenance — you get the access result, not the policy that produced it.
-- `getTaker()` exposes `cancelledVolumeUsd`; the old `lockScore` label was removed in SDK 3. SDK 4 removed the Peer/Plus/Pro wallet classification entirely — leaderboard, maker portfolio, taker portfolio, and taker history carry no wallet-class label, and takers rank by `trustScore`.
-- Orderbook payment pairs carry `isPublic` plus the `disputeProtectionOptedOut` / `disputeProtectionRequiresStake` pair. Protection is default-on, so read the opt-*out* flag; both are null only on a taker-authorized legacy fallback without tuple projection.
-- `DepositMarket.currency` / `deposit.currencies[].currency` are resolved ISO codes (e.g. `"GBP"`). `currencyCode` is the raw bytes32 hash — use `currency` for display.
-- Key management uses the opaque `id` from `listKeys()` (not the raw key): `deleteKey(id)`, `rotateKey(idOrKey)`, `createKey(label?)`.
-- Some timestamp fields (`ApiKeyInfo.createdAt`, `lastUsedAt`, `freeCreditsResetAt`) are typed `number | string` — v2 emits Unix seconds (integer); convert with `Number(value) * 1000` to get a JS `Date`.
-
-[npm](https://www.npmjs.com/package/@peerlytics/sdk) · [llms.txt](peerlytics/llms.txt) (in this repo) · [Explorer](https://peerlytics.xyz/explorer). The hosted developer portal, OpenAPI spec and llms.txt are 404 — see the notice at the top.
-
-### @usdctofiat/offramp
+## @usdctofiat/offramp
 
 Non-custodial USDC-to-fiat cash-out on Base. Revolut, Venmo, Wise, PayPal, Cash App, Zelle, Monzo, and more.
 
@@ -214,7 +140,7 @@ For a private order, create the deposit first and restrict it once it confirms w
 
 Supported platforms: Venmo, Cash App, Chime, Revolut, Wise, Mercado Pago, Zelle, PayPal, Monzo.
 
-[npm](https://www.npmjs.com/package/@usdctofiat/offramp) · [llms.txt](usdctofiat/llms.txt) (in this repo) · [llms-full.txt](https://usdctofiat.xyz/llms-full.txt) · [Sell USDC](https://usdctofiat.xyz/sell). The hosted developer portal and SDK guide are 404 — see the notice at the top.
+[npm](https://www.npmjs.com/package/@usdctofiat/offramp) · [llms.txt](usdctofiat/llms.txt) (in this repo) · [llms-full.txt](https://usdctofiat.xyz/llms-full.txt) · [Sell USDC](https://usdctofiat.xyz/sell).
 
 The SDK also exports the canonical self-serve resource bundle, so apps, bots, CLIs, and coding agents do not need to hardcode docs URLs. Note that the bundle is baked into the published package and most of the pages it names have since been taken down — `npx tsx usdctofiat/developer-resources.ts` flags each dead link:
 
@@ -233,7 +159,9 @@ Run `npx tsx usdctofiat/developer-resources.ts` or `npx tsx usdctofiat/developer
 - [usdctofiat.xyz/sell](https://usdctofiat.xyz/sell) — the product the SDK drives
 - [How USDC to fiat works](https://usdctofiat.xyz/usdc-to-fiat/) — what your users get: methods, currencies, fees
 - [Base USDC](https://usdctofiat.xyz/learn/base-usdc/) — the exact token the off-ramp sells (native, not USDbC)
-- [Peerlytics Explorer](https://peerlytics.xyz/explorer) — protocol explorer and market intel, and the only Peerlytics surface still serving
+- [Peerlytics activity](https://peerlytics.xyz/) — live Peer protocol activity on Base
+- [Peerlytics Explorer](https://peerlytics.xyz/explorer) — read-only intent, deposit, address, and transaction receipts
+- [Connect Peerlytics](https://peerlytics.xyz/connect) — public activity and receipts in compatible AI assistants
 - [ZKP2P Protocol](https://zkp2p.xyz)
 - [@andrewwilkinson](https://x.com/andrewwilkinson)
 

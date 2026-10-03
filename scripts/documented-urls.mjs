@@ -9,9 +9,7 @@
  * npm package pages, X, and shields.io are not fetched: npmjs returns 403 to
  * many clients (the scheduled `published` job already installs without a
  * lockfile), and the others are badges or social links rather than the product
- * contract. The Peerlytics origin is listed unprobed on purpose — its homepage
- * still returns 200 while `/api/v1/*` is 404, so probing the origin would hide
- * the outage #15 tracks.
+ * contract.
  */
 
 export const DEAD_DOC_URLS = [
@@ -35,7 +33,10 @@ export const LIVE_DOC_URLS = [
   "https://usdctofiat.xyz/sell",
   "https://usdctofiat.xyz/usdc-to-fiat/",
   "https://usdctofiat.xyz/learn/base-usdc/",
+  "https://peerlytics.xyz",
+  "https://peerlytics.xyz/",
   "https://peerlytics.xyz/explorer",
+  "https://peerlytics.xyz/connect",
   "https://galleonlabs.io/",
   "https://zkp2p.xyz",
   "https://github.com/ADWilkinson/usdctofiat-peerlytics-starters",
@@ -48,7 +49,7 @@ export const LIVE_DOC_URLS = [
   "https://docs.base.org/apps/builder-codes/app-developers",
 ];
 
-export const UNPROBED_URLS = ["https://peerlytics.xyz"];
+export const UNPROBED_URLS = [];
 
 export const UNPROBED_URL_PREFIXES = [
   "https://www.npmjs.com/",

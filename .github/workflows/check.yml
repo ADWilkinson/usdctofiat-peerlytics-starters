@@ -94,3 +94,15 @@ jobs:
         continue-on-error: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
       - run: npm run build
         working-directory: templates/${{ matrix.template }}
+
+  cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm install
+        working-directory: create-offramp-app
+      - run: npm test
+        working-directory: create-offramp-app

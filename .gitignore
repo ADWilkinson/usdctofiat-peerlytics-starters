@@ -8,3 +8,5 @@ playwright-*.png
 .env*.local
 
 .claude/
+
+/create-offramp-app/templates/

@@ -1,0 +1,43 @@
+{
+  "name": "create-offramp-app",
+  "version": "0.1.17",
+  "description": "Scaffold starter apps for @usdctofiat/offramp integrations",
+  "keywords": [
+    "offramp",
+    "scaffold",
+    "usdc",
+    "usdctofiat"
+  ],
+  "homepage": "https://github.com/ADWilkinson/usdctofiat-peerlytics-starters/tree/main/create-offramp-app",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ADWilkinson/usdctofiat-peerlytics-starters.git",
+    "directory": "create-offramp-app"
+  },
+  "bin": {
+    "create-offramp-app": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepack": "node scripts/prepack.mjs",
+    "test": "node scripts/test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "@types/node": "^26.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

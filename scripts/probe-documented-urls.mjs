@@ -1,26 +1,9 @@
 import { LIVE_DOC_URLS } from "./documented-urls.mjs";
-
-const TIMEOUT_MS = 15_000;
-const USER_AGENT =
-  "usdctofiat-peerlytics-starters-reachability/1.0 (+https://github.com/ADWilkinson/usdctofiat-peerlytics-starters)";
+import { probe } from "./probe-url.mjs";
 
 if (LIVE_DOC_URLS.length === 0) {
   console.error("LIVE_DOC_URLS is empty; the reachability check has nothing to probe.");
   process.exit(1);
-}
-
-async function probe(url) {
-  try {
-    const response = await fetch(url, {
-      redirect: "follow",
-      headers: { "user-agent": USER_AGENT, accept: "*/*" },
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-    return { url, status: response.status, error: null };
-  } catch (error) {
-    const name = error instanceof Error ? error.name : "fetch_failed";
-    return { url, status: null, error: name };
-  }
 }
 
 const results = [];
